@@ -27,7 +27,7 @@ repositories {
 
 dependencies {
     compile 'com.android.support:appcompat-v7:25.0.1'
-    compile 'com.google.atap:tango:1.47'
-    compile 'com.google.atap:tango-ux:1.47'
-    compile 'com.projecttango:tango-support:1.47'
+    compile 'com.google.atap:tango:1.48'
+    compile 'com.google.atap:tango-ux:1.48'
+    compile 'com.projecttango:tango-support:1.48'
 }
