@@ -13,6 +13,7 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import java.util.LinkedList;
 import java.util.List;
 
 public final class TangoWrapper {
@@ -23,13 +24,15 @@ public final class TangoWrapper {
 
     private final Context context;
 
+    private final TangoUx tangoUx;
+
     private final TangoUpdateDispatcher tangoUpdateDispatcher = new TangoUpdateDispatcher();
 
     private boolean connected;
 
     private Tango tango;
 
-    private TangoUx tangoUx;
+    private boolean tangoSupportInitialized;
 
     private TangoConfigFactory tangoConfigFactory;
 
@@ -37,8 +40,11 @@ public final class TangoWrapper {
 
     private boolean startTangoUx;
 
+    private List<OnTangoReadyListener> onTangoReadyListeners = new LinkedList<>();
+
     public TangoWrapper(@NonNull Context context) {
         this.context = context;
+        tangoUx = new TangoUx(context);
     }
 
     public void setTangoConfigFactory(TangoConfigFactory tangoConfigFactory) {
@@ -97,6 +103,18 @@ public final class TangoWrapper {
         tangoUpdateDispatcher.getOnTangoEventListeners().remove(listener);
     }
 
+    public synchronized void addOnTangoReadyListener(@NonNull OnTangoReadyListener listener) {
+        onTangoReadyListeners.add(listener);
+
+        if (connected) {
+            listener.onTangoReady(tango);
+        }
+    }
+
+    public synchronized void removeOnTangoReadyListener(@NonNull OnTangoReadyListener listener) {
+        onTangoReadyListeners.remove(listener);
+    }
+
     public void connect() {
         // NOTE:
         //
@@ -104,7 +122,6 @@ public final class TangoWrapper {
         // これは、TangoUxLayout の配置の有無ではなく、TangoUx#start の実行により発生する。
         // このため、開発効率のために TangoUX を OFF にする場合には、TangoUx#start も止めなければならない。
 
-        tangoUx = new TangoUx(context);
         if (startTangoUx) {
             tangoUx.start(new TangoUx.StartParams());
         }
@@ -117,7 +134,10 @@ public final class TangoWrapper {
                 // Synchronize against disconnecting while the service is being used in other threads.
                 synchronized (this) {
                     try {
-                        TangoSupport.initialize();
+                        if (!tangoSupportInitialized) {
+                            TangoSupport.initialize();
+                            tangoSupportInitialized = true;
+                        }
 
                         TangoConfig tangoConfig;
                         if (tangoConfigFactory == null) {
@@ -141,6 +161,12 @@ public final class TangoWrapper {
                     } catch (TangoErrorException e) {
                         Log.e(TAG, "Tango error occurred.", e);
                     }
+
+                    if (!onTangoReadyListeners.isEmpty()) {
+                        for (OnTangoReadyListener listener : onTangoReadyListeners) {
+                            listener.onTangoReady(tango);
+                        }
+                    }
                 }
             }
         });
@@ -159,6 +185,11 @@ public final class TangoWrapper {
         } catch (TangoErrorException e) {
             Log.e(TAG, "Tango error occurred.", e);
         }
+    }
+
+    public interface OnTangoReadyListener {
+
+        void onTangoReady(Tango tango);
     }
 
     public interface TangoConfigFactory {
