@@ -116,6 +116,8 @@ public final class TangoWrapper {
     }
 
     public void connect() {
+        Log.d(TAG, "Connecting...");
+
         // NOTE:
         //
         // 現状、TangoUX を用いるとデバッグ モードでは起動しなくなる。
@@ -132,7 +134,7 @@ public final class TangoWrapper {
                 Log.d(TAG, "Tango is ready.");
 
                 // Synchronize against disconnecting while the service is being used in other threads.
-                synchronized (this) {
+                synchronized (TangoWrapper.this) {
                     try {
                         if (!tangoSupportInitialized) {
                             TangoSupport.initialize();
@@ -153,10 +155,11 @@ public final class TangoWrapper {
                         tango.connectListener(coordinateFramePairs, tangoUpdateDispatcher);
 
                         connected = true;
+
+                        Log.d(TAG, "Connected.");
                     } catch (TangoOutOfDateException e) {
-                        if (tangoUx != null) {
-                            tangoUx.showTangoOutOfDate();
-                        }
+                        tangoUx.showTangoOutOfDate();
+
                         Log.e(TAG, "Tango service outdated.", e);
                     } catch (TangoErrorException e) {
                         Log.e(TAG, "Tango error occurred.", e);
@@ -173,15 +176,20 @@ public final class TangoWrapper {
     }
 
     public synchronized void disconnect() {
+        Log.d(TAG, "Disconnecting...");
+
         try {
             tangoUx.stop();
             tango.disconnect();
-            connected = false;
 
             tangoUpdateDispatcher.getOnPoseAvailableListeners().clear();
             tangoUpdateDispatcher.getOnPointCloudAvailableListeners().clear();
             tangoUpdateDispatcher.getOnFrameAvailableListeners().clear();
             tangoUpdateDispatcher.getOnTangoEventListeners().clear();
+
+            connected = false;
+
+            Log.d(TAG, "Disconnected.");
         } catch (TangoErrorException e) {
             Log.e(TAG, "Tango error occurred.", e);
         }
