@@ -118,12 +118,6 @@ public final class TangoWrapper {
     public void connect() {
         Log.d(TAG, "Connecting...");
 
-        // NOTE:
-        //
-        // 現状、TangoUX を用いるとデバッグ モードでは起動しなくなる。
-        // これは、TangoUxLayout の配置の有無ではなく、TangoUx#start の実行により発生する。
-        // このため、開発効率のために TangoUX を OFF にする場合には、TangoUx#start も止めなければならない。
-
         if (startTangoUx) {
             tangoUx.start(new TangoUx.StartParams());
         }
