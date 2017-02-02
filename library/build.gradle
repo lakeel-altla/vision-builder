@@ -1,11 +1,13 @@
-apply plugin: 'com.android.application'
+apply plugin: 'com.android.library'
 
 android {
     compileSdkVersion 24
     buildToolsVersion "24.0.1"
 
+    // http://blog.hikware.com/article/174972847.html
+    publishNonDefault true
+
     defaultConfig {
-        applicationId "com.lakeel.altla.rajawali"
         minSdkVersion 19
         targetSdkVersion 24
         versionCode 1
@@ -20,4 +22,6 @@ android {
 }
 
 dependencies {
+    compile 'com.android.support:appcompat-v7:24.2.1'
+    compile 'org.rajawali3d:rajawali:1.1.610'
 }
