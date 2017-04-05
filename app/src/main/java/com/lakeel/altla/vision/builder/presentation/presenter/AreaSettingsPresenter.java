@@ -37,14 +37,14 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
     @NonNull
     public ObjectProperty<Scope> propertyScope = new ObjectProperty<Scope>(Scope.PUBLIC) {
         @Override
-        protected void onValueChanged() {
-            super.onValueChanged();
+        protected void onValueChanged(@Nullable Scope oldValue, @Nullable Scope newValue) {
+            super.onValueChanged(oldValue, newValue);
 
-            Scope value = get();
-            if (value == null) {
+            if (newValue == null) {
                 propertyAreaMode.set(null);
             } else {
-                int resId = (get() == Scope.PUBLIC ? R.string.label_area_mode_public : R.string.label_area_mode_user);
+                int resId =
+                        (newValue == Scope.PUBLIC ? R.string.label_area_mode_public : R.string.label_area_mode_user);
                 propertyAreaMode.set(resources.getString(resId));
             }
 
@@ -55,11 +55,10 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
     @NonNull
     public ObjectProperty<Area> propertyArea = new ObjectProperty<Area>() {
         @Override
-        protected void onValueChanged() {
-            super.onValueChanged();
+        protected void onValueChanged(@Nullable Area oldValue, @Nullable Area newValue) {
+            super.onValueChanged(oldValue, newValue);
 
-            Area value = get();
-            propertyAreaName.set(value == null ? null : value.getName());
+            propertyAreaName.set(newValue == null ? null : newValue.getName());
             propertyAreaDescription.set(null);
 
             commandShowAreaDescriptionList.raiseOnCanExecuteChanged();
@@ -69,11 +68,10 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
     @NonNull
     public ObjectProperty<AreaDescription> propertyAreaDescription = new ObjectProperty<AreaDescription>() {
         @Override
-        protected void onValueChanged() {
-            super.onValueChanged();
+        protected void onValueChanged(@Nullable AreaDescription oldValue, @Nullable AreaDescription newValue) {
+            super.onValueChanged(oldValue, newValue);
 
-            AreaDescription value = get();
-            propertyAreaDescriptionName.set(value == null ? null : value.getName());
+            propertyAreaDescriptionName.set(newValue == null ? null : newValue.getName());
 
             commandStart.raiseOnCanExecuteChanged();
         }
