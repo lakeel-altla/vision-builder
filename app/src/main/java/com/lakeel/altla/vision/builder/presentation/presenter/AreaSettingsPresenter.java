@@ -1,6 +1,7 @@
 package com.lakeel.altla.vision.builder.presentation.presenter;
 
 import com.lakeel.altla.android.binding.command.RelayCommand;
+import com.lakeel.altla.android.binding.property.IntProperty;
 import com.lakeel.altla.android.binding.property.ObjectProperty;
 import com.lakeel.altla.vision.ArgumentNullException;
 import com.lakeel.altla.vision.api.CurrentUser;
@@ -15,7 +16,6 @@ import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 
 import org.parceler.Parcels;
 
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -29,9 +29,6 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
     @Inject
     VisionService visionService;
 
-    @Inject
-    Resources resources;
-
     private AreaSettings areaSettings;
 
     @NonNull
@@ -40,13 +37,11 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
         protected void onValueChanged(@Nullable Scope oldValue, @Nullable Scope newValue) {
             super.onValueChanged(oldValue, newValue);
 
-            if (newValue == null) {
-                propertyAreaMode.set(null);
-            } else {
-                int resId =
-                        (newValue == Scope.PUBLIC ? R.string.label_area_mode_public : R.string.label_area_mode_user);
-                propertyAreaMode.set(resources.getString(resId));
+            int resId = R.string.label_area_mode_public;
+            if (newValue != null && newValue == Scope.USER) {
+                resId = R.string.label_area_mode_user;
             }
+            propertyAreaMode.set(resId);
 
             propertyArea.set(null);
         }
@@ -78,7 +73,7 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
     };
 
     @NonNull
-    public ObjectProperty<String> propertyAreaMode = new ObjectProperty<>();
+    public IntProperty propertyAreaMode = new IntProperty();
 
     @NonNull
     public ObjectProperty<String> propertyAreaName = new ObjectProperty<>();

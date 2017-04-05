@@ -1,6 +1,7 @@
 package com.lakeel.altla.vision.builder.presentation.view.fragment;
 
 import com.lakeel.altla.android.binding.BinderFactory;
+import com.lakeel.altla.android.binding.converter.RelayConverter;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.presenter.AreaSettingsPresenter;
@@ -79,7 +80,10 @@ public final class AreaSettingsFragment extends AbstractFragment<AreaSettingsVie
         ButterKnife.bind(this, view);
 
         BinderFactory binderFactory = new BinderFactory(view);
-        binderFactory.create(R.id.text_view_area_mode, "text", presenter.propertyAreaMode).bind();
+        binderFactory.create(R.id.text_view_area_mode, "text", presenter.propertyAreaMode)
+                     .converter(new RelayConverter(
+                             value -> value == null ? null : getResources().getString((int) value)))
+                     .bind();
         binderFactory.create(R.id.text_view_area_name, "text", presenter.propertyAreaName).bind();
         binderFactory.create(R.id.text_view_area_description_name, "text", presenter.propertyAreaDescriptionName)
                      .bind();
