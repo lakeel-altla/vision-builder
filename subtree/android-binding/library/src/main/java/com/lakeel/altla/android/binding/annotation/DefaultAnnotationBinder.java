@@ -1,10 +1,10 @@
 package com.lakeel.altla.android.binding.annotation;
 
-import com.lakeel.altla.android.binding.AnnotationBinder;
 import com.lakeel.altla.android.binding.BinderFactory;
 import com.lakeel.altla.android.binding.BindingMode;
 import com.lakeel.altla.android.binding.Command;
 import com.lakeel.altla.android.binding.CommandBinder;
+import com.lakeel.altla.android.binding.CompositeUnbindable;
 import com.lakeel.altla.android.binding.Converter;
 import com.lakeel.altla.android.binding.Property;
 import com.lakeel.altla.android.binding.PropertyBinder;
@@ -51,7 +51,7 @@ public final class DefaultAnnotationBinder implements AnnotationBinder {
     }
 
     @NonNull
-    public AnnotationBinder create(@NonNull Object object) {
+    AnnotationBinder create(@NonNull Object object) {
         Class<?> clazz = object.getClass();
 
         try {
@@ -113,7 +113,7 @@ public final class DefaultAnnotationBinder implements AnnotationBinder {
             throw new IllegalArgumentException(String.format("Field '%s' has no '%s'.", field, BindProperty.class));
         }
 
-        Property<?> source = getSourceProperty(field, object);
+        Property source = getSourceProperty(field, object);
 
         PropertyBinder propertyBinder = createPropertyBinder(bindProperty, source);
         propertyBinders.add(propertyBinder);
@@ -125,7 +125,7 @@ public final class DefaultAnnotationBinder implements AnnotationBinder {
             throw new IllegalArgumentException(String.format("Field '%s' has no '%s'.", field, BindProperties.class));
         }
 
-        Property<?> source = getSourceProperty(field, object);
+        Property source = getSourceProperty(field, object);
 
         for (BindProperty bindProperty : bindProperties.value()) {
             PropertyBinder propertyBinder = createPropertyBinder(bindProperty, source);
@@ -134,12 +134,12 @@ public final class DefaultAnnotationBinder implements AnnotationBinder {
     }
 
     @NonNull
-    private Property<?> getSourceProperty(@NonNull Field field, @NonNull Object object) throws IllegalAccessException {
+    private Property getSourceProperty(@NonNull Field field, @NonNull Object object) throws IllegalAccessException {
         Object fieldValue = field.get(object);
         if (fieldValue == null) {
             throw new IllegalStateException(String.format("'null' field can not be bound: %s", field));
         }
-        if (!(fieldValue instanceof Property<?>)) {
+        if (!(fieldValue instanceof Property)) {
             throw new IllegalStateException(String.format("Field '%s' is not an instance of '%s'",
                                                           field, Property.class));
         }
@@ -148,7 +148,7 @@ public final class DefaultAnnotationBinder implements AnnotationBinder {
     }
 
     @NonNull
-    private PropertyBinder createPropertyBinder(@NonNull BindProperty bindProperty, @NonNull Property<?> source) {
+    private PropertyBinder createPropertyBinder(@NonNull BindProperty bindProperty, @NonNull Property source) {
         int id = bindProperty.id();
         String propertyName = bindProperty.name();
         BindingMode mode = bindProperty.mode();
@@ -233,21 +233,5 @@ public final class DefaultAnnotationBinder implements AnnotationBinder {
     @NonNull
     private CommandBinder createCommandBinder(int id, String commandName, Command source) {
         return binderFactory.create(id, commandName, source);
-    }
-
-    private final class CompositeUnbindable implements Unbindable {
-
-        private final List<Unbindable> unbindables = new ArrayList<>();
-
-        public void add(@NonNull Unbindable unbindable) {
-            unbindables.add(unbindable);
-        }
-
-        @Override
-        public void unbind() {
-            for (Unbindable unbindable : unbindables) {
-                unbindable.unbind();
-            }
-        }
     }
 }

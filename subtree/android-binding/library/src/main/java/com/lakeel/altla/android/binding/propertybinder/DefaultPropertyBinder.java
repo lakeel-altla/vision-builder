@@ -19,7 +19,7 @@ public class DefaultPropertyBinder implements PropertyBinder, Unbindable {
 
     private final View target;
 
-    private final Property<?> source;
+    private final Property source;
 
     private BindingMode mode = BindingMode.DEFAULT;
 
@@ -32,7 +32,7 @@ public class DefaultPropertyBinder implements PropertyBinder, Unbindable {
     private Property.OnValueChangedListener onValueChangedListener;
 
     public DefaultPropertyBinder(@NonNull PropertyBindingDefinition definition, @NonNull View target,
-                                 @NonNull Property<?> source) {
+                                 @NonNull Property source) {
         this.definition = definition;
         this.target = target;
         this.source = source;
@@ -91,7 +91,7 @@ public class DefaultPropertyBinder implements PropertyBinder, Unbindable {
     }
 
     @NonNull
-    protected Property<?> getSource() {
+    protected Property getSource() {
         return source;
     }
 

@@ -13,7 +13,7 @@ public final class RadioGroupCheckedPropertyBinder extends DefaultPropertyBinder
     private RadioGroup.OnCheckedChangeListener onCheckedChangeListener;
 
     public RadioGroupCheckedPropertyBinder(@NonNull PropertyBindingDefinition definition, @NonNull View target,
-                                           @NonNull Property<?> source) {
+                                           @NonNull Property source) {
         super(definition, target, source);
 
         radioGroup = (RadioGroup) target;

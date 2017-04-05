@@ -1,7 +1,7 @@
 package com.lakeel.altla.android.binding.commandbinder;
 
-import com.lakeel.altla.android.binding.propertybinder.DefaultPropertyBinder;
 import com.lakeel.altla.android.binding.Property;
+import com.lakeel.altla.android.binding.propertybinder.DefaultPropertyBinder;
 import com.lakeel.altla.android.binding.propertybinder.PropertyBindingDefinition;
 
 import android.support.annotation.NonNull;
@@ -15,8 +15,7 @@ public final class CompoundButtonCheckedPropertyBinder extends DefaultPropertyBi
     private CompoundButton.OnCheckedChangeListener onCheckedChangeListener;
 
     public CompoundButtonCheckedPropertyBinder(@NonNull PropertyBindingDefinition definition,
-                                               @NonNull View target,
-                                               @NonNull Property<?> source) {
+                                               @NonNull View target, @NonNull Property source) {
         super(definition, target, source);
 
         compoundButton = (CompoundButton) target;

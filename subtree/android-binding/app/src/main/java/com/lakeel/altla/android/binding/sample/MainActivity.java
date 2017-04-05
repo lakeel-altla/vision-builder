@@ -2,6 +2,7 @@ package com.lakeel.altla.android.binding.sample;
 
 import com.lakeel.altla.android.binding.BinderFactory;
 import com.lakeel.altla.android.binding.Converter;
+import com.lakeel.altla.android.binding.annotation.AnnotationBinderFactory;
 import com.lakeel.altla.android.binding.annotation.BindProperties;
 import com.lakeel.altla.android.binding.annotation.BindProperty;
 import com.lakeel.altla.android.binding.annotation.ConverterName;
@@ -28,8 +29,8 @@ public final class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        BinderFactory binderFactory = new BinderFactory(this);
-        binderFactory.create(viewModel).bind();
+        AnnotationBinderFactory factory = new AnnotationBinderFactory(new BinderFactory(this));
+        factory.create(viewModel).bind();
     }
 
     private final class ViewModel {
@@ -38,8 +39,8 @@ public final class MainActivity extends AppCompatActivity {
         final IntProperty radioGroupChecked = new IntProperty(R.id.radio_button_button_disabled) {
 
             @Override
-            protected void onValueChanged() {
-                super.onValueChanged();
+            protected void onValueChanged(int oldValue, int newValue) {
+                super.onValueChanged(oldValue, newValue);
                 commandClick.raiseOnCanExecuteChanged();
             }
         };

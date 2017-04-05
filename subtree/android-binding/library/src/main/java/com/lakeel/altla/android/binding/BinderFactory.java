@@ -1,6 +1,5 @@
 package com.lakeel.altla.android.binding;
 
-import com.lakeel.altla.android.binding.annotation.DefaultAnnotationBinder;
 import com.lakeel.altla.android.binding.commandbinder.CommandBindingDefinition;
 import com.lakeel.altla.android.binding.commandbinder.CommandBindingDefinitionRegistry;
 import com.lakeel.altla.android.binding.commandbinder.CompoundButtonCheckedPropertyBinder;
@@ -88,13 +87,8 @@ public final class BinderFactory {
     }
 
     @NonNull
-    public AnnotationBinder create(@NonNull Object object) {
-        return new DefaultAnnotationBinder(this).create(object);
-    }
-
-    @NonNull
     public <TView extends View> PropertyBinder create(@NonNull TView target, @NonNull String propertyName,
-                                                      @NonNull Property<?> source) {
+                                                      @NonNull Property source) {
         Class<? extends View> viewType = target.getClass();
 
         PropertyBindingDefinition definition = propertyBindingDefinitionRegistry.find(viewType, propertyName);
@@ -141,7 +135,7 @@ public final class BinderFactory {
 
     @NonNull
     public <TView extends View> PropertyBinder create(@IdRes int id, @NonNull String propertyName,
-                                                      @NonNull Property<?> source) {
+                                                      @NonNull Property source) {
         TView target = findById(id);
         return create(target, propertyName, source);
     }

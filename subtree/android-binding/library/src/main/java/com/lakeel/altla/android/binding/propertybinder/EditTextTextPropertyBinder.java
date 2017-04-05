@@ -12,12 +12,12 @@ public final class EditTextTextPropertyBinder extends DefaultPropertyBinder {
 
     private final EditText editText;
 
-    private final Property<?> source;
+    private final Property source;
 
     private TextWatcher textWatcher;
 
     public EditTextTextPropertyBinder(@NonNull PropertyBindingDefinition definition, @NonNull View target,
-                                      @NonNull Property<?> source) {
+                                      @NonNull Property source) {
         super(definition, target, source);
 
         editText = (EditText) target;

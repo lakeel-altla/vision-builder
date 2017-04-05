@@ -19,12 +19,13 @@ public class FloatProperty extends AbstractFloatProperty {
     @Override
     public final void set(float value) {
         if (this.value != value) {
+            float oldValue = this.value;
             this.value = value;
-            onValueChanged();
+            onValueChanged(oldValue, this.value);
         }
     }
 
-    protected void onValueChanged() {
+    protected void onValueChanged(float oldValue, float newValue) {
         raiseOnValueChanged();
     }
 }

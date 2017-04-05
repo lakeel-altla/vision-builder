@@ -19,12 +19,13 @@ public class IntProperty extends AbstractIntProperty {
     @Override
     public final void set(int value) {
         if (this.value != value) {
+            int oldValue = this.value;
             this.value = value;
-            onValueChanged();
+            onValueChanged(oldValue, this.value);
         }
     }
 
-    protected void onValueChanged() {
+    protected void onValueChanged(int oldValue, int newValue) {
         raiseOnValueChanged();
     }
 }

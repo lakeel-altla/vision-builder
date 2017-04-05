@@ -3,7 +3,7 @@ package com.lakeel.altla.android.binding;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-public interface Property<T> {
+public interface Property {
 
     @Nullable
     Object getAsObject();
