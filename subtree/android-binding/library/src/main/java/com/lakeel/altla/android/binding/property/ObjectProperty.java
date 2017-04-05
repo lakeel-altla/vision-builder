@@ -17,20 +17,15 @@ public class ObjectProperty<T> extends AbstractObjectProperty<T> {
 
     @Nullable
     @Override
-    public final T get() {
+    public T get() {
         return value;
     }
 
     @Override
-    public final void set(@Nullable T value) {
+    public void set(@Nullable T value) {
         if (!Objects.equals(this.value, value)) {
-            T oldValue = this.value;
             this.value = value;
-            onValueChanged(oldValue, this.value);
+            raiseOnValueChanged();
         }
-    }
-
-    protected void onValueChanged(@Nullable T oldValue, @Nullable T newValue) {
-        raiseOnValueChanged();
     }
 }

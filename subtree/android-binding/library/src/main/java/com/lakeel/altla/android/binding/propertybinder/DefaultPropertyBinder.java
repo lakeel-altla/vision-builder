@@ -154,7 +154,7 @@ public class DefaultPropertyBinder implements PropertyBinder, Unbindable {
     private void bindTarget() {
         onValueChangedListener = new Property.OnValueChangedListener() {
             @Override
-            public void onValueChanged() {
+            public void onValueChanged(@NonNull Property sender) {
                 updateTarget();
             }
         };

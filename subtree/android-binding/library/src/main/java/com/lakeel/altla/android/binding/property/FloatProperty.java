@@ -1,6 +1,9 @@
 package com.lakeel.altla.android.binding.property;
 
-public class FloatProperty extends AbstractFloatProperty {
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public final class FloatProperty extends AbstractFloatProperty implements Parcelable {
 
     private float value;
 
@@ -11,21 +14,42 @@ public class FloatProperty extends AbstractFloatProperty {
         this.value = value;
     }
 
+    protected FloatProperty(Parcel in) {
+        value = in.readFloat();
+    }
+
     @Override
-    public final float get() {
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeFloat(value);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    public static final Creator<FloatProperty> CREATOR = new Creator<FloatProperty>() {
+        @Override
+        public FloatProperty createFromParcel(Parcel in) {
+            return new FloatProperty(in);
+        }
+
+        @Override
+        public FloatProperty[] newArray(int size) {
+            return new FloatProperty[size];
+        }
+    };
+
+    @Override
+    public float get() {
         return value;
     }
 
     @Override
-    public final void set(float value) {
+    public void set(float value) {
         if (this.value != value) {
-            float oldValue = this.value;
             this.value = value;
-            onValueChanged(oldValue, this.value);
+            raiseOnValueChanged();
         }
-    }
-
-    protected void onValueChanged(float oldValue, float newValue) {
-        raiseOnValueChanged();
     }
 }

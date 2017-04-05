@@ -16,6 +16,6 @@ public interface Property {
 
     interface OnValueChangedListener {
 
-        void onValueChanged();
+        void onValueChanged(@NonNull Property sender);
     }
 }

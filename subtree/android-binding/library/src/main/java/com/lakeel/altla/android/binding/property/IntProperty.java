@@ -1,6 +1,9 @@
 package com.lakeel.altla.android.binding.property;
 
-public class IntProperty extends AbstractIntProperty {
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public final class IntProperty extends AbstractIntProperty implements Parcelable {
 
     private int value;
 
@@ -11,21 +14,42 @@ public class IntProperty extends AbstractIntProperty {
         this.value = value;
     }
 
+    protected IntProperty(Parcel in) {
+        value = in.readInt();
+    }
+
     @Override
-    public final int get() {
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(value);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    public static final Creator<IntProperty> CREATOR = new Creator<IntProperty>() {
+        @Override
+        public IntProperty createFromParcel(Parcel in) {
+            return new IntProperty(in);
+        }
+
+        @Override
+        public IntProperty[] newArray(int size) {
+            return new IntProperty[size];
+        }
+    };
+
+    @Override
+    public int get() {
         return value;
     }
 
     @Override
-    public final void set(int value) {
+    public void set(int value) {
         if (this.value != value) {
-            int oldValue = this.value;
             this.value = value;
-            onValueChanged(oldValue, this.value);
+            raiseOnValueChanged();
         }
-    }
-
-    protected void onValueChanged(int oldValue, int newValue) {
-        raiseOnValueChanged();
     }
 }

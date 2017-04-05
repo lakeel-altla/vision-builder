@@ -26,7 +26,7 @@ public abstract class BaseProperty implements Property {
 
     public final void raiseOnValueChanged() {
         for (OnValueChangedListener listener : listeners) {
-            listener.onValueChanged();
+            listener.onValueChanged(this);
         }
     }
 }
