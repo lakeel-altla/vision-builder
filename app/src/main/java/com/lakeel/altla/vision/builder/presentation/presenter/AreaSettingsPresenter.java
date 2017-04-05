@@ -24,7 +24,15 @@ import javax.inject.Inject;
 
 public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView> {
 
-    private static final String ARG_SCOPE = "scope";
+    private static final String ARG_AREA_SCOPE = "areaScope";
+
+    private static final String STATE_AREA_SETTINGS = "areaSettings";
+
+    private static final String STATE_AREA_SCOPE = "areaScope";
+
+    private static final String STATE_AREA = "area";
+
+    private static final String STATE_AREA_DESCRIPTION = "areaDescription";
 
     @Inject
     VisionService visionService;
@@ -32,7 +40,7 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
     private AreaSettings areaSettings;
 
     @NonNull
-    public ObjectProperty<Scope> propertyScope = new ObjectProperty<Scope>(Scope.PUBLIC) {
+    public ObjectProperty<Scope> propertyAreaScope = new ObjectProperty<Scope>(Scope.PUBLIC) {
         @Override
         protected void onValueChanged(@Nullable Scope oldValue, @Nullable Scope newValue) {
             super.onValueChanged(oldValue, newValue);
@@ -89,7 +97,7 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
 
     @NonNull
     public RelayCommand commandShowAreaMode = new RelayCommand(() -> {
-        Scope value = propertyScope.get();
+        Scope value = propertyAreaScope.get();
         if (value != null) {
             getView().onShowAreaModeView(value);
         }
@@ -97,7 +105,7 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
 
     @NonNull
     public RelayCommand commandShowAreaFind = new RelayCommand(() -> {
-        Scope value = propertyScope.get();
+        Scope value = propertyAreaScope.get();
         if (value != null) {
             getView().onShowAreaFindView(value);
         }
@@ -106,7 +114,7 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
     @NonNull
     public RelayCommand commandShowAreaDescriptionList = new RelayCommand
             (() -> {
-                Scope scopeValue = propertyScope.get();
+                Scope scopeValue = propertyAreaScope.get();
                 Area areaValue = propertyArea.get();
                 if (scopeValue != null && areaValue != null) {
                     getView().onShowAreaDescriptionByAreaListView(scopeValue, areaValue);
@@ -125,7 +133,7 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
     @NonNull
     public static Bundle createArguments(@NonNull Scope scope) {
         Bundle bundle = new Bundle();
-        bundle.putParcelable(ARG_SCOPE, Parcels.wrap(scope));
+        bundle.putParcelable(ARG_AREA_SCOPE, Parcels.wrap(scope));
         return bundle;
     }
 
@@ -135,14 +143,29 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
 
         if (arguments == null) throw new ArgumentNullException("arguments");
 
-        Scope initialScope = Parcels.unwrap(arguments.getParcelable(ARG_SCOPE));
+        Scope initialScope = Parcels.unwrap(arguments.getParcelable(ARG_AREA_SCOPE));
         if (initialScope == null) {
-            throw new ArgumentNullException(String.format("Argument '%s' is required.", ARG_SCOPE));
+            throw new ArgumentNullException(String.format("Argument '%s' is required.", ARG_AREA_SCOPE));
         }
 
-        propertyScope.set(initialScope);
+        propertyAreaScope.set(initialScope);
 
-        // TODO: restore saved fields.
+        if (savedInstanceState != null) {
+            areaSettings = Parcels.unwrap(savedInstanceState.getParcelable(STATE_AREA_SETTINGS));
+            propertyAreaScope.set(Parcels.unwrap(savedInstanceState.getParcelable(STATE_AREA_SCOPE)));
+            propertyArea.set(Parcels.unwrap(savedInstanceState.getParcelable(STATE_AREA)));
+            propertyAreaDescription.set(Parcels.unwrap(savedInstanceState.getParcelable(STATE_AREA_DESCRIPTION)));
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putParcelable(STATE_AREA_SETTINGS, Parcels.wrap(areaSettings));
+        outState.putParcelable(STATE_AREA_SCOPE, Parcels.wrap(propertyAreaScope.get()));
+        outState.putParcelable(STATE_AREA, Parcels.wrap(propertyArea.get()));
+        outState.putParcelable(STATE_AREA_DESCRIPTION, Parcels.wrap(propertyAreaDescription.get()));
     }
 
     public void onAreaSettingsSelected(@NonNull AreaSettings areaSettings,
@@ -150,7 +173,7 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
                                        @NonNull AreaDescription areaDescription) {
         this.areaSettings = areaSettings;
 
-        propertyScope.set(areaSettings.getAreaScopeAsEnum());
+        propertyAreaScope.set(areaSettings.getAreaScopeAsEnum());
         propertyArea.set(area);
         propertyAreaDescription.set(areaDescription);
     }
@@ -163,7 +186,7 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
             areaSettings.setUserId(CurrentUser.getInstance().getUserId());
         }
 
-        areaSettings.setAreaScopeAsEnum(propertyScope.get());
+        areaSettings.setAreaScopeAsEnum(propertyAreaScope.get());
         areaSettings.setAreaId(propertyArea.get().getId());
         areaSettings.setAreaDescriptionId(propertyAreaDescription.get().getId());
 
@@ -175,6 +198,6 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
     }
 
     private boolean canStart() {
-        return propertyScope.get() != null && propertyArea.get() != null && propertyAreaDescription.get() != null;
+        return propertyAreaScope.get() != null && propertyArea.get() != null && propertyAreaDescription.get() != null;
     }
 }

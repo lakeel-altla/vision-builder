@@ -128,7 +128,7 @@ public final class AreaSettingsFragment extends AbstractFragment<AreaSettingsVie
     }
 
     public void onAreaModeSelected(@NonNull Scope scope) {
-        presenter.propertyScope.set(scope);
+        presenter.propertyAreaScope.set(scope);
     }
 
     public void onAreaSelected(@NonNull Area area) {
