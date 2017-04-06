@@ -30,9 +30,6 @@ import android.view.ViewGroup;
 
 import javax.inject.Inject;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-
 public final class AreaFindFragment extends AbstractFragment<AreaFindView, AreaFindPresenter>
         implements AreaFindView {
 
@@ -46,9 +43,6 @@ public final class AreaFindFragment extends AbstractFragment<AreaFindView, AreaF
 
     @Inject
     GoogleApiClient googleApiClient;
-
-    @BindView(R.id.view_top)
-    View viewTop;
 
     private InteractionListener interactionListener;
 
@@ -97,8 +91,6 @@ public final class AreaFindFragment extends AbstractFragment<AreaFindView, AreaF
     @Override
     protected void onBindView(@NonNull View view) {
         super.onBindView(view);
-
-        ButterKnife.bind(this, view);
 
         BinderFactory factory = new BinderFactory(new ParentViewContainer(view));
         factory.create(R.id.button_place_picker, "onClick", presenter.commandShowPlacePicker).bind();
@@ -153,7 +145,9 @@ public final class AreaFindFragment extends AbstractFragment<AreaFindView, AreaF
 
     @Override
     public void onSnackbar(@StringRes int resId) {
-        Snackbar.make(viewTop, resId, Snackbar.LENGTH_SHORT).show();
+        if (getView() != null) {
+            Snackbar.make(getView(), resId, Snackbar.LENGTH_SHORT).show();
+        }
     }
 
     public interface InteractionListener {

@@ -9,8 +9,8 @@ import com.lakeel.altla.vision.builder.presentation.presenter.AreaSettingsContai
 import com.lakeel.altla.vision.builder.presentation.view.AreaSettingsContainerView;
 import com.lakeel.altla.vision.model.Area;
 import com.lakeel.altla.vision.model.AreaDescription;
-import com.lakeel.altla.vision.model.Scope;
 import com.lakeel.altla.vision.model.AreaSettings;
+import com.lakeel.altla.vision.model.Scope;
 import com.lakeel.altla.vision.presentation.view.fragment.AbstractFragment;
 
 import android.content.Context;
@@ -25,8 +25,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import javax.inject.Inject;
-
-import butterknife.ButterKnife;
 
 public final class AreaSettingsContainerFragment
         extends AbstractFragment<AreaSettingsContainerView, AreaSettingsContainerPresenter>
@@ -84,13 +82,6 @@ public final class AreaSettingsContainerFragment
     protected View onCreateViewCore(LayoutInflater inflater, @Nullable ViewGroup container,
                                     @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_area_settings_container, container, false);
-    }
-
-    @Override
-    protected void onBindView(@NonNull View view) {
-        super.onBindView(view);
-
-        ButterKnife.bind(this, view);
     }
 
     @Override
