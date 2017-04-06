@@ -1,8 +1,10 @@
 package com.lakeel.altla.vision.builder.presentation.view.fragment;
 
+import com.lakeel.altla.android.binding.BinderFactory;
+import com.lakeel.altla.android.binding.ParentViewContainer;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
-import com.lakeel.altla.vision.builder.presentation.helper.DateFormatHelper;
+import com.lakeel.altla.vision.builder.presentation.helper.LongToDateFormatConverter;
 import com.lakeel.altla.vision.builder.presentation.presenter.ActorPresenter;
 import com.lakeel.altla.vision.builder.presentation.view.ActorView;
 import com.lakeel.altla.vision.model.Scope;
@@ -17,31 +19,14 @@ import android.support.design.widget.Snackbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import javax.inject.Inject;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
 
 public final class ActorFragment extends AbstractFragment<ActorView, ActorPresenter>
         implements ActorView {
 
     @Inject
     ActorPresenter presenter;
-
-    @BindView(R.id.view_top)
-    View viewTop;
-
-    @BindView(R.id.text_view_name)
-    TextView textViewName;
-
-    @BindView(R.id.text_view_created_at)
-    TextView textViewCreatedAt;
-
-    @BindView(R.id.text_view_updated_at)
-    TextView textViewUpdatedAt;
 
     private InteractionListener interactionListener;
 
@@ -89,22 +74,15 @@ public final class ActorFragment extends AbstractFragment<ActorView, ActorPresen
     protected void onBindView(@NonNull View view) {
         super.onBindView(view);
 
-        ButterKnife.bind(this, view);
-    }
-
-    @Override
-    public void onUpdateName(@NonNull String name) {
-        textViewName.setText(name);
-    }
-
-    @Override
-    public void onUpdateCreatedAt(long createdAt) {
-        textViewCreatedAt.setText(DateFormatHelper.format(getContext(), createdAt));
-    }
-
-    @Override
-    public void onUpdateUpdatedAt(long updatedAt) {
-        textViewUpdatedAt.setText(DateFormatHelper.format(getContext(), updatedAt));
+        BinderFactory factory = new BinderFactory(new ParentViewContainer(view));
+        factory.create(R.id.text_view_name, "text", presenter.propertyName).bind();
+        factory.create(R.id.text_view_created_at, "text", presenter.propertyCreatedAt)
+               .converter(new LongToDateFormatConverter(getContext()))
+               .bind();
+        factory.create(R.id.text_view_updated_at, "text", presenter.propertyUpdatedAt)
+               .converter(new LongToDateFormatConverter(getContext()))
+               .bind();
+        factory.create(R.id.image_button_close, "onClick", presenter.commandClose).bind();
     }
 
     @Override
@@ -119,16 +97,13 @@ public final class ActorFragment extends AbstractFragment<ActorView, ActorPresen
 
     @Override
     public void onSnackbar(@StringRes int resId) {
-        Snackbar.make(viewTop, resId, Snackbar.LENGTH_SHORT).show();
+        if (getView() != null) {
+            Snackbar.make(getView(), resId, Snackbar.LENGTH_SHORT).show();
+        }
     }
 
     public void onUpdateActor(@NonNull Scope scope, @Nullable String actorId) {
         presenter.onUpdateActor(scope, actorId);
-    }
-
-    @OnClick(R.id.image_button_close)
-    void onClickImageButtonClose() {
-        presenter.onClickImageButtonClose();
     }
 
     public interface InteractionListener {

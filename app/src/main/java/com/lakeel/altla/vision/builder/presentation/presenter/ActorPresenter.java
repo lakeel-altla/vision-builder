@@ -1,5 +1,8 @@
 package com.lakeel.altla.vision.builder.presentation.presenter;
 
+import com.lakeel.altla.android.binding.command.RelayCommand;
+import com.lakeel.altla.android.binding.property.LongProperty;
+import com.lakeel.altla.android.binding.property.StringProperty;
 import com.lakeel.altla.vision.ArgumentNullException;
 import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
@@ -32,6 +35,14 @@ public final class ActorPresenter extends BasePresenter<ActorView> {
 
     @Inject
     VisionService visionService;
+
+    public final StringProperty propertyName = new StringProperty();
+
+    public final LongProperty propertyCreatedAt = new LongProperty(-1);
+
+    public final LongProperty propertyUpdatedAt = new LongProperty(-1);
+
+    public final RelayCommand commandClose = new RelayCommand(this::close);
 
     private final CompositeDisposable compositeDisposable = new CompositeDisposable();
 
@@ -87,23 +98,11 @@ public final class ActorPresenter extends BasePresenter<ActorView> {
         loadActor();
     }
 
-    public void onClickImageButtonClose() {
-        getView().onCloseView();
-        getView().onUpdateMainMenuVisible(true);
-    }
-
-    public void onUpdateActor(@NonNull Scope scope, @Nullable String actorId) {
-        this.scope = scope;
-        this.actorId = actorId;
-
-        loadActor();
-    }
-
     private void loadActor() {
         if (actorId == null) {
-            getView().onUpdateName(null);
-            getView().onUpdateCreatedAt(-1);
-            getView().onUpdateUpdatedAt(-1);
+            propertyName.set(null);
+            propertyCreatedAt.set(-1);
+            propertyUpdatedAt.set(-1);
         } else {
             Disposable disposable = Maybe
                     .<Actor>create(e -> {
@@ -131,9 +130,9 @@ public final class ActorPresenter extends BasePresenter<ActorView> {
                         }
                     })
                     .subscribe(actor -> {
-                        getView().onUpdateName(actor.getName());
-                        getView().onUpdateCreatedAt(actor.getCreatedAtAsLong());
-                        getView().onUpdateUpdatedAt(actor.getUpdatedAtAsLong());
+                        propertyName.set(actor.getName());
+                        propertyCreatedAt.set(actor.getCreatedAtAsLong());
+                        propertyUpdatedAt.set(actor.getUpdatedAtAsLong());
                     }, e -> {
                         getLog().e("Failed.", e);
                         getView().onSnackbar(R.string.snackbar_failed);
@@ -143,5 +142,17 @@ public final class ActorPresenter extends BasePresenter<ActorView> {
                     });
             compositeDisposable.add(disposable);
         }
+    }
+
+    private void close() {
+        getView().onCloseView();
+        getView().onUpdateMainMenuVisible(true);
+    }
+
+    public void onUpdateActor(@NonNull Scope scope, @Nullable String actorId) {
+        this.scope = scope;
+        this.actorId = actorId;
+
+        loadActor();
     }
 }
