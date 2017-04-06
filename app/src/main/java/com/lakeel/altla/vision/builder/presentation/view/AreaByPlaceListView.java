@@ -7,8 +7,6 @@ import android.support.annotation.StringRes;
 
 public interface AreaByPlaceListView {
 
-    void onUpdateButtonSelectEnabled(boolean enabled);
-
     void onItemInserted(int position);
 
     void onItemChanged(int position);
@@ -21,7 +19,7 @@ public interface AreaByPlaceListView {
 
     void onAreaSelected(@NonNull Area area);
 
-    void onBackToAreaFindView();
+    void onBackView();
 
     void onCloseView();
 

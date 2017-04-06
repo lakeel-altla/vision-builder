@@ -2,6 +2,8 @@ package com.lakeel.altla.vision.builder.presentation.view.fragment;
 
 import com.google.android.gms.location.places.Place;
 
+import com.lakeel.altla.android.binding.BinderFactory;
+import com.lakeel.altla.android.binding.ParentViewContainer;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.presenter.AreaByPlaceListPresenter;
@@ -22,13 +24,11 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 
 import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 
 public final class AreaByPlaceListFragment extends AbstractFragment<AreaByPlaceListView, AreaByPlaceListPresenter>
         implements AreaByPlaceListView {
@@ -38,9 +38,6 @@ public final class AreaByPlaceListFragment extends AbstractFragment<AreaByPlaceL
 
     @BindView(R.id.recycler_view)
     RecyclerView recyclerView;
-
-    @BindView(R.id.button_select)
-    Button buttonSelect;
 
     private InteractionListener interactionListener;
 
@@ -92,6 +89,10 @@ public final class AreaByPlaceListFragment extends AbstractFragment<AreaByPlaceL
 
         recyclerView.setAdapter(new AreaByPlaceListAdapter(presenter));
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        BinderFactory factory = new BinderFactory(new ParentViewContainer(view));
+        factory.create(R.id.button_previous, "onClick", presenter.commandBack).bind();
+        factory.create(R.id.button_select, "onClick", presenter.commandSelect).bind();
     }
 
     @Override
@@ -120,17 +121,12 @@ public final class AreaByPlaceListFragment extends AbstractFragment<AreaByPlaceL
     }
 
     @Override
-    public void onUpdateButtonSelectEnabled(boolean enabled) {
-        buttonSelect.setEnabled(enabled);
-    }
-
-    @Override
     public void onAreaSelected(@NonNull Area area) {
         interactionListener.onAreaSelected(area);
     }
 
     @Override
-    public void onBackToAreaFindView() {
+    public void onBackView() {
         interactionListener.onBackToAreaFindView();
     }
 
@@ -142,16 +138,6 @@ public final class AreaByPlaceListFragment extends AbstractFragment<AreaByPlaceL
     @Override
     public void onSnackbar(@StringRes int resId) {
         Snackbar.make(recyclerView, resId, Snackbar.LENGTH_SHORT).show();
-    }
-
-    @OnClick(R.id.button_previous)
-    void onClickButtonPrevious() {
-        presenter.onClickButtonPrevious();
-    }
-
-    @OnClick(R.id.button_select)
-    void onClickButtonSelect() {
-        presenter.onClickButtonSelect();
     }
 
     public interface InteractionListener {

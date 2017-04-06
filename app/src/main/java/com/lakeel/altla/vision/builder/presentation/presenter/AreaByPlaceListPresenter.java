@@ -2,10 +2,11 @@ package com.lakeel.altla.vision.builder.presentation.presenter;
 
 import com.google.android.gms.location.places.Place;
 
+import com.lakeel.altla.android.binding.command.RelayCommand;
+import com.lakeel.altla.android.binding.property.StringProperty;
 import com.lakeel.altla.vision.ArgumentNullException;
 import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
-import com.lakeel.altla.vision.builder.presentation.view.AreaByPlaceItemView;
 import com.lakeel.altla.vision.builder.presentation.view.AreaByPlaceListView;
 import com.lakeel.altla.vision.helper.AreaNameComparater;
 import com.lakeel.altla.vision.model.Area;
@@ -38,6 +39,10 @@ public final class AreaByPlaceListPresenter extends BasePresenter<AreaByPlaceLis
 
     @Inject
     VisionService visionService;
+
+    public final RelayCommand commandBack = new RelayCommand(this::back);
+
+    public final RelayCommand commandSelect = new RelayCommand(this::select, this::canSelect);
 
     private final CompositeDisposable compositeDisposable = new CompositeDisposable();
 
@@ -78,13 +83,6 @@ public final class AreaByPlaceListPresenter extends BasePresenter<AreaByPlaceLis
         }
 
         this.placeId = placeId;
-    }
-
-    @Override
-    protected void onCreateViewOverride() {
-        super.onCreateViewOverride();
-
-        getView().onUpdateButtonSelectEnabled(canSelect());
     }
 
     @Override
@@ -169,14 +167,14 @@ public final class AreaByPlaceListPresenter extends BasePresenter<AreaByPlaceLis
             selectedArea = null;
         }
 
-        getView().onUpdateButtonSelectEnabled(canSelect());
+        commandSelect.raiseOnCanExecuteChanged();
     }
 
-    public void onClickButtonPrevious() {
-        getView().onBackToAreaFindView();
+    private void back() {
+        getView().onBackView();
     }
 
-    public void onClickButtonSelect() {
+    private void select() {
         getView().onAreaSelected(selectedArea);
         getView().onCloseView();
     }
@@ -187,17 +185,17 @@ public final class AreaByPlaceListPresenter extends BasePresenter<AreaByPlaceLis
 
     public final class ItemPresenter {
 
-        private AreaByPlaceItemView itemView;
+        public final StringProperty propertyId = new StringProperty();
 
-        public void onCreateItemView(@NonNull AreaByPlaceItemView itemView) {
-            this.itemView = itemView;
-        }
+        public final StringProperty propertyName = new StringProperty();
+
+        public final StringProperty propertyLevel = new StringProperty();
 
         public void onBind(int position) {
             Area area = items.get(position);
-            itemView.onUpdateAreaId(area.getId());
-            itemView.onUpdateName(area.getName());
-            itemView.onUpdateLevel(area.getLevel());
+            propertyId.set(area.getId());
+            propertyName.set(area.getName());
+            propertyLevel.set(String.valueOf(area.getLevel()));
         }
     }
 }
