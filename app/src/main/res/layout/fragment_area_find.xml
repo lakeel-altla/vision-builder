@@ -29,7 +29,7 @@
                   android:layout_width="match_parent"
                   android:layout_height="wrap_content">
 
-        <Button android:id="@+id/button_find_by_place"
+        <Button android:id="@+id/button_place_picker"
                 android:text="@string/button_find_by_place"
                 android:textColor="@color/foreground_overlay"
                 android:background="@color/background_overlay_button_pressed"

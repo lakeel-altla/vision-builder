@@ -6,6 +6,8 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlacePicker;
 
+import com.lakeel.altla.android.binding.BinderFactory;
+import com.lakeel.altla.android.binding.ParentViewContainer;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.presenter.AreaFindPresenter;
@@ -30,7 +32,6 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 
 public final class AreaFindFragment extends AbstractFragment<AreaFindView, AreaFindPresenter>
         implements AreaFindView {
@@ -98,6 +99,10 @@ public final class AreaFindFragment extends AbstractFragment<AreaFindView, AreaF
         super.onBindView(view);
 
         ButterKnife.bind(this, view);
+
+        BinderFactory factory = new BinderFactory(new ParentViewContainer(view));
+        factory.create(R.id.button_place_picker, "onClick", presenter.commandShowPlacePicker).bind();
+        factory.create(R.id.image_button_close, "onClick", presenter.commandClose).bind();
     }
 
     @Override
@@ -149,16 +154,6 @@ public final class AreaFindFragment extends AbstractFragment<AreaFindView, AreaF
     @Override
     public void onSnackbar(@StringRes int resId) {
         Snackbar.make(viewTop, resId, Snackbar.LENGTH_SHORT).show();
-    }
-
-    @OnClick(R.id.button_find_by_place)
-    void onClickButtonFindByPlace() {
-        presenter.onClickButtonFindByPlace();
-    }
-
-    @OnClick(R.id.image_button_close)
-    void onClickButtonClose() {
-        presenter.onClickButtonClose();
     }
 
     public interface InteractionListener {

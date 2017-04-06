@@ -2,6 +2,7 @@ package com.lakeel.altla.vision.builder.presentation.presenter;
 
 import com.google.android.gms.location.places.Place;
 
+import com.lakeel.altla.android.binding.command.RelayCommand;
 import com.lakeel.altla.vision.ArgumentNullException;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.view.AreaFindView;
@@ -21,6 +22,10 @@ public final class AreaFindPresenter extends BasePresenter<AreaFindView> {
     private static final String ARG_SCOPE = "scope";
 
     private Scope scope;
+
+    public final RelayCommand commandShowPlacePicker = new RelayCommand(this::showPlacePicker);
+
+    public final RelayCommand commandClose = new RelayCommand(this::close);
 
     @Inject
     public AreaFindPresenter() {
@@ -45,10 +50,6 @@ public final class AreaFindPresenter extends BasePresenter<AreaFindView> {
         }
     }
 
-    public void onClickButtonFindByPlace() {
-        getView().onShowPlacePicker();
-    }
-
     public void onPlacePicked(@NonNull Place place) {
         getView().onShowAreaByPlaceListView(scope, place);
     }
@@ -57,7 +58,11 @@ public final class AreaFindPresenter extends BasePresenter<AreaFindView> {
         getView().onSnackbar(R.string.snackbar_failed);
     }
 
-    public void onClickButtonClose() {
+    private void showPlacePicker() {
+        getView().onShowPlacePicker();
+    }
+
+    private void close() {
         getView().onCloseView();
     }
 }
