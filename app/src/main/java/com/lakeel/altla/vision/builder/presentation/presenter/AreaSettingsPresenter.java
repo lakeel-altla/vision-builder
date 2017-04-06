@@ -7,6 +7,7 @@ import com.lakeel.altla.android.binding.property.StringProperty;
 import com.lakeel.altla.vision.ArgumentNullException;
 import com.lakeel.altla.vision.api.CurrentUser;
 import com.lakeel.altla.vision.api.VisionService;
+import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.helper.StringResourceHelper;
 import com.lakeel.altla.vision.builder.presentation.view.AreaSettingsView;
 import com.lakeel.altla.vision.model.Area;
@@ -52,6 +53,9 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
     public final StringProperty propertyAreaName = new StringProperty();
 
     public final StringProperty propertyAreaDescriptionName = new StringProperty();
+
+    public final IntProperty propertyShowAreaDescriptionButtonColorFilter = new IntProperty(
+            R.color.foreground_overlay_disabled);
 
     public final RelayCommand commandClose = new RelayCommand(this::close);
 
@@ -120,6 +124,10 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
             AreaDescription areaDescription = Parcels.unwrap(savedInstanceState.getParcelable(STATE_AREA_DESCRIPTION));
             if (areaDescription != null) propertyAreaDescription.set(areaDescription);
         }
+
+        commandShowAreaDescriptionList.addOnCanExecuteChangedListener(this::updateShowAreaDescriptionButtonColorFilter);
+
+        updateShowAreaDescriptionButtonColorFilter();
     }
 
     @Override
@@ -140,6 +148,12 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
         propertyAreaScope.set(areaSettings.getAreaScopeAsEnum());
         propertyArea.set(area);
         propertyAreaDescription.set(areaDescription);
+    }
+
+    private void updateShowAreaDescriptionButtonColorFilter() {
+        boolean enabled = commandShowAreaDescriptionList.canExecute();
+        int id = enabled ? R.color.foreground_overlay : R.color.foreground_overlay_disabled;
+        propertyShowAreaDescriptionButtonColorFilter.set(id);
     }
 
     private void close() {

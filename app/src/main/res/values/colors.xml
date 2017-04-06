@@ -13,8 +13,8 @@
 
     <!-- white (75%)  -->
     <color name="foreground_overlay">#ccffffff</color>
-    <!-- white (75%)  -->
-    <color name="foreground_overlay_disabled">#ccffffff</color>
+    <!-- white (25%)  -->
+    <color name="foreground_overlay_disabled">#44ffffff</color>
     <!-- black (75%) -->
     <color name="background_overlay">#cc000000</color>
     <!-- royalblue (75%) -->

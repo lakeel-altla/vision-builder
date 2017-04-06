@@ -5,6 +5,7 @@ import com.lakeel.altla.android.binding.ParentViewContainer;
 import com.lakeel.altla.android.binding.converter.ResourceToStringConverter;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
+import com.lakeel.altla.vision.builder.presentation.helper.ResourceToColorFilterConverter;
 import com.lakeel.altla.vision.builder.presentation.presenter.AreaSettingsPresenter;
 import com.lakeel.altla.vision.builder.presentation.view.AreaSettingsView;
 import com.lakeel.altla.vision.model.Area;
@@ -15,7 +16,6 @@ import com.lakeel.altla.vision.presentation.view.fragment.AbstractFragment;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
@@ -83,6 +83,10 @@ public final class AreaSettingsFragment extends AbstractFragment<AreaSettingsVie
         binderFactory.create(R.id.text_view_area_name, "text", presenter.propertyAreaName).bind();
         binderFactory.create(R.id.text_view_area_description_name, "text", presenter.propertyAreaDescriptionName)
                      .bind();
+        binderFactory.create(R.id.image_button_area_description_list, "colorFilter",
+                             presenter.propertyShowAreaDescriptionButtonColorFilter)
+                     .converter(new ResourceToColorFilterConverter(getResources()))
+                     .bind();
         binderFactory.create(R.id.image_button_close, "onClick", presenter.commandClose).bind();
         binderFactory.create(R.id.image_button_history, "onClick", presenter.commandShowHistory).bind();
         binderFactory.create(R.id.image_button_area_mode, "onClick", presenter.commandShowAreaMode).bind();
@@ -141,11 +145,11 @@ public final class AreaSettingsFragment extends AbstractFragment<AreaSettingsVie
         presenter.onAreaSettingsSelected(areaSettings, area, areaDescription);
     }
 
-    @ColorInt
-    private int resolveImageButtonTint(boolean enabled) {
-        int resId = enabled ? R.color.foreground_overlay : R.color.foreground_overlay_disabled;
-        return getResources().getColor(resId);
-    }
+//    @ColorInt
+//    private int resolveImageButtonTint(boolean enabled) {
+//        int resId = enabled ? R.color.foreground_overlay : R.color.foreground_overlay_disabled;
+//        return getResources().getColor(resId);
+//    }
 
     public interface InteractionListener {
 
