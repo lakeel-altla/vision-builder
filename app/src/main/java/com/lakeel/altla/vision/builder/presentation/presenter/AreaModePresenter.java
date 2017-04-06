@@ -1,5 +1,7 @@
 package com.lakeel.altla.vision.builder.presentation.presenter;
 
+import com.lakeel.altla.android.binding.command.RelayCommand;
+import com.lakeel.altla.android.binding.property.IntProperty;
 import com.lakeel.altla.vision.ArgumentNullException;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.view.AreaModeView;
@@ -9,6 +11,7 @@ import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 import org.parceler.Parcels;
 
 import android.os.Bundle;
+import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -20,7 +23,11 @@ public final class AreaModePresenter extends BasePresenter<AreaModeView> {
 
     private static final String STATE_SCOPE = "scope";
 
-    private Scope initialScope;
+    public final IntProperty propertyChckedButton = new IntProperty(R.id.radio_button_public);
+
+    public final RelayCommand commandSelect = new RelayCommand(this::select);
+
+    public final RelayCommand commandClose = new RelayCommand(this::close);
 
     private Scope scope;
 
@@ -41,47 +48,35 @@ public final class AreaModePresenter extends BasePresenter<AreaModeView> {
 
         if (arguments == null) throw new ArgumentNullException("arguments");
 
-        initialScope = Parcels.unwrap(arguments.getParcelable(ARG_SCOPE));
+        Scope initialScope = Parcels.unwrap(arguments.getParcelable(ARG_SCOPE));
         if (initialScope == null) {
             throw new IllegalArgumentException(String.format("Argument '%s' is required.", ARG_SCOPE));
         }
 
-        if (savedInstanceState == null) {
-            scope = initialScope;
-        } else {
-            scope = Parcels.unwrap(savedInstanceState.getParcelable(STATE_SCOPE));
-            if (scope == null) {
-                throw new IllegalStateException(String.format("State '%s' is required.", STATE_SCOPE));
-            }
-        }
+        Scope scope = null;
+        if (savedInstanceState != null) scope = Parcels.unwrap(savedInstanceState.getParcelable(STATE_SCOPE));
+        if (scope == null) scope = initialScope;
+
+        propertyChckedButton.addOnValueChangedListener(sender -> this.scope = resolveScope(propertyChckedButton.get()));
+        propertyChckedButton.set(resolveCheckedId(scope));
     }
 
-    @Override
-    protected void onCreateViewOverride() {
-        super.onCreateViewOverride();
-
-        int checkedId = (scope == Scope.PUBLIC) ? R.id.radio_button_public : R.id.radio_button_user;
-        getView().onUpdateRadioGroupScopeChecked(checkedId);
+    @IdRes
+    private static int resolveCheckedId(@NonNull Scope scope) {
+        return (scope == Scope.PUBLIC) ? R.id.radio_button_public : R.id.radio_button_user;
     }
 
-    public void onClickButtonSelect() {
+    @NonNull
+    private static Scope resolveScope(@IdRes int checkedId) {
+        return (checkedId == R.id.radio_button_public) ? Scope.PUBLIC : Scope.USER;
+    }
+
+    private void select() {
         getView().onAreaModeSelected(scope);
         getView().onCloseView();
     }
 
-    public void onClickButtonClose() {
+    private void close() {
         getView().onCloseView();
-    }
-
-    public void onCheckedChangedRadioButtonPublic(boolean checked) {
-        if (checked) {
-            scope = Scope.PUBLIC;
-        }
-    }
-
-    public void onCheckedChangedRadioButtonUser(boolean checked) {
-        if (checked) {
-            scope = Scope.USER;
-        }
     }
 }

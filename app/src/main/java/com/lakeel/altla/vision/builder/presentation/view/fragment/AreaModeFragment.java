@@ -1,5 +1,7 @@
 package com.lakeel.altla.vision.builder.presentation.view.fragment;
 
+import com.lakeel.altla.android.binding.BinderFactory;
+import com.lakeel.altla.android.binding.ParentViewContainer;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.presenter.AreaModePresenter;
@@ -9,21 +11,13 @@ import com.lakeel.altla.vision.presentation.view.fragment.AbstractFragment;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CompoundButton;
-import android.widget.RadioGroup;
 
 import javax.inject.Inject;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnCheckedChanged;
-import butterknife.OnClick;
 
 public final class AreaModeFragment extends AbstractFragment<AreaModeView, AreaModePresenter>
         implements AreaModeView {
@@ -31,14 +25,11 @@ public final class AreaModeFragment extends AbstractFragment<AreaModeView, AreaM
     @Inject
     AreaModePresenter presenter;
 
-    @BindView(R.id.radio_group_scope)
-    RadioGroup radioGroupScope;
-
     private InteractionListener interactionListener;
 
     @NonNull
     public static AreaModeFragment newInstance(@NonNull Scope scope) {
-        AreaModeFragment fragment =new AreaModeFragment();
+        AreaModeFragment fragment = new AreaModeFragment();
         Bundle bundle = AreaModePresenter.createArguments(scope);
         fragment.setArguments(bundle);
         return fragment;
@@ -80,12 +71,10 @@ public final class AreaModeFragment extends AbstractFragment<AreaModeView, AreaM
     protected void onBindView(@NonNull View view) {
         super.onBindView(view);
 
-        ButterKnife.bind(this, view);
-    }
-
-    @Override
-    public void onUpdateRadioGroupScopeChecked(@IdRes int checkedId) {
-        radioGroupScope.check(checkedId);
+        BinderFactory factory = new BinderFactory(new ParentViewContainer(view));
+        factory.create(R.id.radio_group_scope, "checkedButton", presenter.propertyChckedButton).bind();
+        factory.create(R.id.button_select, "onClick", presenter.commandSelect).bind();
+        factory.create(R.id.image_button_close, "onClick", presenter.commandClose).bind();
     }
 
     @Override
@@ -96,26 +85,6 @@ public final class AreaModeFragment extends AbstractFragment<AreaModeView, AreaM
     @Override
     public void onCloseView() {
         interactionListener.onCloseAreaModeView();
-    }
-
-    @OnClick(R.id.button_select)
-    void onClickButtonSelect() {
-        presenter.onClickButtonSelect();
-    }
-
-    @OnClick(R.id.image_button_close)
-    void onClickButtonClose() {
-        presenter.onClickButtonClose();
-    }
-
-    @OnCheckedChanged(R.id.radio_button_public)
-    void onCheckedChangedRadioButtonPublic(CompoundButton buttonView, boolean checked) {
-        presenter.onCheckedChangedRadioButtonPublic(checked);
-    }
-
-    @OnCheckedChanged(R.id.radio_button_user)
-    void onCheckedChangedRadioButtonUser(CompoundButton buttonView, boolean checked) {
-        presenter.onCheckedChangedRadioButtonUser(checked);
     }
 
     public interface InteractionListener {

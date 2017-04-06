@@ -1,6 +1,7 @@
 package com.lakeel.altla.vision.builder.presentation.view.fragment;
 
 import com.lakeel.altla.android.binding.BinderFactory;
+import com.lakeel.altla.android.binding.ParentViewContainer;
 import com.lakeel.altla.android.binding.converter.ResourceToStringConverter;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
@@ -22,8 +23,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import javax.inject.Inject;
-
-import butterknife.ButterKnife;
 
 public final class AreaSettingsFragment extends AbstractFragment<AreaSettingsView, AreaSettingsPresenter>
         implements AreaSettingsView {
@@ -77,9 +76,7 @@ public final class AreaSettingsFragment extends AbstractFragment<AreaSettingsVie
     protected void onBindView(@NonNull View view) {
         super.onBindView(view);
 
-        ButterKnife.bind(this, view);
-
-        BinderFactory binderFactory = new BinderFactory(view);
+        BinderFactory binderFactory = new BinderFactory(new ParentViewContainer(view));
         binderFactory.create(R.id.text_view_area_mode, "text", presenter.propertyAreaMode)
                      .converter(new ResourceToStringConverter(getResources()))
                      .bind();
