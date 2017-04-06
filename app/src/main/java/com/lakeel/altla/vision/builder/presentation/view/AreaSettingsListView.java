@@ -9,8 +9,6 @@ import android.support.annotation.StringRes;
 
 public interface AreaSettingsListView {
 
-    void onUpdateButtonSelectEnabled(boolean enabled);
-
     void onItemInserted(int position);
 
     void onDataSetChanged();

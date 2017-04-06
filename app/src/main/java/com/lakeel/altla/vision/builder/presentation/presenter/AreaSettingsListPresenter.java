@@ -1,13 +1,17 @@
 package com.lakeel.altla.vision.builder.presentation.presenter;
 
+import com.lakeel.altla.android.binding.command.RelayCommand;
+import com.lakeel.altla.android.binding.property.IntProperty;
+import com.lakeel.altla.android.binding.property.LongProperty;
+import com.lakeel.altla.android.binding.property.StringProperty;
 import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
-import com.lakeel.altla.vision.builder.presentation.view.AreaSettingsItemView;
+import com.lakeel.altla.vision.builder.presentation.helper.StringResourceHelper;
 import com.lakeel.altla.vision.builder.presentation.view.AreaSettingsListView;
 import com.lakeel.altla.vision.model.Area;
 import com.lakeel.altla.vision.model.AreaDescription;
-import com.lakeel.altla.vision.model.Scope;
 import com.lakeel.altla.vision.model.AreaSettings;
+import com.lakeel.altla.vision.model.Scope;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 
 import android.support.annotation.NonNull;
@@ -27,6 +31,10 @@ public final class AreaSettingsListPresenter extends BasePresenter<AreaSettingsL
     @Inject
     VisionService visionService;
 
+    public final RelayCommand commandClose = new RelayCommand(this::close);
+
+    public final RelayCommand commandSelect = new RelayCommand(this::select, this::canSelect);
+
     private final CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     private final List<Item> items = new ArrayList<>();
@@ -35,13 +43,6 @@ public final class AreaSettingsListPresenter extends BasePresenter<AreaSettingsL
 
     @Inject
     public AreaSettingsListPresenter() {
-    }
-
-    @Override
-    protected void onCreateViewOverride() {
-        super.onCreateViewOverride();
-
-        getView().onUpdateButtonSelectEnabled(canSelect());
     }
 
     @Override
@@ -157,14 +158,14 @@ public final class AreaSettingsListPresenter extends BasePresenter<AreaSettingsL
             selectedItem = null;
         }
 
-        getView().onUpdateButtonSelectEnabled(canSelect());
+        commandSelect.raiseOnCanExecuteChanged();
     }
 
-    public void onClickButtonClose() {
+    private void close() {
         getView().onCloseView();
     }
 
-    public void onClickButtonSelect() {
+    private void select() {
         getView().onAreaSettingsSelected(selectedItem.areaSettings, selectedItem.area, selectedItem.areaDescription);
         getView().onCloseView();
     }
@@ -175,21 +176,23 @@ public final class AreaSettingsListPresenter extends BasePresenter<AreaSettingsL
 
     public final class ItemPresenter {
 
-        private AreaSettingsItemView itemView;
+        public final IntProperty propertyAreaMode = new IntProperty(
+                StringResourceHelper.resolveScopeStringResource(Scope.PUBLIC));
 
-        public void onCreateItemView(@NonNull AreaSettingsItemView itemView) {
-            this.itemView = itemView;
-        }
+        public final LongProperty propertyUpdatedAt = new LongProperty();
+
+        public final StringProperty propertyAreaName = new StringProperty();
+
+        public final StringProperty propertyAreaDescriptionName = new StringProperty();
 
         public void onBind(int position) {
             Item item = items.get(position);
 
-            int resId = (item.areaSettings.getAreaScopeAsEnum() == Scope.PUBLIC ? R.string.label_area_mode_public :
-                    R.string.label_area_mode_user);
-            itemView.onUpdateAreaMode(resId);
-            itemView.onUpdateUpdatedAt(item.areaSettings.getUpdatedAtAsLong());
-            itemView.onUpdateAreaName(item.area.getName());
-            itemView.onUpdateAreaDescriptionName(item.areaDescription.getName());
+            propertyAreaMode.set(StringResourceHelper.resolveScopeStringResource(
+                    item.areaSettings.getAreaScopeAsEnum()));
+            propertyUpdatedAt.set(item.areaSettings.getUpdatedAtAsLong());
+            propertyAreaName.set(item.area.getName());
+            propertyAreaDescriptionName.set(item.areaDescription.getName());
         }
     }
 

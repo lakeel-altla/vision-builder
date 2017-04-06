@@ -1,21 +1,19 @@
 package com.lakeel.altla.vision.builder.presentation.view.adapter;
 
+import com.lakeel.altla.android.binding.BinderFactory;
+import com.lakeel.altla.android.binding.ParentViewContainer;
+import com.lakeel.altla.android.binding.converter.RelayConverter;
+import com.lakeel.altla.android.binding.converter.ResourceToStringConverter;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.helper.DateFormatHelper;
 import com.lakeel.altla.vision.builder.presentation.presenter.AreaSettingsListPresenter;
 import com.lakeel.altla.vision.builder.presentation.view.AreaSettingsItemView;
 
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.StringRes;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 public final class AreaSettingsListAdapter extends RecyclerView.Adapter<AreaSettingsListAdapter.ViewHolder> {
 
@@ -85,48 +83,24 @@ public final class AreaSettingsListAdapter extends RecyclerView.Adapter<AreaSett
 
     class ViewHolder extends RecyclerView.ViewHolder implements AreaSettingsItemView {
 
-        @BindView(R.id.text_view_updated_at)
-        TextView textViewUpdatedAt;
-
-        @BindView(R.id.text_view_area_mode)
-        TextView textViewAreaMode;
-
-        @BindView(R.id.text_view_area_name)
-        TextView textViewAreaName;
-
-        @BindView(R.id.text_view_area_description_name)
-        TextView textViewAreaDescriptionName;
-
         private AreaSettingsListPresenter.ItemPresenter itemPresenter;
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);
 
-            ButterKnife.bind(this, itemView);
-
             itemPresenter = presenter.createItemPresenter();
-            itemPresenter.onCreateItemView(this);
-        }
 
-        @Override
-        public void onUpdateUpdatedAt(long updatedAt) {
-            String text = DateFormatHelper.format(itemView.getContext(), updatedAt);
-            textViewUpdatedAt.setText(text);
-        }
-
-        @Override
-        public void onUpdateAreaMode(@StringRes int resId) {
-            textViewAreaMode.setText(resId);
-        }
-
-        @Override
-        public void onUpdateAreaName(@Nullable String areaName) {
-            textViewAreaName.setText(areaName);
-        }
-
-        @Override
-        public void onUpdateAreaDescriptionName(@Nullable String areaDescriptionName) {
-            textViewAreaDescriptionName.setText(areaDescriptionName);
+            BinderFactory factory = new BinderFactory(new ParentViewContainer(itemView));
+            factory.create(R.id.text_view_updated_at, "text", itemPresenter.propertyUpdatedAt)
+                   .converter(new RelayConverter(
+                           value -> DateFormatHelper.format(itemView.getContext(), (long) value)))
+                   .bind();
+            factory.create(R.id.text_view_area_mode, "text", itemPresenter.propertyAreaMode)
+                   .converter(new ResourceToStringConverter(itemView.getResources()))
+                   .bind();
+            factory.create(R.id.text_view_area_name, "text", itemPresenter.propertyAreaName).bind();
+            factory.create(R.id.text_view_area_description_name, "text", itemPresenter.propertyAreaDescriptionName)
+                   .bind();
         }
     }
 }

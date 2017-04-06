@@ -7,7 +7,7 @@ import com.lakeel.altla.android.binding.property.StringProperty;
 import com.lakeel.altla.vision.ArgumentNullException;
 import com.lakeel.altla.vision.api.CurrentUser;
 import com.lakeel.altla.vision.api.VisionService;
-import com.lakeel.altla.vision.builder.R;
+import com.lakeel.altla.vision.builder.presentation.helper.StringResourceHelper;
 import com.lakeel.altla.vision.builder.presentation.view.AreaSettingsView;
 import com.lakeel.altla.vision.model.Area;
 import com.lakeel.altla.vision.model.AreaDescription;
@@ -20,7 +20,6 @@ import org.parceler.Parcels;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.annotation.StringRes;
 
 import javax.inject.Inject;
 
@@ -47,7 +46,8 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
 
     public final ObjectProperty<AreaDescription> propertyAreaDescription = new ObjectProperty<>();
 
-    public final IntProperty propertyAreaMode = new IntProperty(resolveScopeString(Scope.PUBLIC));
+    public final IntProperty propertyAreaMode = new IntProperty(
+            StringResourceHelper.resolveScopeStringResource(Scope.PUBLIC));
 
     public final StringProperty propertyAreaName = new StringProperty();
 
@@ -89,7 +89,7 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
         }
 
         propertyAreaScope.addOnValueChangedListener(sender -> {
-            propertyAreaMode.set(resolveScopeString(propertyAreaScope.get()));
+            propertyAreaMode.set(StringResourceHelper.resolveScopeStringResource(propertyAreaScope.get()));
             propertyArea.set(null);
         });
 
@@ -140,15 +140,6 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
         propertyAreaScope.set(areaSettings.getAreaScopeAsEnum());
         propertyArea.set(area);
         propertyAreaDescription.set(areaDescription);
-    }
-
-    @StringRes
-    private static int resolveScopeString(@Nullable Scope scope) {
-        int resId = R.string.label_area_mode_public;
-        if (scope != null && scope == Scope.USER) {
-            resId = R.string.label_area_mode_user;
-        }
-        return resId;
     }
 
     private void close() {
