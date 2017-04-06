@@ -1,10 +1,11 @@
 package com.lakeel.altla.vision.builder.presentation.presenter;
 
+import com.lakeel.altla.android.binding.command.RelayCommand;
+import com.lakeel.altla.android.binding.property.StringProperty;
 import com.lakeel.altla.vision.ArgumentNullException;
 import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.view.AreaDescriptionByAreaListView;
-import com.lakeel.altla.vision.builder.presentation.view.AreaDescriptionItemView;
 import com.lakeel.altla.vision.helper.AreaDescriptionNameComparater;
 import com.lakeel.altla.vision.model.Area;
 import com.lakeel.altla.vision.model.AreaDescription;
@@ -37,6 +38,10 @@ public final class AreaDescriptionByAreaListPresenter extends BasePresenter<Area
 
     @Inject
     VisionService visionService;
+
+    public final RelayCommand commandClose = new RelayCommand(this::close);
+
+    public final RelayCommand commandSelect = new RelayCommand(this::select, this::canSelect);
 
     private final CompositeDisposable compositeDisposable = new CompositeDisposable();
 
@@ -76,13 +81,6 @@ public final class AreaDescriptionByAreaListPresenter extends BasePresenter<Area
         if (area == null) {
             throw new IllegalArgumentException(String.format("Argument '%s' must be not null.", ARG_AREA));
         }
-    }
-
-    @Override
-    protected void onCreateViewOverride() {
-        super.onCreateViewOverride();
-
-        getView().onUpdateButtonSelectEnabled(canSelect());
     }
 
     @Override
@@ -169,14 +167,14 @@ public final class AreaDescriptionByAreaListPresenter extends BasePresenter<Area
             selectedAreaDescription = null;
         }
 
-        getView().onUpdateButtonSelectEnabled(canSelect());
+        commandSelect.raiseOnCanExecuteChanged();
     }
 
-    public void onClickButtonClose() {
+    private void close() {
         getView().onCloseView();
     }
 
-    public void onClickButtonSelect() {
+    private void select() {
         getView().onAreaDescriptionSelected(selectedAreaDescription);
         getView().onCloseView();
     }
@@ -187,16 +185,14 @@ public final class AreaDescriptionByAreaListPresenter extends BasePresenter<Area
 
     public final class ItemPresenter {
 
-        private AreaDescriptionItemView itemView;
+        public final StringProperty propertyId = new StringProperty();
 
-        public void onCreateItemView(@NonNull AreaDescriptionItemView itemView) {
-            this.itemView = itemView;
-        }
+        public final StringProperty propertyName = new StringProperty();
 
         public void onBind(int position) {
             AreaDescription areaDescription = items.get(position);
-            itemView.onUpdateAreaDescriptionId(areaDescription.getId());
-            itemView.onUpdateName(areaDescription.getName());
+            propertyId.set(areaDescription.getId());
+            propertyName.set(areaDescription.getName());
         }
     }
 }

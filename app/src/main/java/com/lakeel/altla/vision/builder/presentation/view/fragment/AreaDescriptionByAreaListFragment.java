@@ -1,5 +1,7 @@
 package com.lakeel.altla.vision.builder.presentation.view.fragment;
 
+import com.lakeel.altla.android.binding.BinderFactory;
+import com.lakeel.altla.android.binding.ParentViewContainer;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.presenter.AreaDescriptionByAreaListPresenter;
@@ -21,13 +23,11 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 
 import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 
 public final class AreaDescriptionByAreaListFragment
         extends AbstractFragment<AreaDescriptionByAreaListView, AreaDescriptionByAreaListPresenter>
@@ -38,9 +38,6 @@ public final class AreaDescriptionByAreaListFragment
 
     @BindView(R.id.recycler_view)
     RecyclerView recyclerView;
-
-    @BindView(R.id.button_select)
-    Button buttonSelect;
 
     private InteractionListener interactionListener;
 
@@ -93,12 +90,9 @@ public final class AreaDescriptionByAreaListFragment
         recyclerView.setAdapter(new AreaDescriptionByAreaListAdapter(presenter));
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        getActivity().setTitle(R.string.title_user_area_description_list_in_area);
-    }
-
-    @Override
-    public void onUpdateButtonSelectEnabled(boolean enabled) {
-        buttonSelect.setEnabled(enabled);
+        BinderFactory factory = new BinderFactory(new ParentViewContainer(view));
+        factory.create(R.id.image_button_close, "onClick", presenter.commandClose).bind();
+        factory.create(R.id.button_select, "onClick", presenter.commandSelect).bind();
     }
 
     @Override
@@ -139,16 +133,6 @@ public final class AreaDescriptionByAreaListFragment
     @Override
     public void onSnackbar(@StringRes int resId) {
         Snackbar.make(recyclerView, resId, Snackbar.LENGTH_SHORT).show();
-    }
-
-    @OnClick(R.id.image_button_close)
-    void onClickButtonClose() {
-        presenter.onClickButtonClose();
-    }
-
-    @OnClick(R.id.button_select)
-    void onClickButtonSelect() {
-        presenter.onClickButtonSelect();
     }
 
     public interface InteractionListener {

@@ -7,8 +7,6 @@ import android.support.annotation.StringRes;
 
 public interface AreaDescriptionByAreaListView {
 
-    void onUpdateButtonSelectEnabled(boolean enabled);
-
     void onItemInserted(int position);
 
     void onItemChanged(int position);

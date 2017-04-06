@@ -1,19 +1,16 @@
 package com.lakeel.altla.vision.builder.presentation.view.adapter;
 
+import com.lakeel.altla.android.binding.BinderFactory;
+import com.lakeel.altla.android.binding.ParentViewContainer;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.presenter.AreaDescriptionByAreaListPresenter;
 import com.lakeel.altla.vision.builder.presentation.view.AreaDescriptionItemView;
 
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 public final class AreaDescriptionByAreaListAdapter
         extends RecyclerView.Adapter<AreaDescriptionByAreaListAdapter.ViewHolder> {
@@ -84,31 +81,16 @@ public final class AreaDescriptionByAreaListAdapter
 
     class ViewHolder extends RecyclerView.ViewHolder implements AreaDescriptionItemView {
 
-        @BindView(R.id.text_view_name)
-        TextView textViewName;
-
-        @BindView(R.id.text_view_id)
-        TextView textViewId;
-
         private AreaDescriptionByAreaListPresenter.ItemPresenter itemPresenter;
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);
 
-            ButterKnife.bind(this, itemView);
-
             itemPresenter = presenter.createItemPresenter();
-            itemPresenter.onCreateItemView(this);
-        }
 
-        @Override
-        public void onUpdateAreaDescriptionId(@NonNull String areaDescriptionId) {
-            textViewId.setText(areaDescriptionId);
-        }
-
-        @Override
-        public void onUpdateName(@Nullable String name) {
-            textViewName.setText(name);
+            BinderFactory factory = new BinderFactory(new ParentViewContainer(itemView));
+            factory.create(R.id.text_view_id, "text", itemPresenter.propertyId).bind();
+            factory.create(R.id.text_view_name, "text", itemPresenter.propertyName).bind();
         }
     }
 }
