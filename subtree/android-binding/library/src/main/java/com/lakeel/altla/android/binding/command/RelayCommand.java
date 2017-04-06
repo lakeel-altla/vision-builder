@@ -1,21 +1,25 @@
 package com.lakeel.altla.android.binding.command;
 
+import com.lakeel.altla.android.binding.CommandCanExecuteDelegate;
+import com.lakeel.altla.android.binding.CommandExecuteDelegate;
+
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 public final class RelayCommand extends AbstractCommand {
 
-    private final ExecuteDelegate executeDelegate;
+    private final CommandExecuteDelegate executeDelegate;
 
-    private final CanExecuteDelegate canExecuteDelegate;
+    private final CommandCanExecuteDelegate commandCanExecuteDelegate;
 
-    public RelayCommand(@NonNull ExecuteDelegate executeDelegate) {
+    public RelayCommand(@NonNull CommandExecuteDelegate executeDelegate) {
         this(executeDelegate, null);
     }
 
-    public RelayCommand(@NonNull ExecuteDelegate executeDelegate, @Nullable CanExecuteDelegate canExecuteDelegate) {
+    public RelayCommand(@NonNull CommandExecuteDelegate executeDelegate,
+                        @Nullable CommandCanExecuteDelegate commandCanExecuteDelegate) {
         this.executeDelegate = executeDelegate;
-        this.canExecuteDelegate = canExecuteDelegate;
+        this.commandCanExecuteDelegate = commandCanExecuteDelegate;
     }
 
     @Override
@@ -25,16 +29,7 @@ public final class RelayCommand extends AbstractCommand {
 
     @Override
     public final boolean canExecute() {
-        return canExecuteDelegate == null || canExecuteDelegate.canExecute();
+        return commandCanExecuteDelegate == null || commandCanExecuteDelegate.canExecute();
     }
 
-    public interface ExecuteDelegate {
-
-        void execute();
-    }
-
-    public interface CanExecuteDelegate {
-
-        boolean canExecute();
-    }
 }

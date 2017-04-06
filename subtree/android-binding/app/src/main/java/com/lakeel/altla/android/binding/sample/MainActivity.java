@@ -1,5 +1,6 @@
 package com.lakeel.altla.android.binding.sample;
 
+import com.lakeel.altla.android.binding.ActivityViewContainer;
 import com.lakeel.altla.android.binding.BinderFactory;
 import com.lakeel.altla.android.binding.Converter;
 import com.lakeel.altla.android.binding.annotation.AnnotationBinderFactory;
@@ -7,7 +8,6 @@ import com.lakeel.altla.android.binding.annotation.BindProperties;
 import com.lakeel.altla.android.binding.annotation.BindProperty;
 import com.lakeel.altla.android.binding.annotation.ConverterName;
 import com.lakeel.altla.android.binding.annotation.OnClickCommand;
-import com.lakeel.altla.android.binding.annotation.OnLongClickCommand;
 import com.lakeel.altla.android.binding.command.RelayCommand;
 import com.lakeel.altla.android.binding.converter.RelayConverter;
 import com.lakeel.altla.android.binding.property.BooleanProperty;
@@ -29,8 +29,14 @@ public final class MainActivity extends AppCompatActivity {
 
         viewModel.onCreate(savedInstanceState);
 
-        AnnotationBinderFactory factory = new AnnotationBinderFactory(new BinderFactory(this));
-        factory.create(viewModel).bind();
+        BinderFactory binderFactory = new BinderFactory(new ActivityViewContainer(this));
+        AnnotationBinderFactory annotationBinderFactory = new AnnotationBinderFactory(binderFactory);
+
+        annotationBinderFactory.create(viewModel).bind();
+        binderFactory.create(R.id.button_set_text, "onClick", viewModel::setTextViewText).bind();
+        binderFactory.create(R.id.button_clear_text, "onClick", viewModel::clearTextViewText).bind();
+        binderFactory.create(R.id.button_edit_text_clear_text, "onClick", viewModel::clearEditTextText).bind();
+        binderFactory.create(R.id.text_view_on_long_click, "onClick", viewModel::onLongClick).bind();
     }
 
     @Override
@@ -40,52 +46,43 @@ public final class MainActivity extends AppCompatActivity {
         viewModel.onSaveInstanceState(outState);
     }
 
-    private final class ViewModel {
+    public final class ViewModel {
 
         private static final String STATE_RADIO_GROUP_CHECKED = "radioGroupChecked";
 
-        private static final String STATE_TEXT_VIEW_TEXT = "textViewText";
+        private static final String STATE_TEXT_VIEW_TEXT = "setTextViewText";
 
         private static final String STATE_EDIT_TEXT_TEXT = "editTextText";
 
         private static final String STATE_TOGGLE_BUTTON_CHECKED = "toggleButtonChecked";
 
         @BindProperty(id = R.id.radio_group_button, name = "checkedButton")
-        IntProperty radioGroupChecked;
+        public IntProperty radioGroupChecked;
 
         @OnClickCommand(R.id.button_on_click)
-        final RelayCommand commandClick = new RelayCommand(
+        public final RelayCommand commandClick = new RelayCommand(
                 () -> Toast.makeText(MainActivity.this, "onClick", Toast.LENGTH_SHORT).show(),
                 () -> radioGroupChecked.get() == R.id.radio_button_button_enabled);
 
         @BindProperty(id = R.id.text_view_set_text, name = "text")
-        StringProperty textViewText;
+        public StringProperty textViewText;
 
-        @OnClickCommand(R.id.button_set_text)
-        final RelayCommand commandTextViewText = new RelayCommand(() -> textViewText.set("Text was set."));
+        @BindProperties({
+                                @BindProperty(id = R.id.edit_text, name = "text"),
+                                @BindProperty(id = R.id.text_view_edit_text_result, name = "text")
+                        })
+        public StringProperty editTextText;
 
-        @OnClickCommand(R.id.button_clear_text)
-        final RelayCommand commandClearTextViewText = new RelayCommand(() -> textViewText.set(null));
-
-        @BindProperties({ @BindProperty(id = R.id.edit_text, name = "text"),
-                          @BindProperty(id = R.id.text_view_edit_text_result, name = "text") })
-        StringProperty editTextText;
-
-        @OnClickCommand(R.id.button_edit_text_clear_text)
-        final RelayCommand commandClearEditTextText = new RelayCommand(() -> editTextText.set(null));
-
-        @OnLongClickCommand(R.id.text_view_on_long_click)
-        final RelayCommand commandLongClick = new RelayCommand(
-                () -> Toast.makeText(MainActivity.this, "onLongClick", Toast.LENGTH_SHORT).show());
-
-        @BindProperties({ @BindProperty(id = R.id.toggle_button, name = "checked"),
-                          @BindProperty(id = R.id.text_view_toggle_button_result, name = "text",
-                                        converter = "objectStringConverter"),
-                          @BindProperty(id = R.id.edit_text_toggle_enabled, name = "enabled") })
-        BooleanProperty toggleButtonChecked;
+        @BindProperties({
+                                @BindProperty(id = R.id.toggle_button, name = "checked"),
+                                @BindProperty(id = R.id.text_view_toggle_button_result, name = "text",
+                                              converter = "objectStringConverter"),
+                                @BindProperty(id = R.id.edit_text_toggle_enabled, name = "enabled")
+                        })
+        public BooleanProperty toggleButtonChecked;
 
         @ConverterName("objectStringConverter")
-        final Converter objectStringConverter = new RelayConverter(value -> value == null ? null : value.toString());
+        public Converter objectStringConverter = new RelayConverter(value -> value == null ? null : value.toString());
 
         private ViewModel() {
         }
@@ -111,6 +108,22 @@ public final class MainActivity extends AppCompatActivity {
             outState.putParcelable(STATE_TEXT_VIEW_TEXT, textViewText);
             outState.putParcelable(STATE_EDIT_TEXT_TEXT, editTextText);
             outState.putParcelable(STATE_TOGGLE_BUTTON_CHECKED, toggleButtonChecked);
+        }
+
+        private void setTextViewText() {
+            textViewText.set("Text was set.");
+        }
+
+        private void clearTextViewText() {
+            textViewText.set(null);
+        }
+
+        private void clearEditTextText() {
+            editTextText.set(null);
+        }
+
+        private void onLongClick() {
+            Toast.makeText(MainActivity.this, "onLongClick", Toast.LENGTH_SHORT).show();
         }
     }
 }
