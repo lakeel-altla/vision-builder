@@ -1,7 +1,7 @@
 package com.lakeel.altla.vision.builder.presentation.view.fragment;
 
-import com.lakeel.altla.android.binding.BinderFactory;
-import com.lakeel.altla.android.binding.ParentViewContainer;
+import com.lakeel.altla.android.binding.ParentViewResolver;
+import com.lakeel.altla.android.binding.ViewBindingFactory;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.presenter.AreaModePresenter;
@@ -71,7 +71,7 @@ public final class AreaModeFragment extends AbstractFragment<AreaModeView, AreaM
     protected void onBindView(@NonNull View view) {
         super.onBindView(view);
 
-        BinderFactory factory = new BinderFactory(new ParentViewContainer(view));
+        ViewBindingFactory factory = new ViewBindingFactory(new ParentViewResolver(view));
         factory.create(R.id.radio_group_scope, "checkedButton", presenter.propertyChckedButton).bind();
         factory.create(R.id.button_select, "onClick", presenter.commandSelect).bind();
         factory.create(R.id.image_button_close, "onClick", presenter.commandClose).bind();

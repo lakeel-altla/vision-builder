@@ -1,7 +1,7 @@
 package com.lakeel.altla.vision.builder.presentation.view.adapter;
 
-import com.lakeel.altla.android.binding.BinderFactory;
-import com.lakeel.altla.android.binding.ParentViewContainer;
+import com.lakeel.altla.android.binding.ParentViewResolver;
+import com.lakeel.altla.android.binding.ViewBindingFactory;
 import com.lakeel.altla.android.binding.converter.RelayConverter;
 import com.lakeel.altla.android.binding.converter.ResourceToStringConverter;
 import com.lakeel.altla.vision.builder.R;
@@ -90,7 +90,7 @@ public final class AreaSettingsListAdapter extends RecyclerView.Adapter<AreaSett
 
             itemPresenter = presenter.createItemPresenter();
 
-            BinderFactory factory = new BinderFactory(new ParentViewContainer(itemView));
+            ViewBindingFactory factory = new ViewBindingFactory(new ParentViewResolver(itemView));
             factory.create(R.id.text_view_updated_at, "text", itemPresenter.propertyUpdatedAt)
                    .converter(new RelayConverter(
                            value -> DateFormatHelper.format(itemView.getContext(), (long) value)))

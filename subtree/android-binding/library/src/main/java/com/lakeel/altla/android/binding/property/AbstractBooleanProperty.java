@@ -13,12 +13,12 @@ public abstract class AbstractBooleanProperty extends BaseProperty {
 
     @Nullable
     @Override
-    public final Object getAsObject() {
+    public final Object getValue() {
         return get();
     }
 
     @Override
-    public final void setAsObject(@Nullable Object value) {
+    public final void setValue(@Nullable Object value) {
         set(value == null ? false : (Boolean) value);
     }
 }

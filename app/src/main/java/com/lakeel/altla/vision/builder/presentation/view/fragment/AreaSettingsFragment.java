@@ -1,7 +1,7 @@
 package com.lakeel.altla.vision.builder.presentation.view.fragment;
 
-import com.lakeel.altla.android.binding.BinderFactory;
-import com.lakeel.altla.android.binding.ParentViewContainer;
+import com.lakeel.altla.android.binding.ParentViewResolver;
+import com.lakeel.altla.android.binding.ViewBindingFactory;
 import com.lakeel.altla.android.binding.converter.ResourceToStringConverter;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
@@ -76,25 +76,24 @@ public final class AreaSettingsFragment extends AbstractFragment<AreaSettingsVie
     protected void onBindView(@NonNull View view) {
         super.onBindView(view);
 
-        BinderFactory binderFactory = new BinderFactory(new ParentViewContainer(view));
-        binderFactory.create(R.id.text_view_area_mode, "text", presenter.propertyAreaMode)
-                     .converter(new ResourceToStringConverter(getResources()))
-                     .bind();
-        binderFactory.create(R.id.text_view_area_name, "text", presenter.propertyAreaName).bind();
-        binderFactory.create(R.id.text_view_area_description_name, "text", presenter.propertyAreaDescriptionName)
-                     .bind();
-        binderFactory.create(R.id.image_button_area_description_list, "colorFilter",
-                             presenter.propertyShowAreaDescriptionButtonColorFilter)
-                     .converter(new ResourceToColorFilterConverter(getResources()))
-                     .bind();
-        binderFactory.create(R.id.image_button_close, "onClick", presenter.commandClose).bind();
-        binderFactory.create(R.id.image_button_history, "onClick", presenter.commandShowHistory).bind();
-        binderFactory.create(R.id.image_button_area_mode, "onClick", presenter.commandShowAreaMode).bind();
-        binderFactory.create(R.id.image_button_area_find, "onClick", presenter.commandShowAreaFind).bind();
-        binderFactory
-                .create(R.id.image_button_area_description_list, "onClick", presenter.commandShowAreaDescriptionList)
-                .bind();
-        binderFactory.create(R.id.button_start, "onClick", presenter.commandStart).bind();
+        ViewBindingFactory factory = new ViewBindingFactory(new ParentViewResolver(view));
+        factory.create(R.id.text_view_area_mode, "text", presenter.propertyAreaMode)
+               .converter(new ResourceToStringConverter(getResources()))
+               .bind();
+        factory.create(R.id.text_view_area_name, "text", presenter.propertyAreaName).bind();
+        factory.create(R.id.text_view_area_description_name, "text", presenter.propertyAreaDescriptionName)
+               .bind();
+        factory.create(R.id.image_button_area_description_list, "colorFilter",
+                       presenter.propertyShowAreaDescriptionButtonColorFilter)
+               .converter(new ResourceToColorFilterConverter(getResources()))
+               .bind();
+        factory.create(R.id.image_button_close, "onClick", presenter.commandClose).bind();
+        factory.create(R.id.image_button_history, "onClick", presenter.commandShowHistory).bind();
+        factory.create(R.id.image_button_area_mode, "onClick", presenter.commandShowAreaMode).bind();
+        factory.create(R.id.image_button_area_find, "onClick", presenter.commandShowAreaFind).bind();
+        factory.create(R.id.image_button_area_description_list, "onClick", presenter.commandShowAreaDescriptionList)
+               .bind();
+        factory.create(R.id.button_start, "onClick", presenter.commandStart).bind();
     }
 
     @Override

@@ -1,7 +1,7 @@
 package com.lakeel.altla.vision.builder.presentation.view.adapter;
 
-import com.lakeel.altla.android.binding.BinderFactory;
-import com.lakeel.altla.android.binding.ParentViewContainer;
+import com.lakeel.altla.android.binding.ParentViewResolver;
+import com.lakeel.altla.android.binding.ViewBindingFactory;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.presenter.AreaByPlaceListPresenter;
 import com.lakeel.altla.vision.builder.presentation.view.AreaByPlaceItemView;
@@ -87,7 +87,7 @@ public final class AreaByPlaceListAdapter extends RecyclerView.Adapter<AreaByPla
 
             itemPresenter = presenter.createItemPresenter();
 
-            BinderFactory factory = new BinderFactory(new ParentViewContainer(itemView));
+            ViewBindingFactory factory = new ViewBindingFactory(new ParentViewResolver(itemView));
             factory.create(R.id.text_view_id, "text", itemPresenter.propertyId).bind();
             factory.create(R.id.text_view_name, "text", itemPresenter.propertyName).bind();
             factory.create(R.id.text_view_level, "text", itemPresenter.propertyLevel).bind();

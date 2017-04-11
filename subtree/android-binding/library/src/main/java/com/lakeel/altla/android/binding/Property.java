@@ -6,9 +6,9 @@ import android.support.annotation.Nullable;
 public interface Property {
 
     @Nullable
-    Object getAsObject();
+    Object getValue();
 
-    void setAsObject(@Nullable Object value);
+    void setValue(@Nullable Object value);
 
     void addOnValueChangedListener(@NonNull OnValueChangedListener listener);
 

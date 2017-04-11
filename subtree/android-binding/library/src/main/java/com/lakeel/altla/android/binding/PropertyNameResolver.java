@@ -1,8 +1,8 @@
-package com.lakeel.altla.android.binding.propertybinder;
+package com.lakeel.altla.android.binding;
 
 import android.support.annotation.NonNull;
 
-final class PropertyNameResolver {
+public final class PropertyNameResolver {
 
     private static final String GET_PREFIX = "get";
 
@@ -14,22 +14,22 @@ final class PropertyNameResolver {
     }
 
     @NonNull
-    static String resolveReadMethodName(@NonNull String propertyName, @NonNull Class<?> propertyType) {
+    public static String resolveReadMethodName(@NonNull String propertyName, @NonNull Class<?> propertyType) {
         return resolveReadMethodPrefix(propertyType) + capitalize(propertyName);
     }
 
     @NonNull
-    static String resolveWriteMethodName(@NonNull String propertyName) {
+    public static String resolveWriteMethodName(@NonNull String propertyName) {
         return SET_PREFIX + capitalize(propertyName);
     }
 
     @NonNull
-    static String resolveReadMethodNameByNonBoolean(@NonNull String propertyName) {
+    public static String resolveReadMethodNameByNonBoolean(@NonNull String propertyName) {
         return GET_PREFIX + capitalize(propertyName);
     }
 
     @NonNull
-    static String resolveReadMethodNameByBoolean(@NonNull String propertyName) {
+    public static String resolveReadMethodNameByBoolean(@NonNull String propertyName) {
         return IS_PREFIX + capitalize(propertyName);
     }
 

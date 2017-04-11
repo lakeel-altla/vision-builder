@@ -13,13 +13,13 @@ public abstract class AbstractObjectProperty<T> extends BaseProperty {
     public abstract void set(@Nullable T value);
 
     @Override
-    public final Object getAsObject() {
+    public final Object getValue() {
         return get();
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public final void setAsObject(Object value) {
+    public final void setValue(Object value) {
         set((T) value);
     }
 }

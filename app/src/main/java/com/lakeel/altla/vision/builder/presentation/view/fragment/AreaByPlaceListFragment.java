@@ -2,8 +2,8 @@ package com.lakeel.altla.vision.builder.presentation.view.fragment;
 
 import com.google.android.gms.location.places.Place;
 
-import com.lakeel.altla.android.binding.BinderFactory;
-import com.lakeel.altla.android.binding.ParentViewContainer;
+import com.lakeel.altla.android.binding.ParentViewResolver;
+import com.lakeel.altla.android.binding.ViewBindingFactory;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.presenter.AreaByPlaceListPresenter;
@@ -90,7 +90,7 @@ public final class AreaByPlaceListFragment extends AbstractFragment<AreaByPlaceL
         recyclerView.setAdapter(new AreaByPlaceListAdapter(presenter));
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        BinderFactory factory = new BinderFactory(new ParentViewContainer(view));
+        ViewBindingFactory factory = new ViewBindingFactory(new ParentViewResolver(view));
         factory.create(R.id.button_previous, "onClick", presenter.commandBack).bind();
         factory.create(R.id.button_select, "onClick", presenter.commandSelect).bind();
     }

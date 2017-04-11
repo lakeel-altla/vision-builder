@@ -1,7 +1,7 @@
 package com.lakeel.altla.vision.builder.presentation.view.fragment;
 
-import com.lakeel.altla.android.binding.BinderFactory;
-import com.lakeel.altla.android.binding.ParentViewContainer;
+import com.lakeel.altla.android.binding.ParentViewResolver;
+import com.lakeel.altla.android.binding.ViewBindingFactory;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.helper.LongToDateFormatConverter;
@@ -74,7 +74,7 @@ public final class ActorFragment extends AbstractFragment<ActorView, ActorPresen
     protected void onBindView(@NonNull View view) {
         super.onBindView(view);
 
-        BinderFactory factory = new BinderFactory(new ParentViewContainer(view));
+        ViewBindingFactory factory = new ViewBindingFactory(new ParentViewResolver(view));
         factory.create(R.id.text_view_name, "text", presenter.propertyName).bind();
         factory.create(R.id.text_view_created_at, "text", presenter.propertyCreatedAt)
                .converter(new LongToDateFormatConverter(getContext()))
