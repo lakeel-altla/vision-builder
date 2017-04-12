@@ -16,7 +16,7 @@ public final class ActivityViewResolver implements ViewResolver {
 
     @Nullable
     @Override
-    public View findViewById(@IdRes int id) {
+    public View resolve(@IdRes int id) {
         return activity.findViewById(id);
     }
 }

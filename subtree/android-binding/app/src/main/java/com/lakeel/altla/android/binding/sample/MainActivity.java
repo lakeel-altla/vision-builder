@@ -1,6 +1,5 @@
 package com.lakeel.altla.android.binding.sample;
 
-import com.lakeel.altla.android.binding.ActivityViewResolver;
 import com.lakeel.altla.android.binding.BindingMode;
 import com.lakeel.altla.android.binding.ViewBindingFactory;
 import com.lakeel.altla.android.binding.command.RelayCommand;
@@ -25,7 +24,7 @@ public final class MainActivity extends AppCompatActivity {
 
         viewModel.onCreate(savedInstanceState);
 
-        ViewBindingFactory bindingFactory = new ViewBindingFactory(new ActivityViewResolver(this));
+        ViewBindingFactory bindingFactory = new ViewBindingFactory(this);
 
         bindingFactory.create(R.id.radio_group_button, "checkedButton", viewModel.radioGroupChecked).bind();
         bindingFactory.create(R.id.text_view_set_text, "text", viewModel.textViewText).bind();

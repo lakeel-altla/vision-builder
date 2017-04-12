@@ -3,6 +3,7 @@ package com.lakeel.altla.android.binding;
 import com.lakeel.altla.android.binding.adapter.view.ViewCommandTargetFactory;
 import com.lakeel.altla.android.binding.adapter.view.ViewPropertyAdapterFactory;
 
+import android.app.Activity;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.view.View;
@@ -17,6 +18,14 @@ public final class ViewBindingFactory {
 
     public ViewBindingFactory(@NonNull ViewResolver viewResolver) {
         this.viewResolver = viewResolver;
+    }
+
+    public ViewBindingFactory(@NonNull Activity activity) {
+        this(new ActivityViewResolver(activity));
+    }
+
+    public ViewBindingFactory(@NonNull View view) {
+        this(new DefaultViewResolver(view));
     }
 
     @NonNull
@@ -45,7 +54,7 @@ public final class ViewBindingFactory {
 
     @NonNull
     private View resolveView(@IdRes int id) {
-        View view = viewResolver.findViewById(id);
+        View view = viewResolver.resolve(id);
         if (view == null) {
             throw new IllegalArgumentException("View not found.");
         }

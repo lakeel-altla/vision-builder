@@ -7,5 +7,5 @@ import android.view.View;
 public interface ViewResolver {
 
     @Nullable
-    View findViewById(@IdRes int id);
+    View resolve(@IdRes int id);
 }
