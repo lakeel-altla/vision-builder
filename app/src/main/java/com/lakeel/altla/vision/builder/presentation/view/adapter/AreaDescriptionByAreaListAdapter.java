@@ -1,6 +1,5 @@
 package com.lakeel.altla.vision.builder.presentation.view.adapter;
 
-import com.lakeel.altla.android.binding.ParentViewResolver;
 import com.lakeel.altla.android.binding.ViewBindingFactory;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.presenter.AreaDescriptionByAreaListPresenter;
@@ -88,7 +87,7 @@ public final class AreaDescriptionByAreaListAdapter
 
             itemPresenter = presenter.createItemPresenter();
 
-            ViewBindingFactory factory = new ViewBindingFactory(new ParentViewResolver(itemView));
+            ViewBindingFactory factory = new ViewBindingFactory(itemView);
             factory.create(R.id.text_view_id, "text", itemPresenter.propertyId).bind();
             factory.create(R.id.text_view_name, "text", itemPresenter.propertyName).bind();
         }

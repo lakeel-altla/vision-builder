@@ -1,6 +1,5 @@
 package com.lakeel.altla.vision.builder.presentation.view.fragment;
 
-import com.lakeel.altla.android.binding.ParentViewResolver;
 import com.lakeel.altla.android.binding.ViewBindingFactory;
 import com.lakeel.altla.android.binding.converter.ResourceToStringConverter;
 import com.lakeel.altla.vision.builder.R;
@@ -76,7 +75,7 @@ public final class AreaSettingsFragment extends AbstractFragment<AreaSettingsVie
     protected void onBindView(@NonNull View view) {
         super.onBindView(view);
 
-        ViewBindingFactory factory = new ViewBindingFactory(new ParentViewResolver(view));
+        ViewBindingFactory factory = new ViewBindingFactory(view);
         factory.create(R.id.text_view_area_mode, "text", presenter.propertyAreaMode)
                .converter(new ResourceToStringConverter(getResources()))
                .bind();

@@ -6,7 +6,6 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlacePicker;
 
-import com.lakeel.altla.android.binding.ParentViewResolver;
 import com.lakeel.altla.android.binding.ViewBindingFactory;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
@@ -92,7 +91,7 @@ public final class AreaFindFragment extends AbstractFragment<AreaFindView, AreaF
     protected void onBindView(@NonNull View view) {
         super.onBindView(view);
 
-        ViewBindingFactory factory = new ViewBindingFactory(new ParentViewResolver(view));
+        ViewBindingFactory factory = new ViewBindingFactory(view);
         factory.create(R.id.button_place_picker, "onClick", presenter.commandShowPlacePicker).bind();
         factory.create(R.id.image_button_close, "onClick", presenter.commandClose).bind();
     }
