@@ -6,7 +6,6 @@ import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.helper.LongToDateFormatConverter;
 import com.lakeel.altla.vision.builder.presentation.presenter.ActorPresenter;
 import com.lakeel.altla.vision.builder.presentation.view.ActorView;
-import com.lakeel.altla.vision.model.Scope;
 import com.lakeel.altla.vision.presentation.view.fragment.AbstractFragment;
 
 import android.content.Context;
@@ -21,20 +20,14 @@ import android.view.ViewGroup;
 
 import javax.inject.Inject;
 
-public final class ActorFragment extends AbstractFragment<ActorView, ActorPresenter>
-        implements ActorView {
+public final class ActorFragment extends AbstractFragment<ActorView, ActorPresenter> implements ActorView {
 
     @Inject
     ActorPresenter presenter;
 
-    private InteractionListener interactionListener;
-
     @NonNull
-    public static ActorFragment newInstance(@NonNull Scope scope, @NonNull String actorId) {
-        ActorFragment fragment = new ActorFragment();
-        Bundle bundle = ActorPresenter.createArguments(scope, actorId);
-        fragment.setArguments(bundle);
-        return fragment;
+    public static ActorFragment newInstance() {
+        return new ActorFragment();
     }
 
     @Override
@@ -52,14 +45,6 @@ public final class ActorFragment extends AbstractFragment<ActorView, ActorPresen
         super.onAttachOverride(context);
 
         ActivityScopeContext.class.cast(context).getActivityComponent().inject(this);
-        interactionListener = InteractionListener.class.cast(getParentFragment());
-    }
-
-    @Override
-    protected void onDetachOverride() {
-        super.onDetachOverride();
-
-        interactionListener = null;
     }
 
     @Nullable
@@ -85,30 +70,9 @@ public final class ActorFragment extends AbstractFragment<ActorView, ActorPresen
     }
 
     @Override
-    public void onUpdateMainMenuVisible(boolean visible) {
-        interactionListener.onUpdateMainMenuVisible(visible);
-    }
-
-    @Override
-    public void onCloseView() {
-        interactionListener.onCloseActorView();
-    }
-
-    @Override
     public void onSnackbar(@StringRes int resId) {
         if (getView() != null) {
             Snackbar.make(getView(), resId, Snackbar.LENGTH_SHORT).show();
         }
-    }
-
-    public void onUpdateActor(@NonNull Scope scope, @Nullable String actorId) {
-        presenter.onUpdateActor(scope, actorId);
-    }
-
-    public interface InteractionListener {
-
-        void onUpdateMainMenuVisible(boolean visible);
-
-        void onCloseActorView();
     }
 }

@@ -10,7 +10,6 @@ import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.model.Axis;
 import com.lakeel.altla.vision.builder.presentation.presenter.ArPresenter;
 import com.lakeel.altla.vision.builder.presentation.view.ArView;
-import com.lakeel.altla.vision.model.Scope;
 import com.lakeel.altla.vision.presentation.view.fragment.AbstractFragment;
 
 import org.rajawali3d.renderer.ISurfaceRenderer;
@@ -45,7 +44,6 @@ import butterknife.OnTouch;
 public final class ArFragment extends AbstractFragment<ArView, ArPresenter>
         implements ArView,
                    AreaSettingsContainerFragment.InteractionListener,
-                   ActorFragment.InteractionListener,
                    ImageAssetListFragment.InteractionListener {
 
     @Inject
@@ -243,8 +241,7 @@ public final class ArFragment extends AbstractFragment<ArView, ArPresenter>
 
     @Override
     public void onUpdateAreaSettingsVisible(boolean visible) {
-        AreaSettingsContainerFragment fragment =
-                (AreaSettingsContainerFragment) findFragment(AreaSettingsContainerFragment.class);
+        AreaSettingsContainerFragment fragment = findFragment(AreaSettingsContainerFragment.class);
 
         if (visible) {
             if (fragment == null) {
@@ -258,8 +255,23 @@ public final class ArFragment extends AbstractFragment<ArView, ArPresenter>
     }
 
     @Override
+    public void onUpdateActorContinerViewVisible(boolean visible) {
+        ActorContainerFragment fragment = findFragment(ActorContainerFragment.class);
+
+        if (visible) {
+            if (fragment == null) {
+                replaceWindowFragment(ActorContainerFragment.newInstance());
+            }
+        } else {
+            if (fragment != null) {
+                removeFragment(fragment);
+            }
+        }
+    }
+
+    @Override
     public void onUpdateAssetListVisible(boolean visible) {
-        ImageAssetListFragment fragment = (ImageAssetListFragment) findFragment(ImageAssetListFragment.class);
+        ImageAssetListFragment fragment = findFragment(ImageAssetListFragment.class);
 
         if (visible) {
             if (fragment == null) {
@@ -272,19 +284,6 @@ public final class ArFragment extends AbstractFragment<ArView, ArPresenter>
             if (fragment != null) {
                 removeFragment(fragment);
             }
-        }
-    }
-
-    @Override
-    public void onUpdateActorViewContent(@NonNull Scope scope, @Nullable String actorId) {
-        ActorFragment fragment = (ActorFragment) findFragment(ActorFragment.class);
-
-        if (fragment == null) {
-            if (actorId != null) {
-                replaceWindowFragment(ActorFragment.newInstance(scope, actorId));
-            }
-        } else {
-            fragment.onUpdateActor(scope, actorId);
         }
     }
 
@@ -340,12 +339,6 @@ public final class ArFragment extends AbstractFragment<ArView, ArPresenter>
     @Override
     public void onShowSignInView() {
         interactionListener.onShowSignInView();
-    }
-
-    @Override
-    public void onCloseActorView() {
-        ActorFragment fragment = (ActorFragment) findFragment(ActorFragment.class);
-        removeFragment(fragment);
     }
 
     @Override
@@ -470,9 +463,10 @@ public final class ArFragment extends AbstractFragment<ArView, ArPresenter>
         presenter.onClickButtonDelete();
     }
 
+    @SuppressWarnings("unchecked")
     @Nullable
-    private Fragment findFragment(@NonNull Class<? extends Fragment> clazz) {
-        return getChildFragmentManager().findFragmentByTag(clazz.getName());
+    private <T extends Fragment> T findFragment(@NonNull Class<T> clazz) {
+        return (T) getChildFragmentManager().findFragmentByTag(clazz.getName());
     }
 
     private void replaceWindowFragment(@NonNull Fragment fragment) {
@@ -485,6 +479,13 @@ public final class ArFragment extends AbstractFragment<ArView, ArPresenter>
         getChildFragmentManager().beginTransaction()
                                  .remove(fragment)
                                  .commit();
+    }
+
+    private void removeFragment(@NonNull Class<? extends Fragment> clazz) {
+        Fragment fragment = findFragment(clazz);
+        if (fragment != null) {
+            removeFragment(fragment);
+        }
     }
 
     public interface InteractionListener {
