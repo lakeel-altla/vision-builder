@@ -7,7 +7,6 @@ import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.presenter.AreaByPlaceListPresenter;
 import com.lakeel.altla.vision.builder.presentation.view.adapter.AreaByPlaceListAdapter;
-import com.lakeel.altla.vision.model.Area;
 import com.lakeel.altla.vision.model.Scope;
 import com.lakeel.altla.vision.presentation.view.fragment.AbstractFragment;
 
@@ -20,6 +19,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
 import javax.inject.Inject;
@@ -36,8 +36,6 @@ public final class AreaByPlaceListFragment
 
     @BindView(R.id.recycler_view)
     RecyclerView recyclerView;
-
-    private InteractionListener interactionListener;
 
     @NonNull
     public static AreaByPlaceListFragment newInstance(@NonNull Scope scope, @NonNull Place place) {
@@ -62,25 +60,18 @@ public final class AreaByPlaceListFragment
         super.onAttachOverride(context);
 
         ActivityScopeContext.class.cast(context).getActivityComponent().inject(this);
-        interactionListener = InteractionListener.class.cast(getParentFragment());
-    }
-
-    @Override
-    protected void onDetachOverride() {
-        super.onDetachOverride();
-
-        interactionListener = null;
+        presenter.onParentViewAttached((AreaByPlaceListPresenter.ParentView) getParentFragment());
     }
 
     @Nullable
     @Override
-    protected android.view.View onCreateViewCore(LayoutInflater inflater, @Nullable ViewGroup container,
-                                                 @Nullable Bundle savedInstanceState) {
+    protected View onCreateViewCore(LayoutInflater inflater, @Nullable ViewGroup container,
+                                    @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_area_by_place_list, container, false);
     }
 
     @Override
-    protected void onBindView(@NonNull android.view.View view) {
+    protected void onBindView(@NonNull View view) {
         super.onBindView(view);
 
         ButterKnife.bind(this, view);
@@ -99,31 +90,9 @@ public final class AreaByPlaceListFragment
     }
 
     @Override
-    public void onAreaSelected(@NonNull Area area) {
-        interactionListener.onAreaSelected(area);
-    }
-
-    @Override
-    public void onBackView() {
-        interactionListener.onBackToAreaFindView();
-    }
-
-    @Override
-    public void onCloseView() {
-        interactionListener.onCloseAreaByPlaceListView();
-    }
-
-    @Override
     public void onSnackbar(@StringRes int resId) {
-        Snackbar.make(recyclerView, resId, Snackbar.LENGTH_SHORT).show();
-    }
-
-    public interface InteractionListener {
-
-        void onAreaSelected(@NonNull Area area);
-
-        void onBackToAreaFindView();
-
-        void onCloseAreaByPlaceListView();
+        if (getView() != null) {
+            Snackbar.make(getView(), resId, Snackbar.LENGTH_SHORT).show();
+        }
     }
 }

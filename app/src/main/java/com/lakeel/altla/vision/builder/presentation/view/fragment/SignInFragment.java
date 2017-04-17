@@ -14,11 +14,11 @@ import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.design.widget.Snackbar;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
 import javax.inject.Inject;
 
-import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
@@ -27,9 +27,6 @@ public final class SignInFragment extends AbstractFragment<SignInPresenter.View,
 
     @Inject
     SignInPresenter presenter;
-
-    @BindView(R.id.view_top)
-    android.view.View viewTop;
 
     private InteractionListener interactionListener;
 
@@ -66,13 +63,13 @@ public final class SignInFragment extends AbstractFragment<SignInPresenter.View,
 
     @Nullable
     @Override
-    protected android.view.View onCreateViewCore(LayoutInflater inflater, @Nullable ViewGroup container,
-                                                 @Nullable Bundle savedInstanceState) {
+    protected View onCreateViewCore(LayoutInflater inflater, @Nullable ViewGroup container,
+                                    @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_sign_in, container, false);
     }
 
     @Override
-    protected void onBindView(@NonNull android.view.View view) {
+    protected void onBindView(@NonNull View view) {
         super.onBindView(view);
 
         ButterKnife.bind(this, view);
@@ -96,7 +93,9 @@ public final class SignInFragment extends AbstractFragment<SignInPresenter.View,
 
     @Override
     public void onSnackbar(@StringRes int resId) {
-        Snackbar.make(viewTop, resId, Snackbar.LENGTH_SHORT).show();
+        if (getView() != null) {
+            Snackbar.make(getView(), resId, Snackbar.LENGTH_SHORT).show();
+        }
     }
 
     @Override

@@ -28,6 +28,8 @@ public final class AreaModePresenter extends BasePresenter<AreaModePresenter.Vie
 
     public final RelayCommand commandClose = new RelayCommand(this::close);
 
+    private ParentView parentView;
+
     private Scope scope;
 
     @Inject
@@ -60,6 +62,10 @@ public final class AreaModePresenter extends BasePresenter<AreaModePresenter.Vie
         propertyChckedButton.set(resolveCheckedId(scope));
     }
 
+    public void onParentViewAttached(@NonNull ParentView parentView) {
+        this.parentView = parentView;
+    }
+
     @IdRes
     private static int resolveCheckedId(@NonNull Scope scope) {
         return (scope == Scope.PUBLIC) ? R.id.radio_button_public : R.id.radio_button_user;
@@ -71,18 +77,22 @@ public final class AreaModePresenter extends BasePresenter<AreaModePresenter.Vie
     }
 
     private void select() {
-        getView().onAreaModeSelected(scope);
-        getView().onCloseView();
+        parentView.onAreaModeSelected(scope);
+        parentView.onCloseAreaModeView();
     }
 
     private void close() {
-        getView().onCloseView();
+        parentView.onCloseAreaModeView();
     }
 
     public interface View {
 
+    }
+
+    public interface ParentView {
+
         void onAreaModeSelected(@NonNull Scope scope);
 
-        void onCloseView();
+        void onCloseAreaModeView();
     }
 }

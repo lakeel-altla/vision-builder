@@ -46,6 +46,8 @@ public final class AreaDescriptionByAreaListPresenter
 
     private final List<AreaDescription> items = new ArrayList<>();
 
+    private ParentView parentView;
+
     private Scope scope;
 
     private Area area;
@@ -125,6 +127,10 @@ public final class AreaDescriptionByAreaListPresenter
         compositeDisposable.clear();
     }
 
+    public void onParentViewAttached(@NonNull ParentView parentView) {
+        this.parentView = parentView;
+    }
+
     public int getItemCount() {
         return items.size();
     }
@@ -145,12 +151,12 @@ public final class AreaDescriptionByAreaListPresenter
     }
 
     private void close() {
-        getView().onCloseView();
+        parentView.onCloseAreaDescriptionByAreaListView();
     }
 
     private void select() {
-        getView().onAreaDescriptionSelected(selectedAreaDescription);
-        getView().onCloseView();
+        parentView.onAreaDescriptionSelected(selectedAreaDescription);
+        parentView.onCloseAreaDescriptionByAreaListView();
     }
 
     private boolean canSelect() {
@@ -161,11 +167,14 @@ public final class AreaDescriptionByAreaListPresenter
 
         void onDataSetChanged();
 
+        void onSnackbar(@StringRes int resId);
+    }
+
+    public interface ParentView {
+
         void onAreaDescriptionSelected(@NonNull AreaDescription areaDescription);
 
-        void onCloseView();
-
-        void onSnackbar(@StringRes int resId);
+        void onCloseAreaDescriptionByAreaListView();
     }
 
     public final class ItemPresenter {

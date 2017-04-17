@@ -5,7 +5,13 @@ import com.google.android.gms.location.places.Place;
 
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
+import com.lakeel.altla.vision.builder.presentation.presenter.AreaByPlaceListPresenter;
+import com.lakeel.altla.vision.builder.presentation.presenter.AreaDescriptionByAreaListPresenter;
+import com.lakeel.altla.vision.builder.presentation.presenter.AreaFindPresenter;
+import com.lakeel.altla.vision.builder.presentation.presenter.AreaModePresenter;
 import com.lakeel.altla.vision.builder.presentation.presenter.AreaSettingsContainerPresenter;
+import com.lakeel.altla.vision.builder.presentation.presenter.AreaSettingsListPresenter;
+import com.lakeel.altla.vision.builder.presentation.presenter.AreaSettingsPresenter;
 import com.lakeel.altla.vision.model.Area;
 import com.lakeel.altla.vision.model.AreaDescription;
 import com.lakeel.altla.vision.model.AreaSettings;
@@ -20,6 +26,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
 import javax.inject.Inject;
@@ -27,12 +34,12 @@ import javax.inject.Inject;
 public final class AreaSettingsContainerFragment
         extends AbstractFragment<AreaSettingsContainerPresenter.View, AreaSettingsContainerPresenter>
         implements AreaSettingsContainerPresenter.View,
-                   AreaSettingsFragment.InteractionListener,
-                   AreaSettingsListFragment.InteractionListener,
-                   AreaModeFragment.InteractionListener,
-                   AreaFindFragment.InteractionListener,
-                   AreaByPlaceListFragment.InteractionListener,
-                   AreaDescriptionByAreaListFragment.InteractionListener {
+                   AreaSettingsPresenter.ParentView,
+                   AreaSettingsListPresenter.ParentView,
+                   AreaModePresenter.ParentView,
+                   AreaFindPresenter.ParentView,
+                   AreaByPlaceListPresenter.ParentView,
+                   AreaDescriptionByAreaListPresenter.ParentView {
 
     @Inject
     AreaSettingsContainerPresenter presenter;
@@ -77,8 +84,8 @@ public final class AreaSettingsContainerFragment
 
     @Nullable
     @Override
-    protected android.view.View onCreateViewCore(LayoutInflater inflater, @Nullable ViewGroup container,
-                                                 @Nullable Bundle savedInstanceState) {
+    protected View onCreateViewCore(LayoutInflater inflater, @Nullable ViewGroup container,
+                                    @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_area_settings_container, container, false);
     }
 

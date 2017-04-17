@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
@@ -64,13 +65,13 @@ public final class ConsoleFragment extends AbstractFragment<ConsolePresenter.Vie
 
     @Nullable
     @Override
-    protected android.view.View onCreateViewCore(LayoutInflater inflater, @Nullable ViewGroup container,
-                                                 @Nullable Bundle savedInstanceState) {
+    protected View onCreateViewCore(LayoutInflater inflater, @Nullable ViewGroup container,
+                                    @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_console, container, false);
     }
 
     @Override
-    protected void onBindView(@NonNull android.view.View view) {
+    protected void onBindView(@NonNull View view) {
         super.onBindView(view);
 
         ButterKnife.bind(this, view);

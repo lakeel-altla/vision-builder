@@ -22,6 +22,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 
@@ -115,13 +116,13 @@ public final class ActorEditFragment extends AbstractFragment<ActorEditPresenter
 
     @Nullable
     @Override
-    protected android.view.View onCreateViewCore(LayoutInflater inflater, @Nullable ViewGroup container,
-                                                 @Nullable Bundle savedInstanceState) {
+    protected View onCreateViewCore(LayoutInflater inflater, @Nullable ViewGroup container,
+                                    @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_actor_edit, container, false);
     }
 
     @Override
-    protected void onBindView(@NonNull android.view.View view) {
+    protected void onBindView(@NonNull View view) {
         super.onBindView(view);
 
         ButterKnife.bind(this, view);

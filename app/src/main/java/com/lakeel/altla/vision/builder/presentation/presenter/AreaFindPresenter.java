@@ -21,6 +21,8 @@ public final class AreaFindPresenter extends BasePresenter<AreaFindPresenter.Vie
 
     private static final String ARG_SCOPE = "scope";
 
+    private ParentView parentView;
+
     private Scope scope;
 
     public final RelayCommand commandShowPlacePicker = new RelayCommand(this::showPlacePicker);
@@ -50,8 +52,12 @@ public final class AreaFindPresenter extends BasePresenter<AreaFindPresenter.Vie
         }
     }
 
+    public void onParentViewAttached(@NonNull ParentView parentView) {
+        this.parentView = parentView;
+    }
+
     public void onPlacePicked(@NonNull Place place) {
-        getView().onShowAreaByPlaceListView(scope, place);
+        parentView.onShowAreaByPlaceListView(scope, place);
     }
 
     public void onShowPlacePickerFailed(@NonNull Exception e) {
@@ -63,17 +69,20 @@ public final class AreaFindPresenter extends BasePresenter<AreaFindPresenter.Vie
     }
 
     private void close() {
-        getView().onCloseView();
+        parentView.onCloseAreaFindView();
     }
 
     public interface View {
 
         void onShowPlacePicker();
 
+        void onSnackbar(@StringRes int resId);
+    }
+
+    public interface ParentView {
+
         void onShowAreaByPlaceListView(@NonNull Scope scope, @NonNull Place place);
 
-        void onCloseView();
-
-        void onSnackbar(@StringRes int resId);
+        void onCloseAreaFindView();
     }
 }

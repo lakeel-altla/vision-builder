@@ -39,6 +39,8 @@ public final class AreaSettingsListPresenter extends BasePresenter<AreaSettingsL
 
     private final List<Item> items = new ArrayList<>();
 
+    private ParentView parentView;
+
     private Item selectedItem;
 
     @Inject
@@ -142,6 +144,10 @@ public final class AreaSettingsListPresenter extends BasePresenter<AreaSettingsL
         compositeDisposable.clear();
     }
 
+    public void onParentViewAttached(@NonNull ParentView parentView) {
+        this.parentView = parentView;
+    }
+
     public int getItemCount() {
         return items.size();
     }
@@ -162,12 +168,12 @@ public final class AreaSettingsListPresenter extends BasePresenter<AreaSettingsL
     }
 
     private void close() {
-        getView().onCloseView();
+        parentView.onCloseAreaSettingsListView();
     }
 
     private void select() {
-        getView().onAreaSettingsSelected(selectedItem.areaSettings, selectedItem.area, selectedItem.areaDescription);
-        getView().onCloseView();
+        parentView.onAreaSettingsSelected(selectedItem.areaSettings, selectedItem.area, selectedItem.areaDescription);
+        parentView.onCloseAreaSettingsListView();
     }
 
     private boolean canSelect() {
@@ -180,13 +186,16 @@ public final class AreaSettingsListPresenter extends BasePresenter<AreaSettingsL
 
         void onDataSetChanged();
 
+        void onSnackbar(@StringRes int resId);
+    }
+
+    public interface ParentView {
+
         void onAreaSettingsSelected(@NonNull AreaSettings areaSettings,
                                     @NonNull Area area,
                                     @NonNull AreaDescription areaDescription);
 
-        void onCloseView();
-
-        void onSnackbar(@StringRes int resId);
+        void onCloseAreaSettingsListView();
     }
 
     public final class ItemPresenter {

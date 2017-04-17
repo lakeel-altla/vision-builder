@@ -28,6 +28,7 @@ import android.view.DragEvent;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -135,13 +136,13 @@ public final class ArFragment extends AbstractFragment<ArPresenter.View, ArPrese
 
     @Nullable
     @Override
-    protected android.view.View onCreateViewCore(LayoutInflater inflater, @Nullable ViewGroup container,
-                                                 @Nullable Bundle savedInstanceState) {
+    protected View onCreateViewCore(LayoutInflater inflater, @Nullable ViewGroup container,
+                                    @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_ar, container, false);
     }
 
     @Override
-    protected void onBindView(@NonNull android.view.View view) {
+    protected void onBindView(@NonNull View view) {
         super.onBindView(view);
 
         ButterKnife.bind(this, view);
@@ -231,12 +232,12 @@ public final class ArFragment extends AbstractFragment<ArPresenter.View, ArPrese
 
     @Override
     public void onUpdateMainMenuVisible(boolean visible) {
-        viewGroupMainMenu.setVisibility(visible ? android.view.View.VISIBLE : android.view.View.INVISIBLE);
+        viewGroupMainMenu.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
     }
 
     @Override
     public void onUpdateImageButtonAssetListVisible(boolean visible) {
-        imageButtonAssetList.setVisibility(visible ? android.view.View.VISIBLE : android.view.View.GONE);
+        imageButtonAssetList.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 
     @Override
@@ -294,9 +295,9 @@ public final class ArFragment extends AbstractFragment<ArPresenter.View, ArPrese
     @Override
     public void onUpdateObjectMenuVisible(boolean visible) {
         if (visible) {
-            viewGroupEditUserActorMenu.setVisibility(android.view.View.VISIBLE);
+            viewGroupEditUserActorMenu.setVisibility(View.VISIBLE);
         } else {
-            viewGroupEditUserActorMenu.setVisibility(android.view.View.GONE);
+            viewGroupEditUserActorMenu.setVisibility(View.GONE);
         }
     }
 
@@ -307,7 +308,7 @@ public final class ArFragment extends AbstractFragment<ArPresenter.View, ArPrese
 
     @Override
     public void onUpdateTranslateMenuVisible(boolean visible) {
-        viewGroupTranslateMenu.setVisibility(visible ? android.view.View.VISIBLE : android.view.View.GONE);
+        viewGroupTranslateMenu.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 
     @Override
@@ -322,7 +323,7 @@ public final class ArFragment extends AbstractFragment<ArPresenter.View, ArPrese
 
     @Override
     public void onUpdateRotateMenuVisible(boolean visible) {
-        viewGroupRotateMenu.setVisibility(visible ? android.view.View.VISIBLE : android.view.View.GONE);
+        viewGroupRotateMenu.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 
     @Override

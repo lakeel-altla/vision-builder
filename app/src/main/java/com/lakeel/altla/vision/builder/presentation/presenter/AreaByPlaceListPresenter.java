@@ -46,6 +46,8 @@ public final class AreaByPlaceListPresenter extends BasePresenter<AreaByPlaceLis
 
     private final List<Area> items = new ArrayList<>();
 
+    private ParentView parentView;
+
     private Scope scope;
 
     private String placeId;
@@ -124,6 +126,10 @@ public final class AreaByPlaceListPresenter extends BasePresenter<AreaByPlaceLis
         compositeDisposable.clear();
     }
 
+    public void onParentViewAttached(@NonNull ParentView parentView) {
+        this.parentView = parentView;
+    }
+
     public int getItemCount() {
         return items.size();
     }
@@ -144,12 +150,12 @@ public final class AreaByPlaceListPresenter extends BasePresenter<AreaByPlaceLis
     }
 
     private void back() {
-        getView().onBackView();
+        parentView.onBackToAreaFindView();
     }
 
     private void select() {
-        getView().onAreaSelected(selectedArea);
-        getView().onCloseView();
+        parentView.onAreaSelected(selectedArea);
+        parentView.onCloseAreaByPlaceListView();
     }
 
     private boolean canSelect() {
@@ -160,13 +166,16 @@ public final class AreaByPlaceListPresenter extends BasePresenter<AreaByPlaceLis
 
         void onDataSetChanged();
 
+        void onSnackbar(@StringRes int resId);
+    }
+
+    public interface ParentView {
+
         void onAreaSelected(@NonNull Area area);
 
-        void onBackView();
+        void onBackToAreaFindView();
 
-        void onCloseView();
-
-        void onSnackbar(@StringRes int resId);
+        void onCloseAreaByPlaceListView();
     }
 
     public final class ItemPresenter {

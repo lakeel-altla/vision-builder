@@ -14,11 +14,11 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
 import javax.inject.Inject;
 
-import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public final class TangoPermissionFragment
@@ -27,9 +27,6 @@ public final class TangoPermissionFragment
 
     @Inject
     TangoPermissionPresenter presenter;
-
-    @BindView(R.id.view_top)
-    android.view.View viewTop;
 
     private InteractionListener interactionListener;
 
@@ -64,13 +61,13 @@ public final class TangoPermissionFragment
 
     @Nullable
     @Override
-    protected android.view.View onCreateViewCore(LayoutInflater inflater, @Nullable ViewGroup container,
-                                                 @Nullable Bundle savedInstanceState) {
+    protected View onCreateViewCore(LayoutInflater inflater, @Nullable ViewGroup container,
+                                    @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_tango_permission, container, false);
     }
 
     @Override
-    protected void onBindView(@NonNull android.view.View view) {
+    protected void onBindView(@NonNull View view) {
         super.onBindView(view);
 
         ButterKnife.bind(this, view);
@@ -91,9 +88,11 @@ public final class TangoPermissionFragment
 
     @Override
     public void onShowAreaLearningPermissionRequiredSnackbar() {
-        Snackbar.make(viewTop, R.string.snackbar_area_learning_permission_required, Snackbar.LENGTH_SHORT)
-                .setAction(R.string.snackbar_action_request_permission, view -> presenter.onConfirmPermission())
-                .show();
+        if (getView() != null) {
+            Snackbar.make(getView(), R.string.snackbar_area_learning_permission_required, Snackbar.LENGTH_SHORT)
+                    .setAction(R.string.snackbar_action_request_permission, view -> presenter.onConfirmPermission())
+                    .show();
+        }
     }
 
     @Override

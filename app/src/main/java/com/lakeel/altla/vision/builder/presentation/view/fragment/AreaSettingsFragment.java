@@ -17,6 +17,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
 import javax.inject.Inject;
@@ -26,8 +27,6 @@ public final class AreaSettingsFragment extends AbstractFragment<AreaSettingsPre
 
     @Inject
     AreaSettingsPresenter presenter;
-
-    private InteractionListener interactionListener;
 
     @NonNull
     public static AreaSettingsFragment newInstance(@NonNull Scope scope) {
@@ -52,25 +51,18 @@ public final class AreaSettingsFragment extends AbstractFragment<AreaSettingsPre
         super.onAttachOverride(context);
 
         ActivityScopeContext.class.cast(context).getActivityComponent().inject(this);
-        interactionListener = InteractionListener.class.cast(getParentFragment());
-    }
-
-    @Override
-    protected void onDetachOverride() {
-        super.onDetachOverride();
-
-        interactionListener = null;
+        presenter.onParentViewAttached((AreaSettingsPresenter.ParentView) getParentFragment());
     }
 
     @Nullable
     @Override
-    protected android.view.View onCreateViewCore(LayoutInflater inflater, @Nullable ViewGroup container,
-                                                 @Nullable Bundle savedInstanceState) {
+    protected View onCreateViewCore(LayoutInflater inflater, @Nullable ViewGroup container,
+                                    @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_area_settings, container, false);
     }
 
     @Override
-    protected void onBindView(@NonNull android.view.View view) {
+    protected void onBindView(@NonNull View view) {
         super.onBindView(view);
 
         ViewBindingFactory factory = new ViewBindingFactory(view);
@@ -93,36 +85,6 @@ public final class AreaSettingsFragment extends AbstractFragment<AreaSettingsPre
         factory.create(R.id.button_start, "onClick", presenter.commandStart).bind();
     }
 
-    @Override
-    public void onShowAreaSettingsHistoryView() {
-        interactionListener.onShowAreaSettingsHistoryView();
-    }
-
-    @Override
-    public void onShowAreaModeView(@NonNull Scope scope) {
-        interactionListener.onShowAreaModeView(scope);
-    }
-
-    @Override
-    public void onShowAreaFindView(@NonNull Scope scope) {
-        interactionListener.onShowAreaFindView(scope);
-    }
-
-    @Override
-    public void onShowAreaDescriptionByAreaListView(@NonNull Scope scope, @NonNull Area area) {
-        interactionListener.onShowAreaDescriptionByAreaListView(scope, area);
-    }
-
-    @Override
-    public void onUpdateArView(@NonNull String areaSettingsId) {
-        interactionListener.onUpdateArView(areaSettingsId);
-    }
-
-    @Override
-    public void onCloseView() {
-        interactionListener.onCloseAreaSettingsView();
-    }
-
     public void onAreaModeSelected(@NonNull Scope scope) {
         presenter.propertyAreaScope.set(scope);
     }
@@ -139,20 +101,5 @@ public final class AreaSettingsFragment extends AbstractFragment<AreaSettingsPre
                                        @NonNull Area area,
                                        @NonNull AreaDescription areaDescription) {
         presenter.onAreaSettingsSelected(areaSettings, area, areaDescription);
-    }
-
-    public interface InteractionListener {
-
-        void onShowAreaSettingsHistoryView();
-
-        void onShowAreaModeView(@NonNull Scope scope);
-
-        void onShowAreaFindView(@NonNull Scope scope);
-
-        void onShowAreaDescriptionByAreaListView(@NonNull Scope scope, @NonNull Area area);
-
-        void onUpdateArView(@NonNull String areaSettingsId);
-
-        void onCloseAreaSettingsView();
     }
 }

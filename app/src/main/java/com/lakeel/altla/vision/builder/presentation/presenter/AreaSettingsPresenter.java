@@ -38,6 +38,8 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsPrese
     @Inject
     VisionService visionService;
 
+    private ParentView parentView;
+
     private AreaSettings areaSettings;
 
     public final ObjectProperty<Scope> propertyAreaScope = new ObjectProperty<>(Scope.PUBLIC);
@@ -139,6 +141,10 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsPrese
         outState.putParcelable(STATE_AREA_DESCRIPTION, Parcels.wrap(propertyAreaDescription.get()));
     }
 
+    public void onParentViewAttached(@NonNull ParentView parentView) {
+        this.parentView = parentView;
+    }
+
     public void onAreaSettingsSelected(@NonNull AreaSettings areaSettings,
                                        @NonNull Area area,
                                        @NonNull AreaDescription areaDescription) {
@@ -156,24 +162,24 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsPrese
     }
 
     private void close() {
-        getView().onCloseView();
+        parentView.onCloseAreaSettingsView();
     }
 
     private void showHistory() {
-        getView().onShowAreaSettingsHistoryView();
+        parentView.onShowAreaSettingsHistoryView();
     }
 
     private void showAreaMode() {
         Scope scope = propertyAreaScope.get();
         if (scope != null) {
-            getView().onShowAreaModeView(scope);
+            parentView.onShowAreaModeView(scope);
         }
     }
 
     private void showAreaFind() {
         Scope scope = propertyAreaScope.get();
         if (scope != null) {
-            getView().onShowAreaFindView(scope);
+            parentView.onShowAreaFindView(scope);
         }
     }
 
@@ -181,7 +187,7 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsPrese
         Scope scope = propertyAreaScope.get();
         Area area = propertyArea.get();
         if (scope != null && area != null) {
-            getView().onShowAreaDescriptionByAreaListView(scope, area);
+            parentView.onShowAreaDescriptionByAreaListView(scope, area);
         }
     }
 
@@ -204,8 +210,8 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsPrese
         visionService.getUserAreaSettingsApi()
                      .saveUserAreaSettings(areaSettings);
 
-        getView().onUpdateArView(areaSettings.getId());
-        getView().onCloseView();
+        parentView.onUpdateArView(areaSettings.getId());
+        parentView.onCloseAreaSettingsView();
     }
 
     private boolean canStart() {
@@ -215,6 +221,10 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsPrese
     }
 
     public interface View {
+
+    }
+
+    public interface ParentView {
 
         void onShowAreaSettingsHistoryView();
 
@@ -226,6 +236,6 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsPrese
 
         void onUpdateArView(@NonNull String areaSettingsId);
 
-        void onCloseView();
+        void onCloseAreaSettingsView();
     }
 }

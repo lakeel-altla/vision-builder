@@ -23,6 +23,7 @@ import android.support.annotation.StringRes;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
 import javax.inject.Inject;
@@ -40,8 +41,6 @@ public final class AreaFindFragment extends AbstractFragment<AreaFindPresenter.V
 
     @Inject
     GoogleApiClient googleApiClient;
-
-    private InteractionListener interactionListener;
 
     private Place pickedPlace;
 
@@ -68,25 +67,18 @@ public final class AreaFindFragment extends AbstractFragment<AreaFindPresenter.V
         super.onAttachOverride(context);
 
         ActivityScopeContext.class.cast(context).getActivityComponent().inject(this);
-        interactionListener = InteractionListener.class.cast(getParentFragment());
-    }
-
-    @Override
-    protected void onDetachOverride() {
-        super.onDetachOverride();
-
-        interactionListener = null;
+        presenter.onParentViewAttached((AreaFindPresenter.ParentView) getParentFragment());
     }
 
     @Nullable
     @Override
-    protected android.view.View onCreateViewCore(LayoutInflater inflater, @Nullable ViewGroup container,
-                                                 @Nullable Bundle savedInstanceState) {
+    protected View onCreateViewCore(LayoutInflater inflater, @Nullable ViewGroup container,
+                                    @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_area_find, container, false);
     }
 
     @Override
-    protected void onBindView(@NonNull android.view.View view) {
+    protected void onBindView(@NonNull View view) {
         super.onBindView(view);
 
         ViewBindingFactory factory = new ViewBindingFactory(view);
@@ -131,26 +123,9 @@ public final class AreaFindFragment extends AbstractFragment<AreaFindPresenter.V
     }
 
     @Override
-    public void onShowAreaByPlaceListView(@NonNull Scope scope, @NonNull Place place) {
-        interactionListener.onShowAreaByPlaceListView(scope, place);
-    }
-
-    @Override
-    public void onCloseView() {
-        interactionListener.onCloseAreaFindView();
-    }
-
-    @Override
     public void onSnackbar(@StringRes int resId) {
         if (getView() != null) {
             Snackbar.make(getView(), resId, Snackbar.LENGTH_SHORT).show();
         }
-    }
-
-    public interface InteractionListener {
-
-        void onShowAreaByPlaceListView(@NonNull Scope scope, @NonNull Place place);
-
-        void onCloseAreaFindView();
     }
 }
