@@ -3,7 +3,6 @@ package com.lakeel.altla.vision.builder.presentation.view.fragment;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.presenter.ActorEditPresenter;
-import com.lakeel.altla.vision.builder.presentation.view.ActorEditView;
 import com.lakeel.altla.vision.presentation.view.fragment.AbstractFragment;
 
 import android.content.Context;
@@ -23,7 +22,6 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 
@@ -33,14 +31,14 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnTextChanged;
 
-public final class ActorEditFragment extends AbstractFragment<ActorEditView, ActorEditPresenter>
-        implements ActorEditView {
+public final class ActorEditFragment extends AbstractFragment<ActorEditPresenter.View, ActorEditPresenter>
+        implements ActorEditPresenter.View {
 
     @Inject
     ActorEditPresenter presenter;
 
     @BindView(R.id.view_top)
-    View viewTop;
+    android.view.View viewTop;
 
     @BindView(R.id.text_input_layout_name)
     TextInputLayout textInputLayoutName;
@@ -96,7 +94,7 @@ public final class ActorEditFragment extends AbstractFragment<ActorEditView, Act
     }
 
     @Override
-    protected ActorEditView getViewInterface() {
+    protected ActorEditPresenter.View getViewInterface() {
         return this;
     }
 
@@ -117,13 +115,13 @@ public final class ActorEditFragment extends AbstractFragment<ActorEditView, Act
 
     @Nullable
     @Override
-    protected View onCreateViewCore(LayoutInflater inflater, @Nullable ViewGroup container,
-                                    @Nullable Bundle savedInstanceState) {
+    protected android.view.View onCreateViewCore(LayoutInflater inflater, @Nullable ViewGroup container,
+                                                 @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_actor_edit, container, false);
     }
 
     @Override
-    protected void onBindView(@NonNull View view) {
+    protected void onBindView(@NonNull android.view.View view) {
         super.onBindView(view);
 
         ButterKnife.bind(this, view);

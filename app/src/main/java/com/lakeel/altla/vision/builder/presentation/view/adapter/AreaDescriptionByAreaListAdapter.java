@@ -3,7 +3,6 @@ package com.lakeel.altla.vision.builder.presentation.view.adapter;
 import com.lakeel.altla.android.binding.ViewBindingFactory;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.presenter.AreaDescriptionByAreaListPresenter;
-import com.lakeel.altla.vision.builder.presentation.view.AreaDescriptionItemView;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
@@ -78,7 +77,7 @@ public final class AreaDescriptionByAreaListAdapter
         return presenter.getItemCount();
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder implements AreaDescriptionItemView {
+    class ViewHolder extends RecyclerView.ViewHolder {
 
         private AreaDescriptionByAreaListPresenter.ItemPresenter itemPresenter;
 

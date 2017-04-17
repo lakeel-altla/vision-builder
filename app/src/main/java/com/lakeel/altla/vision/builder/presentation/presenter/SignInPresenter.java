@@ -9,11 +9,12 @@ import com.google.firebase.auth.FirebaseUser;
 
 import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
-import com.lakeel.altla.vision.builder.presentation.view.SignInView;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.support.annotation.NonNull;
+import android.support.annotation.StringRes;
 
 import javax.inject.Inject;
 
@@ -22,9 +23,9 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 
 /**
- * Defines the presenter for {@link SignInView}.
+ * Defines the presenter for {@link View}.
  */
-public final class SignInPresenter extends BasePresenter<SignInView> {
+public final class SignInPresenter extends BasePresenter<SignInPresenter.View> {
 
     private static final int REQUEST_CODE_GOOGLE_SIGN_IN = 0;
 
@@ -128,5 +129,18 @@ public final class SignInPresenter extends BasePresenter<SignInView> {
                                getLog().e("Failed to sign in to Firebase.", e);
                            });
         compositeDisposable.add(disposable);
+    }
+
+    public interface View {
+
+        void onCloseSignInView();
+
+        void onStartActivityForResult(@NonNull Intent intent, int requestCode);
+
+        void onSnackbar(@StringRes int resId);
+
+        void onShowProgressDialog();
+
+        void onHideProgressDialog();
     }
 }

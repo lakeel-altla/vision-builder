@@ -3,15 +3,17 @@ package com.lakeel.altla.vision.builder.presentation.presenter;
 import com.lakeel.altla.vision.ArgumentNullException;
 import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
-import com.lakeel.altla.vision.builder.presentation.view.ActorEditView;
 import com.lakeel.altla.vision.model.Actor;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 
 import org.parceler.Parcels;
 
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
 
 import javax.inject.Inject;
 
@@ -19,7 +21,7 @@ import io.reactivex.Maybe;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 
-public final class ActorEditPresenter extends BasePresenter<ActorEditView> {
+public final class ActorEditPresenter extends BasePresenter<ActorEditPresenter.View> {
 
     private static final String ARG_AREA_ID = "areaId";
 
@@ -222,5 +224,48 @@ public final class ActorEditPresenter extends BasePresenter<ActorEditView> {
         getView().onUpdateScaleX(actor.getScaleX());
         getView().onUpdateScaleY(actor.getScaleY());
         getView().onUpdateScaleZ(actor.getScaleZ());
+    }
+
+    public interface View {
+
+        void onUpdateViewsEnabled(boolean enabled);
+
+        void onUpdateActionSave(boolean enabled);
+
+        void onUpdateHomeAsUpIndicator(@DrawableRes int resId);
+
+        void onUpdateHomeAsUpIndicator(@Nullable Drawable drawable);
+
+        void onUpdateTitle(@Nullable String title);
+
+        void onUpdateName(@Nullable String name);
+
+        void onUpdatePositionX(double x);
+
+        void onUpdatePositionY(double y);
+
+        void onUpdatePositionZ(double z);
+
+        void onUpdateOrientationX(double x);
+
+        void onUpdateOrientationY(double y);
+
+        void onUpdateOrientationZ(double z);
+
+        void onUpdateOrientationW(double w);
+
+        void onUpdateScaleX(double x);
+
+        void onUpdateScaleY(double y);
+
+        void onUpdateScaleZ(double z);
+
+        void onShowNameError(@StringRes int resId);
+
+        void onHideNameError();
+
+        void onBackView();
+
+        void onSnackbar(@StringRes int resId);
     }
 }

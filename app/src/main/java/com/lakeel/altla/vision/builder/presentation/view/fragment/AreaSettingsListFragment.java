@@ -4,7 +4,6 @@ import com.lakeel.altla.android.binding.ViewBindingFactory;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.presenter.AreaSettingsListPresenter;
-import com.lakeel.altla.vision.builder.presentation.view.AreaSettingsListView;
 import com.lakeel.altla.vision.builder.presentation.view.adapter.AreaSettingsListAdapter;
 import com.lakeel.altla.vision.model.Area;
 import com.lakeel.altla.vision.model.AreaDescription;
@@ -20,7 +19,6 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 
 import javax.inject.Inject;
@@ -28,8 +26,9 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public final class AreaSettingsListFragment extends AbstractFragment<AreaSettingsListView, AreaSettingsListPresenter>
-        implements AreaSettingsListView {
+public final class AreaSettingsListFragment
+        extends AbstractFragment<AreaSettingsListPresenter.View, AreaSettingsListPresenter>
+        implements AreaSettingsListPresenter.View {
 
     @Inject
     AreaSettingsListPresenter presenter;
@@ -50,7 +49,7 @@ public final class AreaSettingsListFragment extends AbstractFragment<AreaSetting
     }
 
     @Override
-    protected AreaSettingsListView getViewInterface() {
+    protected AreaSettingsListPresenter.View getViewInterface() {
         return this;
     }
 
@@ -71,13 +70,13 @@ public final class AreaSettingsListFragment extends AbstractFragment<AreaSetting
 
     @Nullable
     @Override
-    protected View onCreateViewCore(LayoutInflater inflater, @Nullable ViewGroup container,
-                                    @Nullable Bundle savedInstanceState) {
+    protected android.view.View onCreateViewCore(LayoutInflater inflater, @Nullable ViewGroup container,
+                                                 @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_area_settings_list, container, false);
     }
 
     @Override
-    protected void onBindView(@NonNull View view) {
+    protected void onBindView(@NonNull android.view.View view) {
         super.onBindView(view);
 
         ButterKnife.bind(this, view);

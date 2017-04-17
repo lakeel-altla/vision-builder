@@ -6,7 +6,6 @@ import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.helper.ResourceToColorFilterConverter;
 import com.lakeel.altla.vision.builder.presentation.presenter.AreaSettingsPresenter;
-import com.lakeel.altla.vision.builder.presentation.view.AreaSettingsView;
 import com.lakeel.altla.vision.model.Area;
 import com.lakeel.altla.vision.model.AreaDescription;
 import com.lakeel.altla.vision.model.AreaSettings;
@@ -18,13 +17,12 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 
 import javax.inject.Inject;
 
-public final class AreaSettingsFragment extends AbstractFragment<AreaSettingsView, AreaSettingsPresenter>
-        implements AreaSettingsView {
+public final class AreaSettingsFragment extends AbstractFragment<AreaSettingsPresenter.View, AreaSettingsPresenter>
+        implements AreaSettingsPresenter.View {
 
     @Inject
     AreaSettingsPresenter presenter;
@@ -45,7 +43,7 @@ public final class AreaSettingsFragment extends AbstractFragment<AreaSettingsVie
     }
 
     @Override
-    protected AreaSettingsView getViewInterface() {
+    protected AreaSettingsPresenter.View getViewInterface() {
         return this;
     }
 
@@ -66,13 +64,13 @@ public final class AreaSettingsFragment extends AbstractFragment<AreaSettingsVie
 
     @Nullable
     @Override
-    protected View onCreateViewCore(LayoutInflater inflater, @Nullable ViewGroup container,
-                                    @Nullable Bundle savedInstanceState) {
+    protected android.view.View onCreateViewCore(LayoutInflater inflater, @Nullable ViewGroup container,
+                                                 @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_area_settings, container, false);
     }
 
     @Override
-    protected void onBindView(@NonNull View view) {
+    protected void onBindView(@NonNull android.view.View view) {
         super.onBindView(view);
 
         ViewBindingFactory factory = new ViewBindingFactory(view);

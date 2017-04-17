@@ -3,8 +3,6 @@ package com.lakeel.altla.vision.builder.presentation.presenter;
 import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.helper.ObservableHelper;
-import com.lakeel.altla.vision.builder.presentation.view.ImageAssetItemView;
-import com.lakeel.altla.vision.builder.presentation.view.ImageAssetListView;
 import com.lakeel.altla.vision.helper.ObservableListEvent;
 import com.lakeel.altla.vision.model.ImageAsset;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
@@ -12,6 +10,8 @@ import com.lakeel.altla.vision.presentation.presenter.model.DataList;
 
 import android.net.Uri;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
 
 import javax.inject.Inject;
 
@@ -19,7 +19,7 @@ import io.reactivex.Single;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 
-public final class ImageAssetListPresenter extends BasePresenter<ImageAssetListView>
+public final class ImageAssetListPresenter extends BasePresenter<ImageAssetListPresenter.View>
         implements DataList.OnItemListener {
 
     private final DataList<Item> items = new DataList<>(this);
@@ -105,11 +105,37 @@ public final class ImageAssetListPresenter extends BasePresenter<ImageAssetListV
         getView().onCloseView();
     }
 
+    public interface View {
+
+        void onItemInserted(int position);
+
+        void onItemChanged(int position);
+
+        void onItemRemoved(int position);
+
+        void onItemMoved(int fromPosition, int toPosition);
+
+        void onDataSetChanged();
+
+        void onCloseView();
+
+        void onSnackbar(@StringRes int resId);
+    }
+
+    public interface ItemView {
+
+        void onUpdateName(@Nullable String name);
+
+        void onUpdateThumbnail(@NonNull Uri uri);
+
+        void onStartDrag(@NonNull ImageAsset asset);
+    }
+
     public final class ItemPresenter {
 
-        private ImageAssetItemView itemView;
+        private ItemView itemView;
 
-        public void onCreateItemView(@NonNull ImageAssetItemView itemView) {
+        public void onCreateItemView(@NonNull ItemView itemView) {
             this.itemView = itemView;
         }
 

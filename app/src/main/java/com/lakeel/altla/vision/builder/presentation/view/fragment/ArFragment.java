@@ -9,7 +9,6 @@ import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.model.Axis;
 import com.lakeel.altla.vision.builder.presentation.presenter.ArPresenter;
-import com.lakeel.altla.vision.builder.presentation.view.ArView;
 import com.lakeel.altla.vision.model.Scope;
 import com.lakeel.altla.vision.presentation.view.fragment.AbstractFragment;
 
@@ -29,7 +28,6 @@ import android.view.DragEvent;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -42,8 +40,8 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.OnTouch;
 
-public final class ArFragment extends AbstractFragment<ArView, ArPresenter>
-        implements ArView,
+public final class ArFragment extends AbstractFragment<ArPresenter.View, ArPresenter>
+        implements ArPresenter.View,
                    AreaSettingsContainerFragment.InteractionListener,
                    ActorFragment.InteractionListener,
                    ImageAssetListFragment.InteractionListener {
@@ -116,7 +114,7 @@ public final class ArFragment extends AbstractFragment<ArView, ArPresenter>
     }
 
     @Override
-    protected ArView getViewInterface() {
+    protected ArPresenter.View getViewInterface() {
         return this;
     }
 
@@ -137,13 +135,13 @@ public final class ArFragment extends AbstractFragment<ArView, ArPresenter>
 
     @Nullable
     @Override
-    protected View onCreateViewCore(LayoutInflater inflater, @Nullable ViewGroup container,
-                                    @Nullable Bundle savedInstanceState) {
+    protected android.view.View onCreateViewCore(LayoutInflater inflater, @Nullable ViewGroup container,
+                                                 @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_ar, container, false);
     }
 
     @Override
-    protected void onBindView(@NonNull View view) {
+    protected void onBindView(@NonNull android.view.View view) {
         super.onBindView(view);
 
         ButterKnife.bind(this, view);
@@ -233,12 +231,12 @@ public final class ArFragment extends AbstractFragment<ArView, ArPresenter>
 
     @Override
     public void onUpdateMainMenuVisible(boolean visible) {
-        viewGroupMainMenu.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
+        viewGroupMainMenu.setVisibility(visible ? android.view.View.VISIBLE : android.view.View.INVISIBLE);
     }
 
     @Override
     public void onUpdateImageButtonAssetListVisible(boolean visible) {
-        imageButtonAssetList.setVisibility(visible ? View.VISIBLE : View.GONE);
+        imageButtonAssetList.setVisibility(visible ? android.view.View.VISIBLE : android.view.View.GONE);
     }
 
     @Override
@@ -296,9 +294,9 @@ public final class ArFragment extends AbstractFragment<ArView, ArPresenter>
     @Override
     public void onUpdateObjectMenuVisible(boolean visible) {
         if (visible) {
-            viewGroupEditUserActorMenu.setVisibility(View.VISIBLE);
+            viewGroupEditUserActorMenu.setVisibility(android.view.View.VISIBLE);
         } else {
-            viewGroupEditUserActorMenu.setVisibility(View.GONE);
+            viewGroupEditUserActorMenu.setVisibility(android.view.View.GONE);
         }
     }
 
@@ -309,7 +307,7 @@ public final class ArFragment extends AbstractFragment<ArView, ArPresenter>
 
     @Override
     public void onUpdateTranslateMenuVisible(boolean visible) {
-        viewGroupTranslateMenu.setVisibility(visible ? View.VISIBLE : View.GONE);
+        viewGroupTranslateMenu.setVisibility(visible ? android.view.View.VISIBLE : android.view.View.GONE);
     }
 
     @Override
@@ -324,7 +322,7 @@ public final class ArFragment extends AbstractFragment<ArView, ArPresenter>
 
     @Override
     public void onUpdateRotateMenuVisible(boolean visible) {
-        viewGroupRotateMenu.setVisibility(visible ? View.VISIBLE : View.GONE);
+        viewGroupRotateMenu.setVisibility(visible ? android.view.View.VISIBLE : android.view.View.GONE);
     }
 
     @Override

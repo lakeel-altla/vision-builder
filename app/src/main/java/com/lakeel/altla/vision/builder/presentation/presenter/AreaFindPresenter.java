@@ -5,7 +5,6 @@ import com.google.android.gms.location.places.Place;
 import com.lakeel.altla.android.binding.command.RelayCommand;
 import com.lakeel.altla.vision.ArgumentNullException;
 import com.lakeel.altla.vision.builder.R;
-import com.lakeel.altla.vision.builder.presentation.view.AreaFindView;
 import com.lakeel.altla.vision.model.Scope;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 
@@ -14,10 +13,11 @@ import org.parceler.Parcels;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
 
 import javax.inject.Inject;
 
-public final class AreaFindPresenter extends BasePresenter<AreaFindView> {
+public final class AreaFindPresenter extends BasePresenter<AreaFindPresenter.View> {
 
     private static final String ARG_SCOPE = "scope";
 
@@ -64,5 +64,16 @@ public final class AreaFindPresenter extends BasePresenter<AreaFindView> {
 
     private void close() {
         getView().onCloseView();
+    }
+
+    public interface View {
+
+        void onShowPlacePicker();
+
+        void onShowAreaByPlaceListView(@NonNull Scope scope, @NonNull Place place);
+
+        void onCloseView();
+
+        void onSnackbar(@StringRes int resId);
     }
 }

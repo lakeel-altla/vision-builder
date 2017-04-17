@@ -6,7 +6,6 @@ import com.google.android.gms.location.places.Place;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.presenter.AreaSettingsContainerPresenter;
-import com.lakeel.altla.vision.builder.presentation.view.AreaSettingsContainerView;
 import com.lakeel.altla.vision.model.Area;
 import com.lakeel.altla.vision.model.AreaDescription;
 import com.lakeel.altla.vision.model.AreaSettings;
@@ -21,14 +20,13 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 
 import javax.inject.Inject;
 
 public final class AreaSettingsContainerFragment
-        extends AbstractFragment<AreaSettingsContainerView, AreaSettingsContainerPresenter>
-        implements AreaSettingsContainerView,
+        extends AbstractFragment<AreaSettingsContainerPresenter.View, AreaSettingsContainerPresenter>
+        implements AreaSettingsContainerPresenter.View,
                    AreaSettingsFragment.InteractionListener,
                    AreaSettingsListFragment.InteractionListener,
                    AreaModeFragment.InteractionListener,
@@ -58,7 +56,7 @@ public final class AreaSettingsContainerFragment
     }
 
     @Override
-    protected AreaSettingsContainerView getViewInterface() {
+    protected AreaSettingsContainerPresenter.View getViewInterface() {
         return this;
     }
 
@@ -79,8 +77,8 @@ public final class AreaSettingsContainerFragment
 
     @Nullable
     @Override
-    protected View onCreateViewCore(LayoutInflater inflater, @Nullable ViewGroup container,
-                                    @Nullable Bundle savedInstanceState) {
+    protected android.view.View onCreateViewCore(LayoutInflater inflater, @Nullable ViewGroup container,
+                                                 @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_area_settings_container, container, false);
     }
 

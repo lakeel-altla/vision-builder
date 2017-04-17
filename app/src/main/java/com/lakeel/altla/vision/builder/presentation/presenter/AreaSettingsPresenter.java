@@ -9,7 +9,6 @@ import com.lakeel.altla.vision.api.CurrentUser;
 import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.helper.StringResourceHelper;
-import com.lakeel.altla.vision.builder.presentation.view.AreaSettingsView;
 import com.lakeel.altla.vision.model.Area;
 import com.lakeel.altla.vision.model.AreaDescription;
 import com.lakeel.altla.vision.model.AreaSettings;
@@ -24,7 +23,7 @@ import android.support.annotation.Nullable;
 
 import javax.inject.Inject;
 
-public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView> {
+public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsPresenter.View> {
 
     private static final String ARG_AREA_SCOPE = "areaScope";
 
@@ -213,5 +212,20 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsView>
         return propertyAreaScope.get() != null &&
                propertyArea.get() != null &&
                propertyAreaDescription.get() != null;
+    }
+
+    public interface View {
+
+        void onShowAreaSettingsHistoryView();
+
+        void onShowAreaModeView(@NonNull Scope scope);
+
+        void onShowAreaFindView(@NonNull Scope scope);
+
+        void onShowAreaDescriptionByAreaListView(@NonNull Scope scope, @NonNull Area area);
+
+        void onUpdateArView(@NonNull String areaSettingsId);
+
+        void onCloseView();
     }
 }

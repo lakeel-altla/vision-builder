@@ -6,7 +6,6 @@ import com.lakeel.altla.android.binding.converter.ResourceToStringConverter;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.helper.DateFormatHelper;
 import com.lakeel.altla.vision.builder.presentation.presenter.AreaSettingsListPresenter;
-import com.lakeel.altla.vision.builder.presentation.view.AreaSettingsItemView;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
@@ -80,7 +79,7 @@ public final class AreaSettingsListAdapter extends RecyclerView.Adapter<AreaSett
         return presenter.getItemCount();
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder implements AreaSettingsItemView {
+    class ViewHolder extends RecyclerView.ViewHolder {
 
         private AreaSettingsListPresenter.ItemPresenter itemPresenter;
 

@@ -1,5 +1,6 @@
 package com.lakeel.altla.vision.builder.presentation.presenter;
 
+import com.google.atap.tango.ux.TangoUx;
 import com.google.atap.tangoservice.Tango;
 import com.google.atap.tangoservice.TangoCameraIntrinsics;
 import com.google.atap.tangoservice.TangoConfig;
@@ -24,7 +25,6 @@ import com.lakeel.altla.vision.builder.presentation.model.Axis;
 import com.lakeel.altla.vision.builder.presentation.model.EditAxesModel;
 import com.lakeel.altla.vision.builder.presentation.model.ImageActorModel;
 import com.lakeel.altla.vision.builder.presentation.model.TangoLocalizationState;
-import com.lakeel.altla.vision.builder.presentation.view.ArView;
 import com.lakeel.altla.vision.builder.presentation.view.renderer.MainRenderer;
 import com.lakeel.altla.vision.model.Actor;
 import com.lakeel.altla.vision.model.AreaSettings;
@@ -39,6 +39,7 @@ import com.squareup.picasso.Target;
 import org.parceler.Parcels;
 import org.rajawali3d.math.Quaternion;
 import org.rajawali3d.math.vector.Vector3;
+import org.rajawali3d.renderer.ISurfaceRenderer;
 
 import android.content.ClipData;
 import android.content.Context;
@@ -49,6 +50,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
 import android.view.MotionEvent;
 
 import java.util.ArrayList;
@@ -66,9 +68,9 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 
 /**
- * Defines the presenter for {@link ArView}.
+ * Defines the presenter for {@link View}.
  */
-public final class ArPresenter extends BasePresenter<ArView>
+public final class ArPresenter extends BasePresenter<ArPresenter.View>
         implements TangoWrapper.OnTangoReadyListener,
                    OnFrameAvailableListener,
                    OnPoseAvailableListener,
@@ -745,6 +747,47 @@ public final class ArPresenter extends BasePresenter<ArView>
         }
 
         renderer.updateActorModel(pickedActorModel);
+    }
+
+    public interface View {
+
+        void setTangoUxLayout(TangoUx tangoUx);
+
+        void setSurfaceRenderer(ISurfaceRenderer renderer);
+
+        void onResumeTextureView();
+
+        void onPauseTextureView();
+
+        void onUpdateMainMenuVisible(boolean visible);
+
+        void onUpdateImageButtonAssetListVisible(boolean visible);
+
+        void onUpdateAreaSettingsVisible(boolean visible);
+
+        void onUpdateAssetListVisible(boolean visible);
+
+        void onUpdateActorViewContent(@NonNull Scope scope, @Nullable String actorId);
+
+        void onUpdateObjectMenuVisible(boolean visible);
+
+        void onUpdateTranslateSelected(boolean selected);
+
+        void onUpdateTranslateMenuVisible(boolean visible);
+
+        void onUpdateTranslateAxisSelected(Axis axis, boolean selected);
+
+        void onUpdateRotateSelected(boolean selected);
+
+        void onUpdateRotateMenuVisible(boolean visible);
+
+        void onUpdateRotateAxisSelected(Axis axis, boolean selected);
+
+        void onUpdateScaleSelected(boolean selected);
+
+        void onShowSignInView();
+
+        void onSnackbar(@StringRes int resId);
     }
 
     private final class ActorManager {

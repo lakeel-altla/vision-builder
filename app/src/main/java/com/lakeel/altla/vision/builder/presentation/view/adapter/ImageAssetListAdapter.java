@@ -1,10 +1,9 @@
 package com.lakeel.altla.vision.builder.presentation.view.adapter;
 
 import com.lakeel.altla.vision.builder.R;
+import com.lakeel.altla.vision.builder.presentation.helper.ThumbnailLoader;
 import com.lakeel.altla.vision.builder.presentation.model.ActorDragConstants;
 import com.lakeel.altla.vision.builder.presentation.presenter.ImageAssetListPresenter;
-import com.lakeel.altla.vision.builder.presentation.view.ImageAssetItemView;
-import com.lakeel.altla.vision.builder.presentation.helper.ThumbnailLoader;
 import com.lakeel.altla.vision.model.ImageAsset;
 
 import org.parceler.Parcels;
@@ -62,7 +61,7 @@ public final class ImageAssetListAdapter extends RecyclerView.Adapter<ImageAsset
         return presenter.getItemCount();
     }
 
-    class ViewHolderAsset extends RecyclerView.ViewHolder implements ImageAssetItemView {
+    class ViewHolderAsset extends RecyclerView.ViewHolder implements ImageAssetListPresenter.ItemView {
 
         @BindView(R.id.text_view_name)
         TextView textViewName;

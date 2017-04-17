@@ -4,7 +4,6 @@ import com.lakeel.altla.android.binding.ViewBindingFactory;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.presenter.AreaDescriptionByAreaListPresenter;
-import com.lakeel.altla.vision.builder.presentation.view.AreaDescriptionByAreaListView;
 import com.lakeel.altla.vision.builder.presentation.view.adapter.AreaDescriptionByAreaListAdapter;
 import com.lakeel.altla.vision.model.Area;
 import com.lakeel.altla.vision.model.AreaDescription;
@@ -20,7 +19,6 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 
 import javax.inject.Inject;
@@ -29,8 +27,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public final class AreaDescriptionByAreaListFragment
-        extends AbstractFragment<AreaDescriptionByAreaListView, AreaDescriptionByAreaListPresenter>
-        implements AreaDescriptionByAreaListView {
+        extends AbstractFragment<AreaDescriptionByAreaListPresenter.View, AreaDescriptionByAreaListPresenter>
+        implements AreaDescriptionByAreaListPresenter.View {
 
     @Inject
     AreaDescriptionByAreaListPresenter presenter;
@@ -54,7 +52,7 @@ public final class AreaDescriptionByAreaListFragment
     }
 
     @Override
-    protected AreaDescriptionByAreaListView getViewInterface() {
+    protected AreaDescriptionByAreaListPresenter.View getViewInterface() {
         return this;
     }
 
@@ -75,13 +73,13 @@ public final class AreaDescriptionByAreaListFragment
 
     @Nullable
     @Override
-    protected View onCreateViewCore(LayoutInflater inflater, @Nullable ViewGroup container,
-                                    @Nullable Bundle savedInstanceState) {
+    protected android.view.View onCreateViewCore(LayoutInflater inflater, @Nullable ViewGroup container,
+                                                 @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_area_description_by_area_list, container, false);
     }
 
     @Override
-    protected void onBindView(@NonNull View view) {
+    protected void onBindView(@NonNull android.view.View view) {
         super.onBindView(view);
 
         ButterKnife.bind(this, view);
@@ -92,26 +90,6 @@ public final class AreaDescriptionByAreaListFragment
         ViewBindingFactory factory = new ViewBindingFactory(view);
         factory.create(R.id.image_button_close, "onClick", presenter.commandClose).bind();
         factory.create(R.id.button_select, "onClick", presenter.commandSelect).bind();
-    }
-
-    @Override
-    public void onItemInserted(int position) {
-        recyclerView.getAdapter().notifyItemInserted(position);
-    }
-
-    @Override
-    public void onItemChanged(int position) {
-        recyclerView.getAdapter().notifyItemChanged(position);
-    }
-
-    @Override
-    public void onItemRemoved(int position) {
-        recyclerView.getAdapter().notifyItemRemoved(position);
-    }
-
-    @Override
-    public void onItemMoved(int fromPosition, int toPosition) {
-        recyclerView.getAdapter().notifyItemMoved(fromPosition, toPosition);
     }
 
     @Override

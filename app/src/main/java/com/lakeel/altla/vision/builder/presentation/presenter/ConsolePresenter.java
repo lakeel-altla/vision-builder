@@ -4,7 +4,6 @@ import com.google.atap.tangoservice.TangoPoseData;
 
 import com.lakeel.altla.tango.OnPoseAvailableListener;
 import com.lakeel.altla.vision.api.VisionService;
-import com.lakeel.altla.vision.builder.presentation.view.ConsoleView;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 
 import android.os.Handler;
@@ -12,7 +11,7 @@ import android.os.Looper;
 
 import javax.inject.Inject;
 
-public final class ConsolePresenter extends BasePresenter<ConsoleView>
+public final class ConsolePresenter extends BasePresenter<ConsolePresenter.View>
         implements OnPoseAvailableListener {
 
     private static final int SECS_TO_MILLISECS = 1000;
@@ -103,6 +102,17 @@ public final class ConsolePresenter extends BasePresenter<ConsoleView>
             pose.targetFrame == TangoPoseData.COORDINATE_FRAME_DEVICE) {
             debuggerSs2D.debug(pose);
         }
+    }
+
+    public interface View {
+
+        void onUpdateLocalized(boolean localized);
+
+        void onUpdateAd2SsTranslation(double x, double y, double z);
+
+        void onUpdateAd2DTranslation(double x, double y, double z);
+
+        void onUpdateSs2DTranslation(double x, double y, double z);
     }
 
     private enum LocalizationState {

@@ -1,15 +1,15 @@
 package com.lakeel.altla.vision.builder.presentation.presenter;
 
-import com.lakeel.altla.vision.builder.presentation.view.AreaSettingsContainerView;
 import com.lakeel.altla.vision.model.Scope;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import javax.inject.Inject;
 
-public final class AreaSettingsContainerPresenter extends BasePresenter<AreaSettingsContainerView> {
+public final class AreaSettingsContainerPresenter extends BasePresenter<AreaSettingsContainerPresenter.View> {
 
     private boolean initialDisplay;
 
@@ -33,5 +33,10 @@ public final class AreaSettingsContainerPresenter extends BasePresenter<AreaSett
         if (initialDisplay) {
             getView().onShowAreaSettingsView(Scope.USER);
         }
+    }
+
+    public interface View {
+
+        void onShowAreaSettingsView(@NonNull Scope scope);
     }
 }

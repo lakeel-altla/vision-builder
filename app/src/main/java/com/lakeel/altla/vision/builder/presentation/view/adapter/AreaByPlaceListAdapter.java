@@ -3,7 +3,6 @@ package com.lakeel.altla.vision.builder.presentation.view.adapter;
 import com.lakeel.altla.android.binding.ViewBindingFactory;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.presenter.AreaByPlaceListPresenter;
-import com.lakeel.altla.vision.builder.presentation.view.AreaByPlaceItemView;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
@@ -77,7 +76,7 @@ public final class AreaByPlaceListAdapter extends RecyclerView.Adapter<AreaByPla
         return presenter.getItemCount();
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder implements AreaByPlaceItemView {
+    class ViewHolder extends RecyclerView.ViewHolder {
 
         private AreaByPlaceListPresenter.ItemPresenter itemPresenter;
 

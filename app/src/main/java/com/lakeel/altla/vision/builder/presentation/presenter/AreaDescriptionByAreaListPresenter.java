@@ -5,19 +5,18 @@ import com.lakeel.altla.android.binding.property.StringProperty;
 import com.lakeel.altla.vision.ArgumentNullException;
 import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
-import com.lakeel.altla.vision.builder.presentation.view.AreaDescriptionByAreaListView;
 import com.lakeel.altla.vision.helper.AreaDescriptionNameComparater;
 import com.lakeel.altla.vision.model.Area;
 import com.lakeel.altla.vision.model.AreaDescription;
 import com.lakeel.altla.vision.model.Scope;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
-import com.lakeel.altla.vision.presentation.presenter.model.DataList;
 
 import org.parceler.Parcels;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,8 +28,8 @@ import io.reactivex.Single;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 
-public final class AreaDescriptionByAreaListPresenter extends BasePresenter<AreaDescriptionByAreaListView>
-        implements DataList.OnItemListener {
+public final class AreaDescriptionByAreaListPresenter
+        extends BasePresenter<AreaDescriptionByAreaListPresenter.View> {
 
     private static final String ARG_SCOPE = "scrope";
 
@@ -126,31 +125,6 @@ public final class AreaDescriptionByAreaListPresenter extends BasePresenter<Area
         compositeDisposable.clear();
     }
 
-    @Override
-    public void onItemInserted(int index) {
-        getView().onItemInserted(index);
-    }
-
-    @Override
-    public void onItemChanged(int index) {
-        getView().onItemChanged(index);
-    }
-
-    @Override
-    public void onItemRemoved(int index) {
-        getView().onItemRemoved(index);
-    }
-
-    @Override
-    public void onItemMoved(int from, int to) {
-        getView().onItemMoved(from, to);
-    }
-
-    @Override
-    public void onDataSetChanged() {
-        getView().onDataSetChanged();
-    }
-
     public int getItemCount() {
         return items.size();
     }
@@ -181,6 +155,17 @@ public final class AreaDescriptionByAreaListPresenter extends BasePresenter<Area
 
     private boolean canSelect() {
         return selectedAreaDescription != null;
+    }
+
+    public interface View {
+
+        void onDataSetChanged();
+
+        void onAreaDescriptionSelected(@NonNull AreaDescription areaDescription);
+
+        void onCloseView();
+
+        void onSnackbar(@StringRes int resId);
     }
 
     public final class ItemPresenter {

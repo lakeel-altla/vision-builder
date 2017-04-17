@@ -1,11 +1,10 @@
 package com.lakeel.altla.vision.builder.presentation.presenter;
 
-import com.lakeel.altla.vision.builder.presentation.view.TangoPermissionView;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 
 import javax.inject.Inject;
 
-public final class TangoPermissionPresenter extends BasePresenter<TangoPermissionView> {
+public final class TangoPermissionPresenter extends BasePresenter<TangoPermissionPresenter.View> {
 
     @Inject
     public TangoPermissionPresenter() {
@@ -28,5 +27,14 @@ public final class TangoPermissionPresenter extends BasePresenter<TangoPermissio
         } else {
             getView().onShowAreaLearningPermissionRequiredSnackbar();
         }
+    }
+
+    public interface View {
+
+        void onCloseTangoPermissionView();
+
+        void onShowAreaLearningPermissionRequiredSnackbar();
+
+        void onShowTangoPermissionActivity();
     }
 }

@@ -6,7 +6,6 @@ import com.lakeel.altla.android.binding.property.StringProperty;
 import com.lakeel.altla.vision.ArgumentNullException;
 import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
-import com.lakeel.altla.vision.builder.presentation.view.ActorView;
 import com.lakeel.altla.vision.model.Actor;
 import com.lakeel.altla.vision.model.Scope;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
@@ -16,6 +15,7 @@ import org.parceler.Parcels;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
 
 import javax.inject.Inject;
 
@@ -23,7 +23,7 @@ import io.reactivex.Maybe;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 
-public final class ActorPresenter extends BasePresenter<ActorView> {
+public final class ActorPresenter extends BasePresenter<ActorPresenter.View> {
 
     private static final String ARG_SCOPE = "scope";
 
@@ -154,5 +154,14 @@ public final class ActorPresenter extends BasePresenter<ActorView> {
         this.actorId = actorId;
 
         loadActor();
+    }
+
+    public interface View {
+
+        void onUpdateMainMenuVisible(boolean visible);
+
+        void onCloseView();
+
+        void onSnackbar(@StringRes int resId);
     }
 }

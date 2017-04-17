@@ -4,7 +4,6 @@ import com.lakeel.altla.android.binding.command.RelayCommand;
 import com.lakeel.altla.android.binding.property.IntProperty;
 import com.lakeel.altla.vision.ArgumentNullException;
 import com.lakeel.altla.vision.builder.R;
-import com.lakeel.altla.vision.builder.presentation.view.AreaModeView;
 import com.lakeel.altla.vision.model.Scope;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 
@@ -17,7 +16,7 @@ import android.support.annotation.Nullable;
 
 import javax.inject.Inject;
 
-public final class AreaModePresenter extends BasePresenter<AreaModeView> {
+public final class AreaModePresenter extends BasePresenter<AreaModePresenter.View> {
 
     private static final String ARG_SCOPE = "scrope";
 
@@ -78,5 +77,12 @@ public final class AreaModePresenter extends BasePresenter<AreaModeView> {
 
     private void close() {
         getView().onCloseView();
+    }
+
+    public interface View {
+
+        void onAreaModeSelected(@NonNull Scope scope);
+
+        void onCloseView();
     }
 }

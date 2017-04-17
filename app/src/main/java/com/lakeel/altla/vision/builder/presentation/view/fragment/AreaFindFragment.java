@@ -10,7 +10,6 @@ import com.lakeel.altla.android.binding.ViewBindingFactory;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.presenter.AreaFindPresenter;
-import com.lakeel.altla.vision.builder.presentation.view.AreaFindView;
 import com.lakeel.altla.vision.model.Scope;
 import com.lakeel.altla.vision.presentation.view.fragment.AbstractFragment;
 
@@ -24,13 +23,12 @@ import android.support.annotation.StringRes;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 
 import javax.inject.Inject;
 
-public final class AreaFindFragment extends AbstractFragment<AreaFindView, AreaFindPresenter>
-        implements AreaFindView {
+public final class AreaFindFragment extends AbstractFragment<AreaFindPresenter.View, AreaFindPresenter>
+        implements AreaFindPresenter.View {
 
     private static final int REQUEST_CODE_PLACE_PICKER = 1;
 
@@ -61,7 +59,7 @@ public final class AreaFindFragment extends AbstractFragment<AreaFindView, AreaF
     }
 
     @Override
-    protected AreaFindView getViewInterface() {
+    protected AreaFindPresenter.View getViewInterface() {
         return this;
     }
 
@@ -82,13 +80,13 @@ public final class AreaFindFragment extends AbstractFragment<AreaFindView, AreaF
 
     @Nullable
     @Override
-    protected View onCreateViewCore(LayoutInflater inflater, @Nullable ViewGroup container,
-                                    @Nullable Bundle savedInstanceState) {
+    protected android.view.View onCreateViewCore(LayoutInflater inflater, @Nullable ViewGroup container,
+                                                 @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_area_find, container, false);
     }
 
     @Override
-    protected void onBindView(@NonNull View view) {
+    protected void onBindView(@NonNull android.view.View view) {
         super.onBindView(view);
 
         ViewBindingFactory factory = new ViewBindingFactory(view);

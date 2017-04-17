@@ -7,7 +7,6 @@ import com.lakeel.altla.android.binding.property.StringProperty;
 import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.helper.StringResourceHelper;
-import com.lakeel.altla.vision.builder.presentation.view.AreaSettingsListView;
 import com.lakeel.altla.vision.model.Area;
 import com.lakeel.altla.vision.model.AreaDescription;
 import com.lakeel.altla.vision.model.AreaSettings;
@@ -15,6 +14,7 @@ import com.lakeel.altla.vision.model.Scope;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.StringRes;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +26,7 @@ import io.reactivex.Single;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 
-public final class AreaSettingsListPresenter extends BasePresenter<AreaSettingsListView> {
+public final class AreaSettingsListPresenter extends BasePresenter<AreaSettingsListPresenter.View> {
 
     @Inject
     VisionService visionService;
@@ -172,6 +172,21 @@ public final class AreaSettingsListPresenter extends BasePresenter<AreaSettingsL
 
     private boolean canSelect() {
         return selectedItem != null;
+    }
+
+    public interface View {
+
+        void onItemInserted(int position);
+
+        void onDataSetChanged();
+
+        void onAreaSettingsSelected(@NonNull AreaSettings areaSettings,
+                                    @NonNull Area area,
+                                    @NonNull AreaDescription areaDescription);
+
+        void onCloseView();
+
+        void onSnackbar(@StringRes int resId);
     }
 
     public final class ItemPresenter {

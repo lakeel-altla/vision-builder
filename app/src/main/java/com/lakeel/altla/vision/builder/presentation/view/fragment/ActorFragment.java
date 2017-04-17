@@ -5,7 +5,6 @@ import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.helper.LongToDateFormatConverter;
 import com.lakeel.altla.vision.builder.presentation.presenter.ActorPresenter;
-import com.lakeel.altla.vision.builder.presentation.view.ActorView;
 import com.lakeel.altla.vision.model.Scope;
 import com.lakeel.altla.vision.presentation.view.fragment.AbstractFragment;
 
@@ -16,13 +15,12 @@ import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.design.widget.Snackbar;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 
 import javax.inject.Inject;
 
-public final class ActorFragment extends AbstractFragment<ActorView, ActorPresenter>
-        implements ActorView {
+public final class ActorFragment extends AbstractFragment<ActorPresenter.View, ActorPresenter>
+        implements ActorPresenter.View {
 
     @Inject
     ActorPresenter presenter;
@@ -43,7 +41,7 @@ public final class ActorFragment extends AbstractFragment<ActorView, ActorPresen
     }
 
     @Override
-    protected ActorView getViewInterface() {
+    protected ActorPresenter.View getViewInterface() {
         return this;
     }
 
@@ -64,13 +62,13 @@ public final class ActorFragment extends AbstractFragment<ActorView, ActorPresen
 
     @Nullable
     @Override
-    protected View onCreateViewCore(LayoutInflater inflater, @Nullable ViewGroup container,
-                                    @Nullable Bundle savedInstanceState) {
+    protected android.view.View onCreateViewCore(LayoutInflater inflater, @Nullable ViewGroup container,
+                                                 @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_actor, container, false);
     }
 
     @Override
-    protected void onBindView(@NonNull View view) {
+    protected void onBindView(@NonNull android.view.View view) {
         super.onBindView(view);
 
         ViewBindingFactory factory = new ViewBindingFactory(view);
