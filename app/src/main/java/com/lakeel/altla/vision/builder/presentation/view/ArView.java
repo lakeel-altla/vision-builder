@@ -3,9 +3,12 @@ package com.lakeel.altla.vision.builder.presentation.view;
 import com.google.atap.tango.ux.TangoUx;
 
 import com.lakeel.altla.vision.builder.presentation.model.Axis;
+import com.lakeel.altla.vision.model.Scope;
 
 import org.rajawali3d.renderer.ISurfaceRenderer;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 
 /**
@@ -27,9 +30,9 @@ public interface ArView {
 
     void onUpdateAreaSettingsVisible(boolean visible);
 
-    void onUpdateActorContinerViewVisible(boolean visible);
-
     void onUpdateAssetListVisible(boolean visible);
+
+    void onUpdateActorViewContent(@NonNull Scope scope, @Nullable String actorId);
 
     void onUpdateObjectMenuVisible(boolean visible);
 

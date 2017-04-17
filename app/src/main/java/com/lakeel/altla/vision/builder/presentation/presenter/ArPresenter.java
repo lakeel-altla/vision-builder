@@ -17,8 +17,6 @@ import com.lakeel.altla.vision.api.CurrentUser;
 import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.module.Names;
-import com.lakeel.altla.vision.builder.presentation.event.CloseViewEvent;
-import com.lakeel.altla.vision.builder.presentation.event.ShowActorEvent;
 import com.lakeel.altla.vision.builder.presentation.model.ActorDragConstants;
 import com.lakeel.altla.vision.builder.presentation.model.ActorEditMode;
 import com.lakeel.altla.vision.builder.presentation.model.ActorModel;
@@ -26,7 +24,6 @@ import com.lakeel.altla.vision.builder.presentation.model.Axis;
 import com.lakeel.altla.vision.builder.presentation.model.EditAxesModel;
 import com.lakeel.altla.vision.builder.presentation.model.ImageActorModel;
 import com.lakeel.altla.vision.builder.presentation.model.TangoLocalizationState;
-import com.lakeel.altla.vision.builder.presentation.view.ActorContainerView;
 import com.lakeel.altla.vision.builder.presentation.view.ArView;
 import com.lakeel.altla.vision.builder.presentation.view.renderer.MainRenderer;
 import com.lakeel.altla.vision.model.Actor;
@@ -39,8 +36,6 @@ import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
 import org.parceler.Parcels;
 import org.rajawali3d.math.Quaternion;
 import org.rajawali3d.math.vector.Vector3;
@@ -191,8 +186,6 @@ public final class ArPresenter extends BasePresenter<ArView>
     protected void onStartOverride() {
         super.onStartOverride();
 
-        EventBus.getDefault().register(this);
-
         // Instantiate ActorManager here to clear the bitmap cache in Picasso.
         actorManager = new ActorManager(context);
     }
@@ -200,8 +193,6 @@ public final class ArPresenter extends BasePresenter<ArView>
     @Override
     protected void onStopOverride() {
         super.onStopOverride();
-
-        EventBus.getDefault().unregister(this);
 
         compositeDisposable.clear();
     }
@@ -369,21 +360,10 @@ public final class ArPresenter extends BasePresenter<ArView>
         if (areaSettings != null) {
             pickedActorModel = actorModel;
 
-            getView().onUpdateActorContinerViewVisible(true);
-            getView().onUpdateMainMenuVisible(false);
-
             // TODO: use the scope of the targeted actor, not the current area.
-            final Scope scope = Scope.USER;
             final String actorId = pickedActorModel == null ? null : pickedActorModel.actor.getId();
-            EventBus.getDefault().postSticky(new ShowActorEvent(scope, actorId));
-        }
-    }
-
-    @Subscribe
-    public void onEvent(@NonNull CloseViewEvent event) {
-        if (event.viewType == ActorContainerView.class) {
-            getView().onUpdateActorContinerViewVisible(false);
-            getView().onUpdateMainMenuVisible(true);
+            getView().onUpdateActorViewContent(areaSettings.getAreaScopeAsEnum(), actorId);
+            getView().onUpdateMainMenuVisible(false);
         }
     }
 

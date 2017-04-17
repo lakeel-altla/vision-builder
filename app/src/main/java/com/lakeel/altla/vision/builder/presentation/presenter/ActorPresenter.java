@@ -3,18 +3,14 @@ package com.lakeel.altla.vision.builder.presentation.presenter;
 import com.lakeel.altla.android.binding.command.RelayCommand;
 import com.lakeel.altla.android.binding.property.LongProperty;
 import com.lakeel.altla.android.binding.property.StringProperty;
+import com.lakeel.altla.vision.ArgumentNullException;
 import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
-import com.lakeel.altla.vision.builder.presentation.event.CloseViewEvent;
-import com.lakeel.altla.vision.builder.presentation.event.ShowActorEvent;
-import com.lakeel.altla.vision.builder.presentation.view.ActorContainerView;
 import com.lakeel.altla.vision.builder.presentation.view.ActorView;
 import com.lakeel.altla.vision.model.Actor;
 import com.lakeel.altla.vision.model.Scope;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
 import org.parceler.Parcels;
 
 import android.os.Bundle;
@@ -28,6 +24,10 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 
 public final class ActorPresenter extends BasePresenter<ActorView> {
+
+    private static final String ARG_SCOPE = "scope";
+
+    private static final String ARG_ACTOR_ID = "actorId";
 
     private static final String STATE_SCOPE = "scopeValue";
 
@@ -54,48 +54,52 @@ public final class ActorPresenter extends BasePresenter<ActorView> {
     public ActorPresenter() {
     }
 
+    @NonNull
+    public static Bundle createArguments(@NonNull Scope scope, @NonNull String actorId) {
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(ARG_SCOPE, Parcels.wrap(scope));
+        bundle.putString(ARG_ACTOR_ID, actorId);
+        return bundle;
+    }
+
     @Override
     public void onCreate(@Nullable Bundle arguments, @Nullable Bundle savedInstanceState) {
         super.onCreate(arguments, savedInstanceState);
 
-        if (savedInstanceState != null) {
+        if (arguments == null) throw new ArgumentNullException("arguments");
+
+        if (savedInstanceState == null) {
+            scope = Parcels.unwrap(arguments.getParcelable(ARG_SCOPE));
+            if (scope == null) {
+                throw new IllegalArgumentException(String.format("Argument '%s' is required.", ARG_SCOPE));
+            }
+
+            actorId = arguments.getString(ARG_ACTOR_ID);
+            if (actorId == null) {
+                throw new IllegalArgumentException(String.format("Argument '%s' is required.", ARG_ACTOR_ID));
+            }
+        } else {
             scope = Parcels.unwrap(savedInstanceState.getParcelable(STATE_SCOPE));
+            if (scope == null) {
+                throw new IllegalArgumentException(String.format("State '%s' is required.", STATE_SCOPE));
+            }
+
             actorId = savedInstanceState.getString(STATE_ACTOR_ID);
+            if (actorId == null) {
+                throw new IllegalArgumentException(String.format("State '%s' is required.", STATE_ACTOR_ID));
+            }
         }
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-
-        outState.putParcelable(STATE_SCOPE, Parcels.wrap(scope));
-        outState.putString(STATE_ACTOR_ID, actorId);
-    }
-
-    @Override
-    protected void onStartOverride() {
-        super.onStartOverride();
-
-        EventBus.getDefault().register(this);
-    }
-
-    @Override
-    protected void onStopOverride() {
-        super.onStopOverride();
-
-        EventBus.getDefault().unregister(this);
-    }
-
-    @Subscribe(sticky = true)
-    public void onEvent(@NonNull ShowActorEvent event) {
-        this.scope = event.scope;
-        this.actorId = event.actorId;
+    protected void onResumeOverride() {
+        super.onResumeOverride();
 
         loadActor();
     }
 
     private void loadActor() {
-        if (scope == null || actorId == null) {
+        if (actorId == null) {
             propertyName.set(null);
             propertyCreatedAt.set(-1);
             propertyUpdatedAt.set(-1);
@@ -141,6 +145,14 @@ public final class ActorPresenter extends BasePresenter<ActorView> {
     }
 
     private void close() {
-        EventBus.getDefault().post(new CloseViewEvent(ActorContainerView.class));
+        getView().onCloseView();
+        getView().onUpdateMainMenuVisible(true);
+    }
+
+    public void onUpdateActor(@NonNull Scope scope, @Nullable String actorId) {
+        this.scope = scope;
+        this.actorId = actorId;
+
+        loadActor();
     }
 }
