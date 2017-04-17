@@ -141,12 +141,6 @@ public final class AreaSettingsFragment extends AbstractFragment<AreaSettingsPre
         presenter.onAreaSettingsSelected(areaSettings, area, areaDescription);
     }
 
-//    @ColorInt
-//    private int resolveImageButtonTint(boolean enabled) {
-//        int resId = enabled ? R.color.foreground_overlay : R.color.foreground_overlay_disabled;
-//        return getResources().getColor(resId);
-//    }
-
     public interface InteractionListener {
 
         void onShowAreaSettingsHistoryView();
