@@ -90,14 +90,34 @@ public final class AreaSettingsContainerFragment
     }
 
     @Override
-    public void onCloseAreaSettingsView() {
-        interactionListener.onUpdateAreaSettingsVisible(false);
-        interactionListener.onUpdateMainMenuVisible(true);
+    public void onShowAreaSettingsHistoryView() {
+        replaceFragmentAndAddToBackStack(AreaSettingsListFragment.newInstance());
     }
 
     @Override
-    public void onShowAreaSettingsHistoryView() {
-        replaceFragmentAndAddToBackStack(AreaSettingsListFragment.newInstance());
+    public void onShowAreaModeView(@NonNull Scope scope) {
+        replaceFragmentAndAddToBackStack(AreaModeFragment.newInstance(scope));
+    }
+
+    @Override
+    public void onShowAreaFindView(@NonNull Scope scope) {
+        replaceFragmentAndAddToBackStack(AreaFindFragment.newInstance(scope));
+    }
+
+    @Override
+    public void onShowAreaDescriptionByAreaListView(@NonNull Scope scope, @NonNull Area area) {
+        replaceFragmentAndAddToBackStack(AreaDescriptionByAreaListFragment.newInstance(scope, area));
+    }
+
+    @Override
+    public void onUpdateArView(@NonNull String areaSettingsId) {
+        interactionListener.onUpdateArView(areaSettingsId);
+    }
+
+    @Override
+    public void onCloseAreaSettingsView() {
+        interactionListener.onUpdateAreaSettingsVisible(false);
+        interactionListener.onUpdateMainMenuVisible(true);
     }
 
     @Override
@@ -116,26 +136,6 @@ public final class AreaSettingsContainerFragment
     }
 
     @Override
-    public void onShowAreaModeView(@NonNull Scope scope) {
-        replaceFragmentAndAddToBackStack(AreaModeFragment.newInstance(scope));
-    }
-
-    @Override
-    public void onCloseAreaModeView() {
-        backFragment();
-    }
-
-    @Override
-    public void onShowAreaFindView(@NonNull Scope scope) {
-        replaceFragmentAndAddToBackStack(AreaFindFragment.newInstance(scope));
-    }
-
-    @Override
-    public void onShowAreaDescriptionByAreaListView(@NonNull Scope scope, @NonNull Area area) {
-        replaceFragmentAndAddToBackStack(AreaDescriptionByAreaListFragment.newInstance(scope, area));
-    }
-
-    @Override
     public void onShowAreaSettingsView(@NonNull Scope scope) {
         replaceFragment(AreaSettingsFragment.newInstance(scope));
     }
@@ -143,6 +143,11 @@ public final class AreaSettingsContainerFragment
     @Override
     public void onShowAreaByPlaceListView(@NonNull Scope scope, @NonNull Place place) {
         replaceFragmentAndAddToBackStack(AreaByPlaceListFragment.newInstance(scope, place));
+    }
+
+    @Override
+    public void onCloseAreaFindView() {
+        backFragment();
     }
 
     @Override
@@ -154,7 +159,7 @@ public final class AreaSettingsContainerFragment
     }
 
     @Override
-    public void onCloseAreaFindView() {
+    public void onCloseAreaModeView() {
         backFragment();
     }
 
@@ -183,11 +188,6 @@ public final class AreaSettingsContainerFragment
         if (fragment != null) {
             fragment.onAreaDescriptionSelected(areaDescription);
         }
-    }
-
-    @Override
-    public void onUpdateArView(@NonNull String areaSettingsId) {
-        interactionListener.onUpdateArView(areaSettingsId);
     }
 
     @Override

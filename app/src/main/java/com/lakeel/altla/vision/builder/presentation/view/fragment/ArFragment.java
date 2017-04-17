@@ -172,10 +172,9 @@ public final class ArFragment extends AbstractFragment<ArPresenter.View, ArPrese
 
         gestureDetector = new GestureDetectorCompat(getContext(), new GestureDetector.SimpleOnGestureListener() {
             @Override
-            public boolean onDown(MotionEvent e) {
-                getLog().d("onDown");
-                // Must return true to receive motion events on onScroll.
-                return true;
+            public boolean onSingleTapUp(MotionEvent e) {
+                getLog().d("onSingleTapUp");
+                return presenter.onSingleTapUp(e);
             }
 
             @Override
@@ -186,9 +185,10 @@ public final class ArFragment extends AbstractFragment<ArPresenter.View, ArPrese
             }
 
             @Override
-            public boolean onSingleTapUp(MotionEvent e) {
-                getLog().d("onSingleTapUp");
-                return presenter.onSingleTapUp(e);
+            public boolean onDown(MotionEvent e) {
+                getLog().d("onDown");
+                // Must return true to receive motion events on onScroll.
+                return true;
             }
         });
 
@@ -288,11 +288,6 @@ public final class ArFragment extends AbstractFragment<ArPresenter.View, ArPrese
     }
 
     @Override
-    public void onUpdateArView(@NonNull String areaSettingsId) {
-        presenter.onAreaSettingsSelected(areaSettingsId);
-    }
-
-    @Override
     public void onUpdateObjectMenuVisible(boolean visible) {
         if (visible) {
             viewGroupEditUserActorMenu.setVisibility(View.VISIBLE);
@@ -342,14 +337,19 @@ public final class ArFragment extends AbstractFragment<ArPresenter.View, ArPrese
     }
 
     @Override
-    public void onCloseActorView() {
-        ActorFragment fragment = (ActorFragment) findFragment(ActorFragment.class);
-        removeFragment(fragment);
+    public void onSnackbar(@StringRes int resId) {
+        Snackbar.make(viewTop, resId, Snackbar.LENGTH_SHORT).show();
     }
 
     @Override
-    public void onSnackbar(@StringRes int resId) {
-        Snackbar.make(viewTop, resId, Snackbar.LENGTH_SHORT).show();
+    public void onUpdateArView(@NonNull String areaSettingsId) {
+        presenter.onAreaSettingsSelected(areaSettingsId);
+    }
+
+    @Override
+    public void onCloseActorView() {
+        ActorFragment fragment = (ActorFragment) findFragment(ActorFragment.class);
+        removeFragment(fragment);
     }
 
     @OnClick(R.id.image_button_area_settings)
