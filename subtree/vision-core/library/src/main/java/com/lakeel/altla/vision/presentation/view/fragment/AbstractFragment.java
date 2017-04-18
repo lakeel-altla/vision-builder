@@ -77,7 +77,7 @@ public abstract class AbstractFragment<TView, TPresenter extends Presenter<TView
 
         getPresenter().onCreateView(getViewInterface());
 
-        onCreateViewOverride(view);
+        onCreateViewOverride(view, savedInstanceState);
 
         return view;
     }
@@ -89,7 +89,7 @@ public abstract class AbstractFragment<TView, TPresenter extends Presenter<TView
     protected void onBindView(@NonNull View view) {
     }
 
-    protected void onCreateViewOverride(@Nullable View view) {
+    protected void onCreateViewOverride(@Nullable View view, @Nullable Bundle savedInstanceState) {
     }
 
     @Override
