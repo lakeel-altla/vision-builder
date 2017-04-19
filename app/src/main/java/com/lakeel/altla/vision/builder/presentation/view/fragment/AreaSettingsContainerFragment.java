@@ -1,20 +1,11 @@
 package com.lakeel.altla.vision.builder.presentation.view.fragment;
 
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.places.Place;
 
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
-import com.lakeel.altla.vision.builder.presentation.presenter.AreaByPlaceListPresenter;
-import com.lakeel.altla.vision.builder.presentation.presenter.AreaDescriptionByAreaListPresenter;
-import com.lakeel.altla.vision.builder.presentation.presenter.AreaFindPresenter;
-import com.lakeel.altla.vision.builder.presentation.presenter.AreaModePresenter;
 import com.lakeel.altla.vision.builder.presentation.presenter.AreaSettingsContainerPresenter;
-import com.lakeel.altla.vision.builder.presentation.presenter.AreaSettingsListPresenter;
-import com.lakeel.altla.vision.builder.presentation.presenter.AreaSettingsPresenter;
 import com.lakeel.altla.vision.model.Area;
-import com.lakeel.altla.vision.model.AreaDescription;
-import com.lakeel.altla.vision.model.AreaSettings;
 import com.lakeel.altla.vision.model.Scope;
 import com.lakeel.altla.vision.presentation.view.fragment.AbstractFragment;
 
@@ -24,7 +15,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v7.app.AppCompatActivity;
+import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,24 +24,10 @@ import javax.inject.Inject;
 
 public final class AreaSettingsContainerFragment
         extends AbstractFragment<AreaSettingsContainerPresenter.View, AreaSettingsContainerPresenter>
-        implements AreaSettingsContainerPresenter.View,
-                   AreaSettingsPresenter.ParentView,
-                   AreaSettingsListPresenter.ParentView,
-                   AreaModePresenter.ParentView,
-                   AreaFindPresenter.ParentView,
-                   AreaByPlaceListPresenter.ParentView,
-                   AreaDescriptionByAreaListPresenter.ParentView {
+        implements AreaSettingsContainerPresenter.View {
 
     @Inject
     AreaSettingsContainerPresenter presenter;
-
-    @Inject
-    AppCompatActivity activity;
-
-    @Inject
-    GoogleApiClient googleApiClient;
-
-    private InteractionListener interactionListener;
 
     @NonNull
     public static AreaSettingsContainerFragment newInstance() {
@@ -72,14 +49,6 @@ public final class AreaSettingsContainerFragment
         super.onAttachOverride(context);
 
         ActivityScopeContext.class.cast(context).getActivityComponent().inject(this);
-        interactionListener = InteractionListener.class.cast(getParentFragment());
-    }
-
-    @Override
-    protected void onDetachOverride() {
-        super.onDetachOverride();
-
-        interactionListener = null;
     }
 
     @Nullable
@@ -90,132 +59,59 @@ public final class AreaSettingsContainerFragment
     }
 
     @Override
-    public void onShowAreaSettingsHistoryView() {
-        replaceFragmentAndAddToBackStack(AreaSettingsListFragment.newInstance());
-    }
+    protected void onCreateViewOverride(@Nullable View view, @Nullable Bundle savedInstanceState) {
+        super.onCreateViewOverride(view, savedInstanceState);
 
-    @Override
-    public void onShowAreaModeView(@NonNull Scope scope) {
-        replaceFragmentAndAddToBackStack(AreaModeFragment.newInstance(scope));
-    }
-
-    @Override
-    public void onShowAreaFindView(@NonNull Scope scope) {
-        replaceFragmentAndAddToBackStack(AreaFindFragment.newInstance(scope));
-    }
-
-    @Override
-    public void onShowAreaDescriptionByAreaListView(@NonNull Scope scope, @NonNull Area area) {
-        replaceFragmentAndAddToBackStack(AreaDescriptionByAreaListFragment.newInstance(scope, area));
-    }
-
-    @Override
-    public void onUpdateArView(@NonNull String areaSettingsId) {
-        interactionListener.onUpdateArView(areaSettingsId);
-    }
-
-    @Override
-    public void onCloseAreaSettingsView() {
-        interactionListener.onUpdateAreaSettingsVisible(false);
-        interactionListener.onUpdateMainMenuVisible(true);
-    }
-
-    @Override
-    public void onAreaSettingsSelected(@NonNull AreaSettings areaSettings,
-                                       @NonNull Area area,
-                                       @NonNull AreaDescription areaDescription) {
-        AreaSettingsFragment fragment = findAreaSettingsFragment();
-        if (fragment != null) {
-            fragment.onAreaSettingsSelected(areaSettings, area, areaDescription);
+        if (savedInstanceState == null) {
+            addFragment(AreaSettingsFragment.newInstance(Scope.USER));
         }
     }
 
     @Override
-    public void onCloseAreaSettingsListView() {
+    public void showAreaSettingsListView() {
+        addFragment(AreaSettingsListFragment.newInstance());
+    }
+
+    @Override
+    public void showAreaModeView(@NonNull Scope scope) {
+        addFragment(AreaModeFragment.newInstance(scope));
+    }
+
+    @Override
+    public void showAreaFindView(@NonNull Scope scope) {
+        addFragment(AreaFindFragment.newInstance(scope));
+    }
+
+    @Override
+    public void showAreaDescriptionByAreaListView(@NonNull Scope scope, @NonNull Area area) {
+        addFragment(AreaDescriptionByAreaListFragment.newInstance(scope, area));
+    }
+
+    @Override
+    public void showAreaByPlaceListView(@NonNull Scope scope, @NonNull Place place) {
+        addFragment(AreaByPlaceListFragment.newInstance(scope, place));
+    }
+
+    @Override
+    public void backView() {
         backFragment();
     }
 
     @Override
-    public void onShowAreaSettingsView(@NonNull Scope scope) {
-        replaceFragment(AreaSettingsFragment.newInstance(scope));
-    }
-
-    @Override
-    public void onShowAreaByPlaceListView(@NonNull Scope scope, @NonNull Place place) {
-        replaceFragmentAndAddToBackStack(AreaByPlaceListFragment.newInstance(scope, place));
-    }
-
-    @Override
-    public void onCloseAreaFindView() {
-        backFragment();
-    }
-
-    @Override
-    public void onAreaModeSelected(@NonNull Scope scope) {
-        AreaSettingsFragment fragment = findAreaSettingsFragment();
-        if (fragment != null) {
-            fragment.onAreaModeSelected(scope);
-        }
-    }
-
-    @Override
-    public void onCloseAreaModeView() {
-        backFragment();
-    }
-
-    @Override
-    public void onAreaSelected(@NonNull Area area) {
-        AreaSettingsFragment fragment = findAreaSettingsFragment();
-        if (fragment != null) {
-            fragment.onAreaSelected(area);
-        }
-    }
-
-    @Override
-    public void onBackToAreaFindView() {
-        backFragment();
-    }
-
-    @Override
-    public void onCloseAreaByPlaceListView() {
+    public void closeAreaByPlaceListView() {
         getChildFragmentManager().popBackStack(AreaFindFragment.class.getName(),
                                                FragmentManager.POP_BACK_STACK_INCLUSIVE);
     }
 
-    @Override
-    public void onAreaDescriptionSelected(@NonNull AreaDescription areaDescription) {
-        AreaSettingsFragment fragment = findAreaSettingsFragment();
-        if (fragment != null) {
-            fragment.onAreaDescriptionSelected(areaDescription);
-        }
-    }
+    private void addFragment(@NonNull Fragment fragment) {
+        FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
 
-    @Override
-    public void onCloseAreaDescriptionByAreaListView() {
-        backFragment();
-    }
+        Fragment topFragment = getTopFragment();
+        if (topFragment != null) transaction.hide(topFragment);
 
-    @Nullable
-    private AreaSettingsFragment findAreaSettingsFragment() {
-        return (AreaSettingsFragment) findFragment(AreaSettingsFragment.class);
-    }
-
-    @Nullable
-    private Fragment findFragment(Class<? extends Fragment> clazz) {
-        return getChildFragmentManager().findFragmentByTag(clazz.getName());
-    }
-
-    private void replaceFragmentAndAddToBackStack(@NonNull Fragment fragment) {
-        getChildFragmentManager().beginTransaction()
-                                 .addToBackStack(fragment.getClass().getName())
-                                 .replace(R.id.fragment_container, fragment, fragment.getClass().getName())
-                                 .commit();
-    }
-
-    private void replaceFragment(@NonNull Fragment fragment) {
-        getChildFragmentManager().beginTransaction()
-                                 .replace(R.id.fragment_container, fragment, fragment.getClass().getName())
-                                 .commit();
+        transaction.addToBackStack(fragment.getClass().getName())
+                   .add(R.id.fragment_container, fragment, fragment.getClass().getName())
+                   .commit();
     }
 
     private void backFragment() {
@@ -224,12 +120,16 @@ public final class AreaSettingsContainerFragment
         }
     }
 
-    public interface InteractionListener {
+    @Nullable
+    private Fragment getTopFragment() {
+        FragmentManager manager = getChildFragmentManager();
 
-        void onUpdateAreaSettingsVisible(boolean visible);
-
-        void onUpdateMainMenuVisible(boolean visible);
-
-        void onUpdateArView(@NonNull String areaSettingsId);
+        int index = manager.getBackStackEntryCount() - 1;
+        if (index < 0) {
+            return null;
+        } else {
+            FragmentManager.BackStackEntry entry = manager.getBackStackEntryAt(index);
+            return manager.findFragmentByTag(entry.getName());
+        }
     }
 }

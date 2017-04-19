@@ -11,6 +11,7 @@ import com.lakeel.altla.vision.model.AreaDescription;
 import com.lakeel.altla.vision.model.Scope;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 
+import org.greenrobot.eventbus.EventBus;
 import org.parceler.Parcels;
 
 import android.os.Bundle;
@@ -45,8 +46,6 @@ public final class AreaDescriptionByAreaListPresenter
     private final CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     private final List<AreaDescription> items = new ArrayList<>();
-
-    private ParentView parentView;
 
     private Scope scope;
 
@@ -127,10 +126,6 @@ public final class AreaDescriptionByAreaListPresenter
         compositeDisposable.clear();
     }
 
-    public void onParentViewAttached(@NonNull ParentView parentView) {
-        this.parentView = parentView;
-    }
-
     public int getItemCount() {
         return items.size();
     }
@@ -151,12 +146,12 @@ public final class AreaDescriptionByAreaListPresenter
     }
 
     private void close() {
-        parentView.onCloseAreaDescriptionByAreaListView();
+        EventBus.getDefault().post(CloseViewEvent.INSTANCE);
     }
 
     private void select() {
-        parentView.onAreaDescriptionSelected(selectedAreaDescription);
-        parentView.onCloseAreaDescriptionByAreaListView();
+        EventBus.getDefault().post(new AreaDescriptionSelectedEvent(selectedAreaDescription));
+        close();
     }
 
     private boolean canSelect() {
@@ -170,11 +165,22 @@ public final class AreaDescriptionByAreaListPresenter
         void onSnackbar(@StringRes int resId);
     }
 
-    public interface ParentView {
+    public final class AreaDescriptionSelectedEvent {
 
-        void onAreaDescriptionSelected(@NonNull AreaDescription areaDescription);
+        @NonNull
+        public final AreaDescription areaDescription;
 
-        void onCloseAreaDescriptionByAreaListView();
+        public AreaDescriptionSelectedEvent(@NonNull AreaDescription areaDescription) {
+            this.areaDescription = areaDescription;
+        }
+    }
+
+    public static final class CloseViewEvent {
+
+        private static final CloseViewEvent INSTANCE = new CloseViewEvent();
+
+        private CloseViewEvent() {
+        }
     }
 
     public final class ItemPresenter {

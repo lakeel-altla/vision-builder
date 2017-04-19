@@ -54,7 +54,6 @@ public final class AreaSettingsListFragment
         super.onAttachOverride(context);
 
         ActivityScopeContext.class.cast(context).getActivityComponent().inject(this);
-        presenter.onParentViewAttached((AreaSettingsListPresenter.ParentView) getParentFragment());
     }
 
     @Nullable

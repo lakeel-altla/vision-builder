@@ -60,7 +60,6 @@ public final class AreaByPlaceListFragment
         super.onAttachOverride(context);
 
         ActivityScopeContext.class.cast(context).getActivityComponent().inject(this);
-        presenter.onParentViewAttached((AreaByPlaceListPresenter.ParentView) getParentFragment());
     }
 
     @Nullable

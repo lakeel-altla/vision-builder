@@ -46,7 +46,6 @@ public final class AreaModeFragment extends AbstractFragment<AreaModePresenter.V
         super.onAttachOverride(context);
 
         ActivityScopeContext.class.cast(context).getActivityComponent().inject(this);
-        presenter.onParentViewAttached((AreaModePresenter.ParentView) getParentFragment());
     }
 
     @Nullable

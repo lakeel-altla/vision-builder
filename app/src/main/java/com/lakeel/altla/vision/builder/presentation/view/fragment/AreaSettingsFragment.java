@@ -6,9 +6,6 @@ import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.helper.ResourceToColorFilterConverter;
 import com.lakeel.altla.vision.builder.presentation.presenter.AreaSettingsPresenter;
-import com.lakeel.altla.vision.model.Area;
-import com.lakeel.altla.vision.model.AreaDescription;
-import com.lakeel.altla.vision.model.AreaSettings;
 import com.lakeel.altla.vision.model.Scope;
 import com.lakeel.altla.vision.presentation.view.fragment.AbstractFragment;
 
@@ -51,7 +48,6 @@ public final class AreaSettingsFragment extends AbstractFragment<AreaSettingsPre
         super.onAttachOverride(context);
 
         ActivityScopeContext.class.cast(context).getActivityComponent().inject(this);
-        presenter.onParentViewAttached((AreaSettingsPresenter.ParentView) getParentFragment());
     }
 
     @Nullable
@@ -83,23 +79,5 @@ public final class AreaSettingsFragment extends AbstractFragment<AreaSettingsPre
         factory.create(R.id.image_button_area_description_list, "onClick", presenter.commandShowAreaDescriptionList)
                .bind();
         factory.create(R.id.button_start, "onClick", presenter.commandStart).bind();
-    }
-
-    public void onAreaModeSelected(@NonNull Scope scope) {
-        presenter.propertyAreaScope.set(scope);
-    }
-
-    public void onAreaSelected(@NonNull Area area) {
-        presenter.propertyArea.set(area);
-    }
-
-    public void onAreaDescriptionSelected(@NonNull AreaDescription areaDescription) {
-        presenter.propertyAreaDescription.set(areaDescription);
-    }
-
-    public void onAreaSettingsSelected(@NonNull AreaSettings areaSettings,
-                                       @NonNull Area area,
-                                       @NonNull AreaDescription areaDescription) {
-        presenter.onAreaSettingsSelected(areaSettings, area, areaDescription);
     }
 }

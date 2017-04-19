@@ -43,7 +43,6 @@ import butterknife.OnTouch;
 
 public final class ArFragment extends AbstractFragment<ArPresenter.View, ArPresenter>
         implements ArPresenter.View,
-                   AreaSettingsContainerFragment.InteractionListener,
                    ActorFragment.InteractionListener,
                    ImageAssetListFragment.InteractionListener {
 
@@ -339,11 +338,6 @@ public final class ArFragment extends AbstractFragment<ArPresenter.View, ArPrese
     @Override
     public void onSnackbar(@StringRes int resId) {
         Snackbar.make(viewTop, resId, Snackbar.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void onUpdateArView(@NonNull String areaSettingsId) {
-        presenter.onAreaSettingsSelected(areaSettingsId);
     }
 
     @Override

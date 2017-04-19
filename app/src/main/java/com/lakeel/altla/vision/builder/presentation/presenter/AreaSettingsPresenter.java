@@ -15,6 +15,8 @@ import com.lakeel.altla.vision.model.AreaSettings;
 import com.lakeel.altla.vision.model.Scope;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 import org.parceler.Parcels;
 
 import android.os.Bundle;
@@ -37,8 +39,6 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsPrese
 
     @Inject
     VisionService visionService;
-
-    private ParentView parentView;
 
     private AreaSettings areaSettings;
 
@@ -141,18 +141,41 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsPrese
         outState.putParcelable(STATE_AREA_DESCRIPTION, Parcels.wrap(propertyAreaDescription.get()));
     }
 
-    public void onParentViewAttached(@NonNull ParentView parentView) {
-        this.parentView = parentView;
+    @Override
+    protected void onStartOverride() {
+        super.onStartOverride();
+        EventBus.getDefault().register(this);
     }
 
-    public void onAreaSettingsSelected(@NonNull AreaSettings areaSettings,
-                                       @NonNull Area area,
-                                       @NonNull AreaDescription areaDescription) {
-        this.areaSettings = areaSettings;
+    @Override
+    protected void onStopOverride() {
+        super.onStopOverride();
+
+        EventBus.getDefault().unregister(this);
+    }
+
+    @Subscribe
+    public void onEvent(@NonNull AreaSettingsListPresenter.AreaSettingsSelectedEvent event) {
+        this.areaSettings = event.areaSettings;
 
         propertyAreaScope.set(areaSettings.getAreaScopeAsEnum());
-        propertyArea.set(area);
-        propertyAreaDescription.set(areaDescription);
+        propertyArea.set(event.area);
+        propertyAreaDescription.set(event.areaDescription);
+    }
+
+    @Subscribe
+    public void onEvent(@NonNull AreaModePresenter.AreaModeSelectedEvent event) {
+        propertyAreaScope.set(event.scope);
+    }
+
+    @Subscribe
+    public void onEvent(@NonNull AreaByPlaceListPresenter.AreaSelectedEvent event) {
+        propertyArea.set(event.area);
+    }
+
+    @Subscribe
+    public void onEvent(@NonNull AreaDescriptionByAreaListPresenter.AreaDescriptionSelectedEvent event) {
+        propertyAreaDescription.set(event.areaDescription);
     }
 
     private void updateShowAreaDescriptionButtonColorFilter() {
@@ -162,24 +185,24 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsPrese
     }
 
     private void close() {
-        parentView.onCloseAreaSettingsView();
+        EventBus.getDefault().post(CloseViewEvent.INSTANCE);
     }
 
     private void showHistory() {
-        parentView.onShowAreaSettingsHistoryView();
+        EventBus.getDefault().post(ShowAreaSettingsListViewEvent.INSTANCE);
     }
 
     private void showAreaMode() {
         Scope scope = propertyAreaScope.get();
         if (scope != null) {
-            parentView.onShowAreaModeView(scope);
+            EventBus.getDefault().post(new ShowAreaModeViewEvent(scope));
         }
     }
 
     private void showAreaFind() {
         Scope scope = propertyAreaScope.get();
         if (scope != null) {
-            parentView.onShowAreaFindView(scope);
+            EventBus.getDefault().post(new ShowAreaFindViewEvent(scope));
         }
     }
 
@@ -187,7 +210,7 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsPrese
         Scope scope = propertyAreaScope.get();
         Area area = propertyArea.get();
         if (scope != null && area != null) {
-            parentView.onShowAreaDescriptionByAreaListView(scope, area);
+            EventBus.getDefault().post(new ShowAreaDescriptionByAreaListViewEvent(scope, area));
         }
     }
 
@@ -210,8 +233,8 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsPrese
         visionService.getUserAreaSettingsApi()
                      .saveUserAreaSettings(areaSettings);
 
-        parentView.onUpdateArView(areaSettings.getId());
-        parentView.onCloseAreaSettingsView();
+        EventBus.getDefault().post(new StartArEvent(areaSettings.getId()));
+        close();
     }
 
     private boolean canStart() {
@@ -224,18 +247,63 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsPrese
 
     }
 
-    public interface ParentView {
+    public static final class CloseViewEvent {
 
-        void onShowAreaSettingsHistoryView();
+        private static final CloseViewEvent INSTANCE = new CloseViewEvent();
 
-        void onShowAreaModeView(@NonNull Scope scope);
+        private CloseViewEvent() {
+        }
+    }
 
-        void onShowAreaFindView(@NonNull Scope scope);
+    public final class StartArEvent {
 
-        void onShowAreaDescriptionByAreaListView(@NonNull Scope scope, @NonNull Area area);
+        @NonNull
+        public final String areaSettingsId;
 
-        void onUpdateArView(@NonNull String areaSettingsId);
+        private StartArEvent(@NonNull String areaSettingsId) {
+            this.areaSettingsId = areaSettingsId;
+        }
+    }
 
-        void onCloseAreaSettingsView();
+    public static final class ShowAreaSettingsListViewEvent {
+
+        private static final ShowAreaSettingsListViewEvent INSTANCE = new ShowAreaSettingsListViewEvent();
+
+        private ShowAreaSettingsListViewEvent() {
+        }
+    }
+
+    public static final class ShowAreaModeViewEvent {
+
+        @NonNull
+        public final Scope scope;
+
+        public ShowAreaModeViewEvent(@NonNull Scope scope) {
+            this.scope = scope;
+        }
+    }
+
+    public static final class ShowAreaFindViewEvent {
+
+        @NonNull
+        public final Scope scope;
+
+        public ShowAreaFindViewEvent(@NonNull Scope scope) {
+            this.scope = scope;
+        }
+    }
+
+    public static final class ShowAreaDescriptionByAreaListViewEvent {
+
+        @NonNull
+        public final Scope scope;
+
+        @NonNull
+        public final Area area;
+
+        public ShowAreaDescriptionByAreaListViewEvent(@NonNull Scope scope, @NonNull Area area) {
+            this.scope = scope;
+            this.area = area;
+        }
     }
 }

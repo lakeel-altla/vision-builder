@@ -67,7 +67,6 @@ public final class AreaFindFragment extends AbstractFragment<AreaFindPresenter.V
         super.onAttachOverride(context);
 
         ActivityScopeContext.class.cast(context).getActivityComponent().inject(this);
-        presenter.onParentViewAttached((AreaFindPresenter.ParentView) getParentFragment());
     }
 
     @Nullable

@@ -59,7 +59,6 @@ public final class AreaDescriptionByAreaListFragment
         super.onAttachOverride(context);
 
         ActivityScopeContext.class.cast(context).getActivityComponent().inject(this);
-        presenter.onParentViewAttached((AreaDescriptionByAreaListPresenter.ParentView) getParentFragment());
     }
 
     @Nullable

@@ -8,6 +8,7 @@ import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.model.Scope;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 
+import org.greenrobot.eventbus.EventBus;
 import org.parceler.Parcels;
 
 import android.os.Bundle;
@@ -20,8 +21,6 @@ import javax.inject.Inject;
 public final class AreaFindPresenter extends BasePresenter<AreaFindPresenter.View> {
 
     private static final String ARG_SCOPE = "scope";
-
-    private ParentView parentView;
 
     private Scope scope;
 
@@ -52,12 +51,8 @@ public final class AreaFindPresenter extends BasePresenter<AreaFindPresenter.Vie
         }
     }
 
-    public void onParentViewAttached(@NonNull ParentView parentView) {
-        this.parentView = parentView;
-    }
-
     public void onPlacePicked(@NonNull Place place) {
-        parentView.onShowAreaByPlaceListView(scope, place);
+        EventBus.getDefault().post(new ShowAreaByPlaceListViewEvent(scope, place));
     }
 
     public void onShowPlacePickerFailed(@NonNull Exception e) {
@@ -69,7 +64,7 @@ public final class AreaFindPresenter extends BasePresenter<AreaFindPresenter.Vie
     }
 
     private void close() {
-        parentView.onCloseAreaFindView();
+        EventBus.getDefault().post(CloseViewEvent.INSTANCE);
     }
 
     public interface View {
@@ -79,10 +74,25 @@ public final class AreaFindPresenter extends BasePresenter<AreaFindPresenter.Vie
         void onSnackbar(@StringRes int resId);
     }
 
-    public interface ParentView {
+    public final class ShowAreaByPlaceListViewEvent {
 
-        void onShowAreaByPlaceListView(@NonNull Scope scope, @NonNull Place place);
+        @NonNull
+        public final Scope scope;
 
-        void onCloseAreaFindView();
+        @NonNull
+        public final Place place;
+
+        public ShowAreaByPlaceListViewEvent(@NonNull Scope scope, @NonNull Place place) {
+            this.scope = scope;
+            this.place = place;
+        }
+    }
+
+    public static final class CloseViewEvent {
+
+        private static final CloseViewEvent INSTANCE = new CloseViewEvent();
+
+        private CloseViewEvent() {
+        }
     }
 }

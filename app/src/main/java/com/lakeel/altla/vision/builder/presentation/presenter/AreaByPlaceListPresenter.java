@@ -12,6 +12,7 @@ import com.lakeel.altla.vision.model.Area;
 import com.lakeel.altla.vision.model.Scope;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 
+import org.greenrobot.eventbus.EventBus;
 import org.parceler.Parcels;
 
 import android.os.Bundle;
@@ -45,8 +46,6 @@ public final class AreaByPlaceListPresenter extends BasePresenter<AreaByPlaceLis
     private final CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     private final List<Area> items = new ArrayList<>();
-
-    private ParentView parentView;
 
     private Scope scope;
 
@@ -126,10 +125,6 @@ public final class AreaByPlaceListPresenter extends BasePresenter<AreaByPlaceLis
         compositeDisposable.clear();
     }
 
-    public void onParentViewAttached(@NonNull ParentView parentView) {
-        this.parentView = parentView;
-    }
-
     public int getItemCount() {
         return items.size();
     }
@@ -150,12 +145,12 @@ public final class AreaByPlaceListPresenter extends BasePresenter<AreaByPlaceLis
     }
 
     private void back() {
-        parentView.onBackToAreaFindView();
+        EventBus.getDefault().post(BackViewEvent.INSTANCE);
     }
 
     private void select() {
-        parentView.onAreaSelected(selectedArea);
-        parentView.onCloseAreaByPlaceListView();
+        EventBus.getDefault().post(new AreaSelectedEvent(selectedArea));
+        EventBus.getDefault().post(CloseViewEvent.INSTANCE);
     }
 
     private boolean canSelect() {
@@ -169,13 +164,30 @@ public final class AreaByPlaceListPresenter extends BasePresenter<AreaByPlaceLis
         void onSnackbar(@StringRes int resId);
     }
 
-    public interface ParentView {
+    public final class AreaSelectedEvent {
 
-        void onAreaSelected(@NonNull Area area);
+        @NonNull
+        public final Area area;
 
-        void onBackToAreaFindView();
+        public AreaSelectedEvent(@NonNull Area area) {
+            this.area = area;
+        }
+    }
 
-        void onCloseAreaByPlaceListView();
+    public static final class BackViewEvent {
+
+        private static final BackViewEvent INSTANCE = new BackViewEvent();
+
+        private BackViewEvent() {
+        }
+    }
+
+    public static final class CloseViewEvent {
+
+        private static final CloseViewEvent INSTANCE = new CloseViewEvent();
+
+        private CloseViewEvent() {
+        }
     }
 
     public final class ItemPresenter {

@@ -36,6 +36,8 @@ import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 import org.parceler.Parcels;
 import org.rajawali3d.math.Quaternion;
 import org.rajawali3d.math.vector.Vector3;
@@ -190,6 +192,8 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
 
         // Instantiate ActorManager here to clear the bitmap cache in Picasso.
         actorManager = new ActorManager(context);
+
+        EventBus.getDefault().register(this);
     }
 
     @Override
@@ -197,6 +201,8 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
         super.onStopOverride();
 
         compositeDisposable.clear();
+
+        EventBus.getDefault().unregister(this);
     }
 
     @Override
@@ -367,40 +373,6 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
             getView().onUpdateActorViewContent(areaSettings.getAreaScopeAsEnum(), actorId);
             getView().onUpdateMainMenuVisible(false);
         }
-    }
-
-    public void onAreaSettingsSelected(@NonNull String areaSettingsId) {
-        this.areaSettingsId = areaSettingsId;
-
-        Disposable disposable = Maybe
-                .<AreaSettings>create(e -> {
-                    visionService.getUserAreaSettingsApi()
-                                 .findUserAreaSettingsById(areaSettingsId, areaSettings -> {
-                                     if (areaSettings == null) {
-                                         e.onComplete();
-                                     } else {
-                                         e.onSuccess(areaSettings);
-                                     }
-                                 }, e::onError);
-                })
-                .subscribe(areaSettings -> {
-                    this.areaSettings = areaSettings;
-
-                    disconnectTango();
-
-                    // Pause the thread for OpenGL in the texture view.
-                    getView().onPauseTextureView();
-                    getView().onUpdateImageButtonAssetListVisible(true);
-
-                    connectTango();
-                }, e -> {
-                    getLog().e("Failed.", e);
-                    getView().onSnackbar(R.string.snackbar_failed);
-                }, () -> {
-                    getLog().e("Entity not found.");
-                    getView().onSnackbar(R.string.snackbar_failed);
-                });
-        compositeDisposable.add(disposable);
     }
 
     public void onClickButtonAreaSettings() {
@@ -584,6 +556,51 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
 
         // Save.
         visionService.getUserActorApi().saveActor(pickedActorModel.actor);
+    }
+
+    @Subscribe
+    public void onEvent(@NonNull AreaSettingsPresenter.CloseViewEvent event) {
+        getView().onUpdateAreaSettingsVisible(false);
+        getView().onUpdateMainMenuVisible(true);
+    }
+
+    @Subscribe
+    public void onEvent(@NonNull AreaSettingsPresenter.StartArEvent event) {
+        startAr(event.areaSettingsId);
+    }
+
+    private void startAr(@NonNull String areaSettingsId) {
+        this.areaSettingsId = areaSettingsId;
+
+        Disposable disposable = Maybe
+                .<AreaSettings>create(e -> {
+                    visionService.getUserAreaSettingsApi()
+                                 .findUserAreaSettingsById(areaSettingsId, areaSettings -> {
+                                     if (areaSettings == null) {
+                                         e.onComplete();
+                                     } else {
+                                         e.onSuccess(areaSettings);
+                                     }
+                                 }, e::onError);
+                })
+                .subscribe(areaSettings -> {
+                    this.areaSettings = areaSettings;
+
+                    disconnectTango();
+
+                    // Pause the thread for OpenGL in the texture view.
+                    getView().onPauseTextureView();
+                    getView().onUpdateImageButtonAssetListVisible(true);
+
+                    connectTango();
+                }, e -> {
+                    getLog().e("Failed.", e);
+                    getView().onSnackbar(R.string.snackbar_failed);
+                }, () -> {
+                    getLog().e("Entity not found.");
+                    getView().onSnackbar(R.string.snackbar_failed);
+                });
+        compositeDisposable.add(disposable);
     }
 
     @NonNull

@@ -13,6 +13,8 @@ import com.lakeel.altla.vision.model.AreaSettings;
 import com.lakeel.altla.vision.model.Scope;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 
+import org.greenrobot.eventbus.EventBus;
+
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
 
@@ -38,8 +40,6 @@ public final class AreaSettingsListPresenter extends BasePresenter<AreaSettingsL
     private final CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     private final List<Item> items = new ArrayList<>();
-
-    private ParentView parentView;
 
     private Item selectedItem;
 
@@ -144,10 +144,6 @@ public final class AreaSettingsListPresenter extends BasePresenter<AreaSettingsL
         compositeDisposable.clear();
     }
 
-    public void onParentViewAttached(@NonNull ParentView parentView) {
-        this.parentView = parentView;
-    }
-
     public int getItemCount() {
         return items.size();
     }
@@ -168,12 +164,14 @@ public final class AreaSettingsListPresenter extends BasePresenter<AreaSettingsL
     }
 
     private void close() {
-        parentView.onCloseAreaSettingsListView();
+        EventBus.getDefault().post(CloseViewEvent.INSTANCE);
     }
 
     private void select() {
-        parentView.onAreaSettingsSelected(selectedItem.areaSettings, selectedItem.area, selectedItem.areaDescription);
-        parentView.onCloseAreaSettingsListView();
+        EventBus.getDefault().post(new AreaSettingsSelectedEvent(selectedItem.areaSettings,
+                                                                 selectedItem.area,
+                                                                 selectedItem.areaDescription));
+        close();
     }
 
     private boolean canSelect() {
@@ -189,13 +187,31 @@ public final class AreaSettingsListPresenter extends BasePresenter<AreaSettingsL
         void onSnackbar(@StringRes int resId);
     }
 
-    public interface ParentView {
+    public static final class AreaSettingsSelectedEvent {
 
-        void onAreaSettingsSelected(@NonNull AreaSettings areaSettings,
-                                    @NonNull Area area,
-                                    @NonNull AreaDescription areaDescription);
+        @NonNull
+        public final AreaSettings areaSettings;
 
-        void onCloseAreaSettingsListView();
+        @NonNull
+        public final Area area;
+
+        @NonNull
+        public final AreaDescription areaDescription;
+
+        public AreaSettingsSelectedEvent(@NonNull AreaSettings areaSettings, @NonNull Area area,
+                                         @NonNull AreaDescription areaDescription) {
+            this.areaSettings = areaSettings;
+            this.area = area;
+            this.areaDescription = areaDescription;
+        }
+    }
+
+    public static final class CloseViewEvent {
+
+        private static final CloseViewEvent INSTANCE = new CloseViewEvent();
+
+        private CloseViewEvent() {
+        }
     }
 
     public final class ItemPresenter {

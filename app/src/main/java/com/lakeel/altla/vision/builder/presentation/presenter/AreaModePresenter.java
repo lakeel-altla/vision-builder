@@ -7,6 +7,7 @@ import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.model.Scope;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 
+import org.greenrobot.eventbus.EventBus;
 import org.parceler.Parcels;
 
 import android.os.Bundle;
@@ -27,8 +28,6 @@ public final class AreaModePresenter extends BasePresenter<AreaModePresenter.Vie
     public final RelayCommand commandSelect = new RelayCommand(this::select);
 
     public final RelayCommand commandClose = new RelayCommand(this::close);
-
-    private ParentView parentView;
 
     private Scope scope;
 
@@ -62,10 +61,6 @@ public final class AreaModePresenter extends BasePresenter<AreaModePresenter.Vie
         propertyChckedButton.set(resolveCheckedId(scope));
     }
 
-    public void onParentViewAttached(@NonNull ParentView parentView) {
-        this.parentView = parentView;
-    }
-
     @IdRes
     private static int resolveCheckedId(@NonNull Scope scope) {
         return (scope == Scope.PUBLIC) ? R.id.radio_button_public : R.id.radio_button_user;
@@ -77,22 +72,33 @@ public final class AreaModePresenter extends BasePresenter<AreaModePresenter.Vie
     }
 
     private void select() {
-        parentView.onAreaModeSelected(scope);
-        parentView.onCloseAreaModeView();
+        EventBus.getDefault().post(new AreaModeSelectedEvent(scope));
+        close();
     }
 
     private void close() {
-        parentView.onCloseAreaModeView();
+        EventBus.getDefault().post(CloseViewEvent.INSTANCE);
     }
 
     public interface View {
 
     }
 
-    public interface ParentView {
+    public final class AreaModeSelectedEvent {
 
-        void onAreaModeSelected(@NonNull Scope scope);
+        @NonNull
+        public final Scope scope;
 
-        void onCloseAreaModeView();
+        private AreaModeSelectedEvent(@NonNull Scope scope) {
+            this.scope = scope;
+        }
+    }
+
+    public static final class CloseViewEvent {
+
+        private static final CloseViewEvent INSTANCE = new CloseViewEvent();
+
+        private CloseViewEvent() {
+        }
     }
 }
