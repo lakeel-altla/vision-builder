@@ -5,6 +5,7 @@ import com.google.firebase.storage.FirebaseStorage;
 
 import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScope;
+import com.lakeel.altla.vision.builder.presentation.model.ArModel;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -48,5 +49,11 @@ public final class ActivityModule {
     @Provides
     VisionService provideVisionService(FirebaseDatabase firebaseDatabase, FirebaseStorage firebaseStorage) {
         return new VisionService(activity, firebaseDatabase, firebaseStorage);
+    }
+
+    @ActivityScope
+    @Provides
+    ArModel provideArModel() {
+        return new ArModel();
     }
 }

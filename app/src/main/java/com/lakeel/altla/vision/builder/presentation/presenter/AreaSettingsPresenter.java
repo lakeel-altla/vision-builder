@@ -9,6 +9,7 @@ import com.lakeel.altla.vision.api.CurrentUser;
 import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.helper.StringResourceHelper;
+import com.lakeel.altla.vision.builder.presentation.model.ArModel;
 import com.lakeel.altla.vision.model.Area;
 import com.lakeel.altla.vision.model.AreaDescription;
 import com.lakeel.altla.vision.model.AreaSettings;
@@ -39,6 +40,9 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsPrese
 
     @Inject
     VisionService visionService;
+
+    @Inject
+    ArModel arModel;
 
     private AreaSettings areaSettings;
 
@@ -233,7 +237,7 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsPrese
         visionService.getUserAreaSettingsApi()
                      .saveUserAreaSettings(areaSettings);
 
-        EventBus.getDefault().post(new StartArEvent(areaSettings.getId()));
+        arModel.areaSettingsId.set(areaSettings.getId());
         close();
     }
 
@@ -252,16 +256,6 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsPrese
         private static final CloseViewEvent INSTANCE = new CloseViewEvent();
 
         private CloseViewEvent() {
-        }
-    }
-
-    public final class StartArEvent {
-
-        @NonNull
-        public final String areaSettingsId;
-
-        private StartArEvent(@NonNull String areaSettingsId) {
-            this.areaSettingsId = areaSettingsId;
         }
     }
 

@@ -9,7 +9,6 @@ import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.model.Axis;
 import com.lakeel.altla.vision.builder.presentation.presenter.ArPresenter;
-import com.lakeel.altla.vision.model.Scope;
 import com.lakeel.altla.vision.presentation.view.fragment.AbstractFragment;
 
 import org.rajawali3d.renderer.ISurfaceRenderer;
@@ -43,7 +42,6 @@ import butterknife.OnTouch;
 
 public final class ArFragment extends AbstractFragment<ArPresenter.View, ArPresenter>
         implements ArPresenter.View,
-                   ActorFragment.InteractionListener,
                    ImageAssetListFragment.InteractionListener {
 
     @Inject
@@ -240,9 +238,8 @@ public final class ArFragment extends AbstractFragment<ArPresenter.View, ArPrese
     }
 
     @Override
-    public void onUpdateAreaSettingsVisible(boolean visible) {
-        AreaSettingsContainerFragment fragment =
-                (AreaSettingsContainerFragment) findFragment(AreaSettingsContainerFragment.class);
+    public void onUpdateAreaSettingsContainerViewVisible(boolean visible) {
+        AreaSettingsContainerFragment fragment = findFragment(AreaSettingsContainerFragment.class);
 
         if (visible) {
             if (fragment == null) {
@@ -256,8 +253,23 @@ public final class ArFragment extends AbstractFragment<ArPresenter.View, ArPrese
     }
 
     @Override
+    public void onUpdateActorContainerViewVisible(boolean visible) {
+        ActorContainerFragment fragment = findFragment(ActorContainerFragment.class);
+
+        if (visible) {
+            if (fragment == null) {
+                replaceWindowFragment(ActorContainerFragment.newInstance());
+            }
+        } else {
+            if (fragment != null) {
+                removeFragment(fragment);
+            }
+        }
+    }
+
+    @Override
     public void onUpdateAssetListVisible(boolean visible) {
-        ImageAssetListFragment fragment = (ImageAssetListFragment) findFragment(ImageAssetListFragment.class);
+        ImageAssetListFragment fragment = findFragment(ImageAssetListFragment.class);
 
         if (visible) {
             if (fragment == null) {
@@ -270,19 +282,6 @@ public final class ArFragment extends AbstractFragment<ArPresenter.View, ArPrese
             if (fragment != null) {
                 removeFragment(fragment);
             }
-        }
-    }
-
-    @Override
-    public void onUpdateActorViewContent(@NonNull Scope scope, @Nullable String actorId) {
-        ActorFragment fragment = (ActorFragment) findFragment(ActorFragment.class);
-
-        if (fragment == null) {
-            if (actorId != null) {
-                replaceWindowFragment(ActorFragment.newInstance(scope, actorId));
-            }
-        } else {
-            fragment.onUpdateActor(scope, actorId);
         }
     }
 
@@ -338,12 +337,6 @@ public final class ArFragment extends AbstractFragment<ArPresenter.View, ArPrese
     @Override
     public void onSnackbar(@StringRes int resId) {
         Snackbar.make(viewTop, resId, Snackbar.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void onCloseActorView() {
-        ActorFragment fragment = (ActorFragment) findFragment(ActorFragment.class);
-        removeFragment(fragment);
     }
 
     @OnClick(R.id.image_button_area_settings)
@@ -463,9 +456,10 @@ public final class ArFragment extends AbstractFragment<ArPresenter.View, ArPrese
         presenter.onClickButtonDelete();
     }
 
+    @SuppressWarnings("unchecked")
     @Nullable
-    private Fragment findFragment(@NonNull Class<? extends Fragment> clazz) {
-        return getChildFragmentManager().findFragmentByTag(clazz.getName());
+    private <T extends Fragment> T findFragment(@NonNull Class<T> clazz) {
+        return (T) getChildFragmentManager().findFragmentByTag(clazz.getName());
     }
 
     private void replaceWindowFragment(@NonNull Fragment fragment) {

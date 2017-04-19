@@ -21,6 +21,7 @@ import com.lakeel.altla.vision.builder.presentation.di.module.Names;
 import com.lakeel.altla.vision.builder.presentation.model.ActorDragConstants;
 import com.lakeel.altla.vision.builder.presentation.model.ActorEditMode;
 import com.lakeel.altla.vision.builder.presentation.model.ActorModel;
+import com.lakeel.altla.vision.builder.presentation.model.ArModel;
 import com.lakeel.altla.vision.builder.presentation.model.Axis;
 import com.lakeel.altla.vision.builder.presentation.model.EditAxesModel;
 import com.lakeel.altla.vision.builder.presentation.model.ImageActorModel;
@@ -111,6 +112,9 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
     @Inject
     VisionService visionService;
 
+    @Inject
+    ArModel arModel;
+
     private final CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     private final Vector3 cameraPosition = new Vector3();
@@ -157,6 +161,13 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
         visionService.getTangoWrapper().setStartTangoUx(false);
         visionService.getTangoWrapper().setCoordinateFramePairs(FRAME_PAIRS);
         visionService.getTangoWrapper().setTangoConfigFactory(this::createTangoConfig);
+
+        arModel.areaSettingsId.addOnValueChangedListener(sender -> {
+            String value = arModel.areaSettingsId.get();
+            if (value != null) {
+                startAr(value);
+            }
+        });
     }
 
     @Override
@@ -368,15 +379,21 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
         if (areaSettings != null) {
             pickedActorModel = actorModel;
 
+            getView().onUpdateActorContainerViewVisible(true);
+            getView().onUpdateMainMenuVisible(false);
+
             // TODO: use the scope of the targeted actor, not the current area.
             final String actorId = pickedActorModel == null ? null : pickedActorModel.actor.getId();
-            getView().onUpdateActorViewContent(areaSettings.getAreaScopeAsEnum(), actorId);
-            getView().onUpdateMainMenuVisible(false);
+            if (actorId == null) {
+                arModel.pickedActor.set(null);
+            } else {
+                arModel.pickedActor.set(new ArModel.PickedActor(Scope.USER, actorId));
+            }
         }
     }
 
     public void onClickButtonAreaSettings() {
-        getView().onUpdateAreaSettingsVisible(true);
+        getView().onUpdateAreaSettingsContainerViewVisible(true);
         getView().onUpdateMainMenuVisible(false);
     }
 
@@ -560,17 +577,23 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
 
     @Subscribe
     public void onEvent(@NonNull AreaSettingsPresenter.CloseViewEvent event) {
-        getView().onUpdateAreaSettingsVisible(false);
+        getView().onUpdateAreaSettingsContainerViewVisible(false);
         getView().onUpdateMainMenuVisible(true);
     }
 
+//    @Subscribe
+//    public void onEvent(@NonNull AreaSettingsPresenter.StartArEvent event) {
+//        startAr(event.areaSettingsId);
+//    }
+
     @Subscribe
-    public void onEvent(@NonNull AreaSettingsPresenter.StartArEvent event) {
-        startAr(event.areaSettingsId);
+    public void onEvent(@NonNull ActorPresenter.CloseViewEvent event) {
+        getView().onUpdateActorContainerViewVisible(false);
+        getView().onUpdateMainMenuVisible(true);
     }
 
     private void startAr(@NonNull String areaSettingsId) {
-        this.areaSettingsId = areaSettingsId;
+//        this.areaSettingsId = areaSettingsId;
 
         Disposable disposable = Maybe
                 .<AreaSettings>create(e -> {
@@ -780,11 +803,11 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
 
         void onUpdateImageButtonAssetListVisible(boolean visible);
 
-        void onUpdateAreaSettingsVisible(boolean visible);
+        void onUpdateAreaSettingsContainerViewVisible(boolean visible);
+
+        void onUpdateActorContainerViewVisible(boolean visible);
 
         void onUpdateAssetListVisible(boolean visible);
-
-        void onUpdateActorViewContent(@NonNull Scope scope, @Nullable String actorId);
 
         void onUpdateObjectMenuVisible(boolean visible);
 
