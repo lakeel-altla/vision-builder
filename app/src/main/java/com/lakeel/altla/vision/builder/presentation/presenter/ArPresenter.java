@@ -18,6 +18,7 @@ import com.lakeel.altla.vision.api.CurrentUser;
 import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.module.Names;
+import com.lakeel.altla.vision.builder.presentation.event.SnackbarEvent;
 import com.lakeel.altla.vision.builder.presentation.model.ActorDragConstants;
 import com.lakeel.altla.vision.builder.presentation.model.ActorEditMode;
 import com.lakeel.altla.vision.builder.presentation.model.ActorModel;
@@ -113,6 +114,9 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
     VisionService visionService;
 
     @Inject
+    EventBus eventBus;
+
+    @Inject
     ArModel arModel;
 
     private final CompositeDisposable compositeDisposable = new CompositeDisposable();
@@ -204,7 +208,7 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
         // Instantiate ActorManager here to clear the bitmap cache in Picasso.
         actorManager = new ActorManager(context);
 
-        EventBus.getDefault().register(this);
+        eventBus.register(this);
     }
 
     @Override
@@ -213,7 +217,7 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
 
         compositeDisposable.clear();
 
-        EventBus.getDefault().unregister(this);
+        eventBus.unregister(this);
     }
 
     @Override
@@ -581,20 +585,18 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
         getView().onUpdateMainMenuVisible(true);
     }
 
-//    @Subscribe
-//    public void onEvent(@NonNull AreaSettingsPresenter.StartArEvent event) {
-//        startAr(event.areaSettingsId);
-//    }
-
     @Subscribe
     public void onEvent(@NonNull ActorPresenter.CloseViewEvent event) {
         getView().onUpdateActorContainerViewVisible(false);
         getView().onUpdateMainMenuVisible(true);
     }
 
-    private void startAr(@NonNull String areaSettingsId) {
-//        this.areaSettingsId = areaSettingsId;
+    @Subscribe
+    public void onEvent(@NonNull SnackbarEvent event) {
+        getView().onSnackbar(event.resource);
+    }
 
+    private void startAr(@NonNull String areaSettingsId) {
         Disposable disposable = Maybe
                 .<AreaSettings>create(e -> {
                     visionService.getUserAreaSettingsApi()

@@ -7,6 +7,7 @@ import com.lakeel.altla.android.binding.property.StringProperty;
 import com.lakeel.altla.vision.ArgumentNullException;
 import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
+import com.lakeel.altla.vision.builder.presentation.helper.SnackbarEventHelper;
 import com.lakeel.altla.vision.helper.AreaNameComparater;
 import com.lakeel.altla.vision.model.Area;
 import com.lakeel.altla.vision.model.Scope;
@@ -18,7 +19,6 @@ import org.parceler.Parcels;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.annotation.StringRes;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -38,6 +38,9 @@ public final class AreaByPlaceListPresenter extends BasePresenter<AreaByPlaceLis
 
     @Inject
     VisionService visionService;
+
+    @Inject
+    EventBus eventBus;
 
     public final RelayCommand commandBack = new RelayCommand(this::back);
 
@@ -113,7 +116,7 @@ public final class AreaByPlaceListPresenter extends BasePresenter<AreaByPlaceLis
             getView().onDataSetChanged();
         }, e -> {
             getLog().e("Failed.", e);
-            getView().onSnackbar(R.string.snackbar_failed);
+            SnackbarEventHelper.post(eventBus, R.string.snackbar_done);
         });
         compositeDisposable.add(disposable);
     }
@@ -145,12 +148,12 @@ public final class AreaByPlaceListPresenter extends BasePresenter<AreaByPlaceLis
     }
 
     private void back() {
-        EventBus.getDefault().post(BackViewEvent.INSTANCE);
+        eventBus.post(BackViewEvent.INSTANCE);
     }
 
     private void select() {
-        EventBus.getDefault().post(new AreaSelectedEvent(selectedArea));
-        EventBus.getDefault().post(CloseViewEvent.INSTANCE);
+        eventBus.post(new AreaSelectedEvent(selectedArea));
+        eventBus.post(CloseViewEvent.INSTANCE);
     }
 
     private boolean canSelect() {
@@ -160,8 +163,6 @@ public final class AreaByPlaceListPresenter extends BasePresenter<AreaByPlaceLis
     public interface View {
 
         void onDataSetChanged();
-
-        void onSnackbar(@StringRes int resId);
     }
 
     public final class AreaSelectedEvent {

@@ -5,6 +5,7 @@ import com.lakeel.altla.android.binding.property.StringProperty;
 import com.lakeel.altla.vision.ArgumentNullException;
 import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
+import com.lakeel.altla.vision.builder.presentation.helper.SnackbarEventHelper;
 import com.lakeel.altla.vision.helper.AreaDescriptionNameComparater;
 import com.lakeel.altla.vision.model.Area;
 import com.lakeel.altla.vision.model.AreaDescription;
@@ -17,7 +18,6 @@ import org.parceler.Parcels;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.annotation.StringRes;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -38,6 +38,9 @@ public final class AreaDescriptionByAreaListPresenter
 
     @Inject
     VisionService visionService;
+
+    @Inject
+    EventBus eventBus;
 
     public final RelayCommand commandClose = new RelayCommand(this::close);
 
@@ -114,7 +117,7 @@ public final class AreaDescriptionByAreaListPresenter
             getView().onDataSetChanged();
         }, e -> {
             getLog().e("Failed.", e);
-            getView().onSnackbar(R.string.snackbar_failed);
+            SnackbarEventHelper.post(eventBus, R.string.snackbar_done);
         });
         compositeDisposable.add(disposable);
     }
@@ -146,11 +149,11 @@ public final class AreaDescriptionByAreaListPresenter
     }
 
     private void close() {
-        EventBus.getDefault().post(CloseViewEvent.INSTANCE);
+        eventBus.post(CloseViewEvent.INSTANCE);
     }
 
     private void select() {
-        EventBus.getDefault().post(new AreaDescriptionSelectedEvent(selectedAreaDescription));
+        eventBus.post(new AreaDescriptionSelectedEvent(selectedAreaDescription));
         close();
     }
 
@@ -161,8 +164,6 @@ public final class AreaDescriptionByAreaListPresenter
     public interface View {
 
         void onDataSetChanged();
-
-        void onSnackbar(@StringRes int resId);
     }
 
     public final class AreaDescriptionSelectedEvent {

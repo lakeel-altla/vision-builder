@@ -5,6 +5,7 @@ import com.google.android.gms.location.places.Place;
 import com.lakeel.altla.android.binding.command.RelayCommand;
 import com.lakeel.altla.vision.ArgumentNullException;
 import com.lakeel.altla.vision.builder.R;
+import com.lakeel.altla.vision.builder.presentation.helper.SnackbarEventHelper;
 import com.lakeel.altla.vision.model.Scope;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 
@@ -14,13 +15,15 @@ import org.parceler.Parcels;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.annotation.StringRes;
 
 import javax.inject.Inject;
 
 public final class AreaFindPresenter extends BasePresenter<AreaFindPresenter.View> {
 
     private static final String ARG_SCOPE = "scope";
+
+    @Inject
+    EventBus eventBus;
 
     private Scope scope;
 
@@ -52,11 +55,11 @@ public final class AreaFindPresenter extends BasePresenter<AreaFindPresenter.Vie
     }
 
     public void onPlacePicked(@NonNull Place place) {
-        EventBus.getDefault().post(new ShowAreaByPlaceListViewEvent(scope, place));
+        eventBus.post(new ShowAreaByPlaceListViewEvent(scope, place));
     }
 
     public void onShowPlacePickerFailed(@NonNull Exception e) {
-        getView().onSnackbar(R.string.snackbar_failed);
+        SnackbarEventHelper.post(eventBus, R.string.snackbar_done);
     }
 
     private void showPlacePicker() {
@@ -64,14 +67,12 @@ public final class AreaFindPresenter extends BasePresenter<AreaFindPresenter.Vie
     }
 
     private void close() {
-        EventBus.getDefault().post(CloseViewEvent.INSTANCE);
+        eventBus.post(CloseViewEvent.INSTANCE);
     }
 
     public interface View {
 
         void onShowPlacePicker();
-
-        void onSnackbar(@StringRes int resId);
     }
 
     public final class ShowAreaByPlaceListViewEvent {

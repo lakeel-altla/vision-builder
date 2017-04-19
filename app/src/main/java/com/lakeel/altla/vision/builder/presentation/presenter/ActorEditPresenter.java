@@ -3,9 +3,11 @@ package com.lakeel.altla.vision.builder.presentation.presenter;
 import com.lakeel.altla.vision.ArgumentNullException;
 import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
+import com.lakeel.altla.vision.builder.presentation.helper.SnackbarEventHelper;
 import com.lakeel.altla.vision.model.Actor;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 
+import org.greenrobot.eventbus.EventBus;
 import org.parceler.Parcels;
 
 import android.graphics.drawable.Drawable;
@@ -31,6 +33,9 @@ public final class ActorEditPresenter extends BasePresenter<ActorEditPresenter.V
 
     @Inject
     VisionService visionService;
+
+    @Inject
+    EventBus eventBus;
 
     private final CompositeDisposable compositeDisposable = new CompositeDisposable();
 
@@ -116,10 +121,10 @@ public final class ActorEditPresenter extends BasePresenter<ActorEditPresenter.V
                 getView().onUpdateActionSave(canSave());
             }, e -> {
                 getLog().e("Failed.", e);
-                getView().onSnackbar(R.string.snackbar_failed);
+                SnackbarEventHelper.post(eventBus, R.string.snackbar_done);
             }, () -> {
                 getLog().e("Entity not found.");
-                getView().onSnackbar(R.string.snackbar_failed);
+                SnackbarEventHelper.post(eventBus, R.string.snackbar_done);
             });
             compositeDisposable.add(disposable);
         } else {
@@ -200,8 +205,9 @@ public final class ActorEditPresenter extends BasePresenter<ActorEditPresenter.V
         getView().onUpdateActionSave(false);
 
         visionService.getUserActorApi().saveActor(actor);
-        getView().onSnackbar(R.string.snackbar_done);
         getView().onBackView();
+
+        SnackbarEventHelper.post(eventBus, R.string.snackbar_done);
     }
 
     private boolean canSave() {
@@ -265,7 +271,5 @@ public final class ActorEditPresenter extends BasePresenter<ActorEditPresenter.V
         void onHideNameError();
 
         void onBackView();
-
-        void onSnackbar(@StringRes int resId);
     }
 }

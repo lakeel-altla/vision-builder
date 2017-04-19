@@ -7,6 +7,8 @@ import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScope;
 import com.lakeel.altla.vision.builder.presentation.model.ArModel;
 
+import org.greenrobot.eventbus.EventBus;
+
 import android.content.ContentResolver;
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -55,5 +57,11 @@ public final class ActivityModule {
     @Provides
     ArModel provideArModel() {
         return new ArModel();
+    }
+
+    @ActivityScope
+    @Provides
+    EventBus provideEventBus() {
+        return new EventBus();
     }
 }

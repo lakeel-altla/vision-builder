@@ -6,6 +6,7 @@ import com.lakeel.altla.android.binding.property.LongProperty;
 import com.lakeel.altla.android.binding.property.StringProperty;
 import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
+import com.lakeel.altla.vision.builder.presentation.helper.SnackbarEventHelper;
 import com.lakeel.altla.vision.builder.presentation.helper.StringResourceHelper;
 import com.lakeel.altla.vision.model.Area;
 import com.lakeel.altla.vision.model.AreaDescription;
@@ -16,7 +17,6 @@ import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 import org.greenrobot.eventbus.EventBus;
 
 import android.support.annotation.NonNull;
-import android.support.annotation.StringRes;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +32,9 @@ public final class AreaSettingsListPresenter extends BasePresenter<AreaSettingsL
 
     @Inject
     VisionService visionService;
+
+    @Inject
+    EventBus eventBus;
 
     public final RelayCommand commandClose = new RelayCommand(this::close);
 
@@ -132,7 +135,7 @@ public final class AreaSettingsListPresenter extends BasePresenter<AreaSettingsL
                     getView().onItemInserted(items.size() - 1);
                 }, e -> {
                     getLog().e("Failed.", e);
-                    getView().onSnackbar(R.string.snackbar_failed);
+                    SnackbarEventHelper.post(eventBus, R.string.snackbar_done);
                 });
         compositeDisposable.add(disposable);
     }
@@ -164,13 +167,13 @@ public final class AreaSettingsListPresenter extends BasePresenter<AreaSettingsL
     }
 
     private void close() {
-        EventBus.getDefault().post(CloseViewEvent.INSTANCE);
+        eventBus.post(CloseViewEvent.INSTANCE);
     }
 
     private void select() {
-        EventBus.getDefault().post(new AreaSettingsSelectedEvent(selectedItem.areaSettings,
-                                                                 selectedItem.area,
-                                                                 selectedItem.areaDescription));
+        eventBus.post(new AreaSettingsSelectedEvent(selectedItem.areaSettings,
+                                                    selectedItem.area,
+                                                    selectedItem.areaDescription));
         close();
     }
 
@@ -183,8 +186,6 @@ public final class AreaSettingsListPresenter extends BasePresenter<AreaSettingsL
         void onItemInserted(int position);
 
         void onDataSetChanged();
-
-        void onSnackbar(@StringRes int resId);
     }
 
     public static final class AreaSettingsSelectedEvent {

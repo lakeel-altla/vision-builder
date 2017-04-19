@@ -16,19 +16,22 @@ import javax.inject.Inject;
 public final class AreaSettingsContainerPresenter extends BasePresenter<AreaSettingsContainerPresenter.View> {
 
     @Inject
+    EventBus eventBus;
+
+    @Inject
     public AreaSettingsContainerPresenter() {
     }
 
     @Override
     protected void onStartOverride() {
         super.onStartOverride();
-        EventBus.getDefault().register(this);
+        eventBus.register(this);
     }
 
     @Override
     protected void onStopOverride() {
         super.onStopOverride();
-        EventBus.getDefault().unregister(this);
+        eventBus.unregister(this);
     }
 
     @Subscribe

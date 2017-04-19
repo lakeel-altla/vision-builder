@@ -23,6 +23,9 @@ public final class AreaModePresenter extends BasePresenter<AreaModePresenter.Vie
 
     private static final String STATE_SCOPE = "scope";
 
+    @Inject
+    EventBus eventBus;
+
     public final IntProperty propertyChckedButton = new IntProperty(R.id.radio_button_public);
 
     public final RelayCommand commandSelect = new RelayCommand(this::select);
@@ -72,12 +75,12 @@ public final class AreaModePresenter extends BasePresenter<AreaModePresenter.Vie
     }
 
     private void select() {
-        EventBus.getDefault().post(new AreaModeSelectedEvent(scope));
+        eventBus.post(new AreaModeSelectedEvent(scope));
         close();
     }
 
     private void close() {
-        EventBus.getDefault().post(CloseViewEvent.INSTANCE);
+        eventBus.post(CloseViewEvent.INSTANCE);
     }
 
     public interface View {

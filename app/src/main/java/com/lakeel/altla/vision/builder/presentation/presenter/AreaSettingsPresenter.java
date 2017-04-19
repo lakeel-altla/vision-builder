@@ -42,6 +42,9 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsPrese
     VisionService visionService;
 
     @Inject
+    EventBus eventBus;
+
+    @Inject
     ArModel arModel;
 
     private AreaSettings areaSettings;
@@ -148,14 +151,13 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsPrese
     @Override
     protected void onStartOverride() {
         super.onStartOverride();
-        EventBus.getDefault().register(this);
+        eventBus.register(this);
     }
 
     @Override
     protected void onStopOverride() {
         super.onStopOverride();
-
-        EventBus.getDefault().unregister(this);
+        eventBus.unregister(this);
     }
 
     @Subscribe
@@ -189,24 +191,24 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsPrese
     }
 
     private void close() {
-        EventBus.getDefault().post(CloseViewEvent.INSTANCE);
+        eventBus.post(CloseViewEvent.INSTANCE);
     }
 
     private void showHistory() {
-        EventBus.getDefault().post(ShowAreaSettingsListViewEvent.INSTANCE);
+        eventBus.post(ShowAreaSettingsListViewEvent.INSTANCE);
     }
 
     private void showAreaMode() {
         Scope scope = propertyAreaScope.get();
         if (scope != null) {
-            EventBus.getDefault().post(new ShowAreaModeViewEvent(scope));
+            eventBus.post(new ShowAreaModeViewEvent(scope));
         }
     }
 
     private void showAreaFind() {
         Scope scope = propertyAreaScope.get();
         if (scope != null) {
-            EventBus.getDefault().post(new ShowAreaFindViewEvent(scope));
+            eventBus.post(new ShowAreaFindViewEvent(scope));
         }
     }
 
@@ -214,7 +216,7 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsPrese
         Scope scope = propertyAreaScope.get();
         Area area = propertyArea.get();
         if (scope != null && area != null) {
-            EventBus.getDefault().post(new ShowAreaDescriptionByAreaListViewEvent(scope, area));
+            eventBus.post(new ShowAreaDescriptionByAreaListViewEvent(scope, area));
         }
     }
 

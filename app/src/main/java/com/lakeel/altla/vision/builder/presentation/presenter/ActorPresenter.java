@@ -5,6 +5,7 @@ import com.lakeel.altla.android.binding.property.LongProperty;
 import com.lakeel.altla.android.binding.property.StringProperty;
 import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
+import com.lakeel.altla.vision.builder.presentation.helper.SnackbarEventHelper;
 import com.lakeel.altla.vision.builder.presentation.model.ArModel;
 import com.lakeel.altla.vision.model.Actor;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
@@ -13,7 +14,6 @@ import org.greenrobot.eventbus.EventBus;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.annotation.StringRes;
 
 import javax.inject.Inject;
 
@@ -25,6 +25,9 @@ public final class ActorPresenter extends BasePresenter<ActorPresenter.View> {
 
     @Inject
     VisionService visionService;
+
+    @Inject
+    EventBus eventBus;
 
     @Inject
     ArModel arModel;
@@ -98,10 +101,10 @@ public final class ActorPresenter extends BasePresenter<ActorPresenter.View> {
                         propertyUpdatedAt.set(actor.getUpdatedAtAsLong());
                     }, e -> {
                         getLog().e("Failed.", e);
-                        getView().onSnackbar(R.string.snackbar_failed);
+                        SnackbarEventHelper.post(eventBus, R.string.snackbar_done);
                     }, () -> {
                         getLog().e("Entity not found.");
-                        getView().onSnackbar(R.string.snackbar_failed);
+                        SnackbarEventHelper.post(eventBus, R.string.snackbar_done);
                     });
             compositeDisposable.add(disposable);
         }
@@ -121,6 +124,5 @@ public final class ActorPresenter extends BasePresenter<ActorPresenter.View> {
 
     public interface View {
 
-        void onSnackbar(@StringRes int resId);
     }
 }

@@ -11,8 +11,6 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.annotation.StringRes;
-import android.support.design.widget.Snackbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -67,12 +65,5 @@ public final class ActorFragment extends AbstractFragment<ActorPresenter.View, A
                .converter(new LongToDateFormatConverter(getContext()))
                .bind();
         factory.create(R.id.image_button_close, "onClick", presenter.commandClose).bind();
-    }
-
-    @Override
-    public void onSnackbar(@StringRes int resId) {
-        if (getView() != null) {
-            Snackbar.make(getView(), resId, Snackbar.LENGTH_SHORT).show();
-        }
     }
 }
