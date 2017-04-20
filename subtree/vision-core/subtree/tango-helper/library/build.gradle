@@ -1,10 +1,11 @@
-apply plugin: 'com.android.application'
+apply plugin: 'com.android.library'
 
 android {
     compileSdkVersion 25
     buildToolsVersion "25.0.2"
+    publishNonDefault true
+
     defaultConfig {
-        applicationId "com.lakeel.altla.vision"
         minSdkVersion 19
         targetSdkVersion 25
         versionCode 1
@@ -18,5 +19,15 @@ android {
     }
 }
 
+repositories {
+    maven {
+        url 'https://lakeel-altla.github.io/maven-repository'
+    }
+}
+
 dependencies {
+    compile 'com.android.support:appcompat-v7:25.3.1'
+    compile 'com.google.atap:tango:1.48'
+    compile 'com.google.atap:tango-ux:1.48'
+    compile 'com.projecttango:tango-support:1.48'
 }
