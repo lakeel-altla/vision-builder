@@ -11,29 +11,29 @@ import android.support.annotation.Nullable;
 @Parcel(Parcel.Serialization.BEAN)
 public final class AreaSettings extends BaseEntity {
 
-    private int areaScope;
+    private String areaScope;
 
     private String areaId;
 
     private String areaDescriptionId;
 
-    public int getAreaScope() {
+    public String getAreaScope() {
         return areaScope;
     }
 
-    public void setAreaScope(int areaScope) {
+    public void setAreaScope(String areaScope) {
         this.areaScope = areaScope;
     }
 
     @Exclude
     @Transient
     @NonNull
-    public AreaScope getAreaScopeAsEnum() {
-        return AreaScope.toAreaScope(areaScope);
+    public Scope getAreaScopeAsEnum() {
+        return Scope.valueOf(areaScope);
     }
 
-    public void setAreaScopeAsEnum(@NonNull AreaScope areaScope) {
-        this.areaScope = areaScope.getValue();
+    public void setAreaScopeAsEnum(@NonNull Scope scope) {
+        this.areaScope = scope.name();
     }
 
     @Nullable

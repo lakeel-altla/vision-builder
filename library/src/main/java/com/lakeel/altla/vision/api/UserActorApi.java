@@ -21,24 +21,24 @@ public final class UserActorApi extends BaseVisionApi {
         userActorRepository = new UserActorRepository(visionService.getFirebaseDatabase());
     }
 
-    public void findUserActorById(@NonNull String actorId,
-                                  @Nullable OnSuccessListener<Actor> onSuccessListener,
-                                  @Nullable OnFailureListener onFailureListener) {
+    public void findActorById(@NonNull String actorId,
+                              @Nullable OnSuccessListener<Actor> onSuccessListener,
+                              @Nullable OnFailureListener onFailureListener) {
         userActorRepository.find(CurrentUser.getInstance().getUserId(), actorId, onSuccessListener, onFailureListener);
     }
 
-    public void findUserActorsByAreaId(@NonNull String areaId,
-                                       @Nullable OnSuccessListener<List<Actor>> onSuccessListener,
-                                       @Nullable OnFailureListener onFailureListener) {
+    public void findActorsByAreaId(@NonNull String areaId,
+                                   @Nullable OnSuccessListener<List<Actor>> onSuccessListener,
+                                   @Nullable OnFailureListener onFailureListener) {
         userActorRepository.findByAreaId(CurrentUser.getInstance().getUserId(), areaId,
                                          onSuccessListener, onFailureListener);
     }
 
-    public ObservableData<Actor> observeUserActorById(@NonNull String actorId) {
+    public ObservableData<Actor> observeActorById(@NonNull String actorId) {
         return userActorRepository.observe(CurrentUser.getInstance().getUserId(), actorId);
     }
 
-    public void saveUserActor(@NonNull Actor actor) {
+    public void saveActor(@NonNull Actor actor) {
         if (!CurrentUser.getInstance().getUserId().equals(actor.getUserId())) {
             throw new IllegalArgumentException("Invalid user id.");
         }
@@ -46,7 +46,7 @@ public final class UserActorApi extends BaseVisionApi {
         userActorRepository.save(actor);
     }
 
-    public void deleteUserActorById(@NonNull String actorId) {
+    public void deleteActorById(@NonNull String actorId) {
         userActorRepository.delete(CurrentUser.getInstance().getUserId(), actorId);
     }
 }

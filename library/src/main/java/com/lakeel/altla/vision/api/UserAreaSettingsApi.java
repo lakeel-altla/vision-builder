@@ -1,8 +1,6 @@
 package com.lakeel.altla.vision.api;
 
-import com.google.firebase.iid.FirebaseInstanceId;
-
-import com.lakeel.altla.vision.data.repository.firebase.UserCurrentAreaSettingsRepository;
+import com.lakeel.altla.vision.data.repository.firebase.UserAreaSettingsRepository;
 import com.lakeel.altla.vision.helper.OnFailureListener;
 import com.lakeel.altla.vision.helper.OnSuccessListener;
 import com.lakeel.altla.vision.model.AreaSettings;
@@ -10,28 +8,37 @@ import com.lakeel.altla.vision.model.AreaSettings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import java.util.List;
+
 public final class UserAreaSettingsApi extends BaseVisionApi {
 
-    private final UserCurrentAreaSettingsRepository userCurrentAreaSettingsRepository;
+    private final UserAreaSettingsRepository userAreaSettingsRepository;
 
     public UserAreaSettingsApi(@NonNull VisionService visionService) {
         super(visionService);
 
-        userCurrentAreaSettingsRepository = new UserCurrentAreaSettingsRepository(visionService.getFirebaseDatabase());
+        userAreaSettingsRepository = new UserAreaSettingsRepository(visionService.getFirebaseDatabase());
     }
 
-    public void findUserCurrentAreaSettings(@Nullable OnSuccessListener<AreaSettings> onSuccessListener,
-                                            @Nullable OnFailureListener onFailureListener) {
-        userCurrentAreaSettingsRepository.find(CurrentUser.getInstance().getUserId(),
-                                               FirebaseInstanceId.getInstance().getId(),
-                                               onSuccessListener, onFailureListener);
+    public void findUserAreaSettingsById(@NonNull String areaSettingsId,
+                                         @Nullable OnSuccessListener<AreaSettings> onSuccessListener,
+                                         @Nullable OnFailureListener onFailureListener) {
+        userAreaSettingsRepository.find(CurrentUser.getInstance().getUserId(),
+                                        areaSettingsId,
+                                        onSuccessListener, onFailureListener);
     }
 
-    public void saveUserCurrentAreaSettings(@NonNull AreaSettings areaSettings) {
+    public void findAllUserAreaSettings(@Nullable OnSuccessListener<List<AreaSettings>> onSuccessListener,
+                                        @Nullable OnFailureListener onFailureListener) {
+        userAreaSettingsRepository.findAll(CurrentUser.getInstance().getUserId(),
+                                           onSuccessListener, onFailureListener);
+    }
+
+    public void saveUserAreaSettings(@NonNull AreaSettings areaSettings) {
         if (!CurrentUser.getInstance().getUserId().equals(areaSettings.getUserId())) {
             throw new IllegalArgumentException("Invalid user id.");
         }
 
-        userCurrentAreaSettingsRepository.save(areaSettings);
+        userAreaSettingsRepository.save(areaSettings);
     }
 }

@@ -25,6 +25,26 @@ public final class PublicActorRepository extends BaseDatabaseRepository {
         super(database);
     }
 
+    public void find(@NonNull String actorId,
+                     @Nullable OnSuccessListener<Actor> onSuccessListener,
+                     @Nullable OnFailureListener onFailureListener) {
+        getDatabase().getReference()
+                     .child(BASE_PATH)
+                     .child(actorId)
+                     .addListenerForSingleValueEvent(new ValueEventListener() {
+                         @Override
+                         public void onDataChange(DataSnapshot snapshot) {
+                             Actor actor = snapshot.getValue(Actor.class);
+                             if (onSuccessListener != null) onSuccessListener.onSuccess(actor);
+                         }
+
+                         @Override
+                         public void onCancelled(DatabaseError error) {
+                             if (onFailureListener != null) onFailureListener.onFailure(error.toException());
+                         }
+                     });
+    }
+
     public void findByAreaId(@NonNull String areaId,
                              @Nullable OnSuccessListener<List<Actor>> onSuccessListener,
                              @Nullable OnFailureListener onFailureListener) {

@@ -20,9 +20,15 @@ public final class PublicActorApi extends BaseVisionApi {
         publicActorRepository = new PublicActorRepository(visionService.getFirebaseDatabase());
     }
 
-    public void findUserActorsByAreaId(@NonNull String areaId,
-                                       @Nullable OnSuccessListener<List<Actor>> onSuccessListener,
-                                       @Nullable OnFailureListener onFailureListener) {
+    public void findActorById(@NonNull String actorId,
+                              @Nullable OnSuccessListener<Actor> onSuccessListener,
+                              @Nullable OnFailureListener onFailureListener) {
+        publicActorRepository.find(actorId, onSuccessListener, onFailureListener);
+    }
+
+    public void findActorsByAreaId(@NonNull String areaId,
+                                   @Nullable OnSuccessListener<List<Actor>> onSuccessListener,
+                                   @Nullable OnFailureListener onFailureListener) {
         publicActorRepository.findByAreaId(areaId, onSuccessListener, onFailureListener);
     }
 }

@@ -10,12 +10,18 @@ import com.lakeel.altla.vision.helper.OnSuccessListener;
 import com.lakeel.altla.vision.model.AreaSettings;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
-public final class UserCurrentAreaSettingsRepository extends BaseDatabaseRepository {
+import java.util.ArrayList;
+import java.util.List;
 
-    private static final String BASE_PATH = "userCurrentAreaSettings";
+public final class UserAreaSettingsRepository extends BaseDatabaseRepository {
 
-    public UserCurrentAreaSettingsRepository(@NonNull FirebaseDatabase database) {
+    private static final String BASE_PATH = "userAreaSettings";
+
+    private static final String FIELD_UPDATED_AT = "updatedAt";
+
+    public UserAreaSettingsRepository(@NonNull FirebaseDatabase database) {
         super(database);
     }
 
@@ -38,17 +44,42 @@ public final class UserCurrentAreaSettingsRepository extends BaseDatabaseReposit
                      });
     }
 
-    public void find(@NonNull String userId, @NonNull String instanceId,
-                     OnSuccessListener<AreaSettings> onSuccessListener, OnFailureListener onFailureListener) {
+    public void find(@NonNull String userId, @NonNull String areaSettingsId,
+                     @Nullable OnSuccessListener<AreaSettings> onSuccessListener,
+                     @Nullable OnFailureListener onFailureListener) {
         getDatabase().getReference()
                      .child(BASE_PATH)
                      .child(userId)
-                     .child(instanceId)
+                     .child(areaSettingsId)
                      .addListenerForSingleValueEvent(new ValueEventListener() {
                          @Override
                          public void onDataChange(DataSnapshot snapshot) {
                              AreaSettings areaSettings = snapshot.getValue(AreaSettings.class);
                              if (onSuccessListener != null) onSuccessListener.onSuccess(areaSettings);
+                         }
+
+                         @Override
+                         public void onCancelled(DatabaseError error) {
+                             if (onFailureListener != null) onFailureListener.onFailure(error.toException());
+                         }
+                     });
+    }
+
+    public void findAll(@NonNull String userId,
+                        @Nullable OnSuccessListener<List<AreaSettings>> onSuccessListener,
+                        @Nullable OnFailureListener onFailureListener) {
+        getDatabase().getReference()
+                     .child(BASE_PATH)
+                     .child(userId)
+                     .orderByChild(FIELD_UPDATED_AT)
+                     .addListenerForSingleValueEvent(new ValueEventListener() {
+                         @Override
+                         public void onDataChange(DataSnapshot snapshot) {
+                             List<AreaSettings> list = new ArrayList<>((int) snapshot.getChildrenCount());
+                             for (DataSnapshot child : snapshot.getChildren()) {
+                                 list.add(child.getValue(AreaSettings.class));
+                             }
+                             if (onSuccessListener != null) onSuccessListener.onSuccess(list);
                          }
 
                          @Override
