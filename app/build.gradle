@@ -1,15 +1,28 @@
 apply plugin: 'com.android.application'
 
+// retrolambda
+apply plugin: 'me.tatarka.retrolambda'
+
+// to use Google API.
+Properties googleApiProperties = new Properties()
+googleApiProperties.load(project.rootProject.file('google-api.properties').newDataInputStream())
+
 android {
     compileSdkVersion 25
-    buildToolsVersion '25.0.2'
+    buildToolsVersion "25.0.1"
 
     defaultConfig {
-        applicationId "com.lakeel.tango.rajawali"
+        applicationId "com.lakeel.altla.vision.builder"
         minSdkVersion 19
         targetSdkVersion 25
         versionCode 1
         versionName "1.0"
+
+        try {
+            manifestPlaceholders = [GOOGLE_API_KEY: googleApiProperties.getProperty("GOOGLE_API_KEY")]
+        } catch (e) {
+            throw new RuntimeException("GOOGLE_API_KEY in google-api.properties is required.")
+        }
     }
     buildTypes {
         release {
@@ -17,7 +30,51 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+repositories {
+    maven {
+        url 'https://lakeel-altla.github.io/maven-repository'
+    }
 }
 
 dependencies {
+    compile 'com.android.support:multidex:1.0.1'
+    compile 'com.android.support:appcompat-v7:25.1.0'
+    compile 'com.android.support:design:25.1.0'
+    compile 'com.android.support:percent:25.1.0'
+    compile 'com.jakewharton:butterknife:8.4.0'
+    compile 'com.afollestad.material-dialogs:core:0.9.1.0'
+    compile 'com.squareup.picasso:picasso:2.5.2'
+    compile "io.reactivex.rxjava2:rxjava:2.0.4"
+    compile 'io.reactivex.rxjava2:rxandroid:2.0.1'
+    compile 'org.greenrobot:eventbus:3.0.0'
+
+    compile 'com.google.dagger:dagger:2.7'
+    annotationProcessor 'com.google.dagger:dagger-compiler:2.7'
+
+    compile 'com.jakewharton:butterknife:8.5.1'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:8.5.1'
+
+    compile 'org.parceler:parceler-api:1.1.6'
+    annotationProcessor 'org.parceler:parceler:1.1.6'
+
+    compile project(path: ':android-binding')
+
+    debugCompile project(path: ':vision-core', configuration: 'debug')
+    debugCompile project(path: ':tango-rajawali', configuration: 'debug')
+    debugCompile project(path: ':rajawali-pool', configuration: 'debug')
+    debugCompile 'com.squareup.leakcanary:leakcanary-android:1.4'
+
+    releaseCompile project(path: ':vision-core', configuration: 'debug')
+    releaseCompile project(path: ':tango-rajawali', configuration: 'release')
+    releaseCompile project(path: ':rajawali-pool', configuration: 'release')
+    releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.4'
 }
+
+// google-services plugin to use firebase.
+apply plugin: 'com.google.gms.google-services'

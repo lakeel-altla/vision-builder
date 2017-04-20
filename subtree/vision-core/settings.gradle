@@ -1,0 +1,2 @@
+include ':app', ':library', ':tango-helper'
+project(':tango-helper').projectDir = new File(settingsDir, './subtree/tango-helper/library')

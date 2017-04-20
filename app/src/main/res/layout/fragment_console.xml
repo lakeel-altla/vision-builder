@@ -1,0 +1,70 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:id="@+id/view_top"
+                android:background="@color/background_overlay"
+                android:paddingStart="@dimen/content_horizontal_margin"
+                android:paddingEnd="@dimen/content_horizontal_margin"
+                android:paddingTop="@dimen/content_vertical_margin"
+                android:paddingBottom="@dimen/content_vertical_margin"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                tools:context="com.lakeel.altla.vision.builder.presentation.view.fragment.ConsoleFragment">
+
+    <TextView android:id="@+id/text_view_localized_label"
+              android:text="Localized: "
+              android:textColor="@color/debug_console_text_color"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"/>
+
+    <TextView android:id="@+id/text_view_localized_value"
+              android:textColor="@color/debug_console_text_color"
+              android:layout_toEndOf="@id/text_view_localized_label"
+              android:layout_marginStart="@dimen/content_horizontal_margin"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"/>
+
+    <TextView android:id="@+id/text_view_ad2ss_pose_label"
+              android:text="AD2SS Pose: "
+              android:textColor="@color/debug_console_text_color"
+              android:layout_below="@id/text_view_localized_label"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"/>
+
+    <TextView android:id="@+id/text_view_ad2ss_translation"
+              android:textColor="@color/debug_console_text_color"
+              android:layout_toEndOf="@id/text_view_ad2ss_pose_label"
+              android:layout_below="@id/text_view_localized_value"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"/>
+
+    <TextView android:id="@+id/text_view_ad2d_pose_label"
+              android:text="AD2D Pose: "
+              android:textColor="@color/debug_console_text_color"
+              android:layout_below="@id/text_view_ad2ss_pose_label"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"/>
+
+    <TextView android:id="@+id/text_view_ad2d_translation"
+              android:textColor="@color/debug_console_text_color"
+              android:layout_toEndOf="@id/text_view_ad2d_pose_label"
+              android:layout_below="@id/text_view_ad2ss_translation"
+              android:layout_alignStart="@id/text_view_ad2ss_translation"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"/>
+
+    <TextView android:id="@+id/text_view_ss2d_pose_label"
+              android:text="SS2D Pose: "
+              android:textColor="@color/debug_console_text_color"
+              android:layout_below="@id/text_view_ad2d_pose_label"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"/>
+
+    <TextView android:id="@+id/text_view_ss2d_translation"
+              android:textColor="@color/debug_console_text_color"
+              android:layout_toEndOf="@id/text_view_ss2d_pose_label"
+              android:layout_below="@id/text_view_ad2d_translation"
+              android:layout_alignStart="@id/text_view_ad2d_translation"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"/>
+
+</RelativeLayout>

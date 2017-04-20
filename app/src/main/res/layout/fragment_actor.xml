@@ -1,0 +1,74 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:id="@+id/view_top"
+              android:background="@color/background_overlay"
+              android:paddingStart="@dimen/content_horizontal_margin"
+              android:paddingEnd="@dimen/content_horizontal_margin"
+              android:paddingTop="@dimen/content_vertical_margin"
+              android:paddingBottom="@dimen/content_vertical_margin"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              tools:context="com.lakeel.altla.vision.builder.presentation.view.fragment.ActorFragment">
+
+    <FrameLayout android:layout_marginBottom="@dimen/content_vertical_margin"
+                 android:layout_width="match_parent"
+                 android:layout_height="wrap_content">
+
+        <ImageButton android:id="@+id/image_button_close"
+                     android:src="@drawable/ic_close_black_24dp"
+                     android:tint="@color/foreground_overlay"
+                     android:background="@drawable/button_background_overlay"
+                     android:layout_gravity="start"
+                     android:layout_width="@dimen/touch_target_width"
+                     android:layout_height="@dimen/touch_target_height"/>
+
+        <ImageButton android:id="@+id/button_select"
+                     android:src="@drawable/ic_mode_edit_black_24dp"
+                     android:tint="@color/foreground_overlay"
+                     android:background="@drawable/button_background_overlay"
+                     android:layout_gravity="end"
+                     android:layout_width="@dimen/touch_target_width"
+                     android:layout_height="@dimen/touch_target_height"/>
+
+    </FrameLayout>
+
+    <TextView android:text="@string/label_name"
+              android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+              android:textColor="@color/foreground_overlay"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"/>
+
+    <TextView android:id="@+id/text_view_name"
+              android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+              android:textColor="@color/foreground_overlay"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"/>
+
+    <TextView android:text="@string/label_created_at"
+              android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+              android:textColor="@color/foreground_overlay"
+              android:layout_marginTop="@dimen/content_vertical_margin"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"/>
+
+    <TextView android:id="@+id/text_view_created_at"
+              android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+              android:textColor="@color/foreground_overlay"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"/>
+
+    <TextView android:text="@string/label_updated_at"
+              android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+              android:textColor="@color/foreground_overlay"
+              android:layout_marginTop="@dimen/content_vertical_margin"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"/>
+
+    <TextView android:id="@+id/text_view_updated_at"
+              android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+              android:textColor="@color/foreground_overlay"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"/>
+
+</LinearLayout>

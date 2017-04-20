@@ -1,0 +1,187 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             xmlns:app="http://schemas.android.com/apk/res-auto"
+             xmlns:tools="http://schemas.android.com/tools"
+             android:id="@+id/view_top"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+             tools:context=".presentation.view.fragment.ArFragment">
+
+    <org.rajawali3d.view.TextureView
+            android:id="@+id/texture_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+
+    <RelativeLayout android:id="@+id/view_group_edit_user_actor_menu"
+                    android:layout_marginStart="@dimen/content_horizontal_margin"
+                    android:layout_marginTop="@dimen/content_vertical_margin"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+        <LinearLayout android:id="@+id/view_group_edit_actor_menu"
+                      android:orientation="horizontal"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content">
+
+            <Button android:id="@+id/button_translate"
+                    android:text="@string/button_translate"
+                    android:textColor="@drawable/button_text_color"
+                    android:background="@drawable/button_background"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+            <Button android:id="@+id/button_rotate"
+                    android:text="@string/button_rotate"
+                    android:textColor="@drawable/button_text_color"
+                    android:background="@drawable/button_background"
+                    android:layout_marginStart="@dimen/content_horizontal_margin"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+            <Button android:id="@+id/button_scale"
+                    android:text="@string/button_scale"
+                    android:textColor="@drawable/button_text_color"
+                    android:background="@drawable/button_background"
+                    android:layout_marginStart="@dimen/content_horizontal_margin"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+            <Button android:id="@+id/button_detail"
+                    android:text="@string/button_detail"
+                    android:textColor="@drawable/button_text_color"
+                    android:background="@drawable/button_background"
+                    android:layout_marginStart="@dimen/content_horizontal_margin"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+            <Button android:id="@+id/button_delete"
+                    android:text="@string/button_delete"
+                    android:textColor="@drawable/button_text_color"
+                    android:background="@drawable/button_background"
+                    android:layout_marginStart="@dimen/content_horizontal_margin"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+        </LinearLayout>
+
+        <LinearLayout android:id="@+id/view_group_translate_menu"
+                      android:layout_below="@id/view_group_edit_actor_menu"
+                      android:layout_marginTop="@dimen/content_vertical_margin"
+                      android:orientation="horizontal"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content">
+
+            <Button android:id="@+id/button_translate_in_x_axis"
+                    android:text="@string/button_x_axis"
+                    android:textColor="@drawable/button_text_color"
+                    android:background="@drawable/button_background"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+            <Button android:id="@+id/button_translate_in_y_axis"
+                    android:text="@string/button_y_axis"
+                    android:textColor="@drawable/button_text_color"
+                    android:background="@drawable/button_background"
+                    android:layout_marginStart="@dimen/content_horizontal_margin"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+            <Button android:id="@+id/button_translate_in_z_axis"
+                    android:text="@string/button_z_axis"
+                    android:textColor="@drawable/button_text_color"
+                    android:background="@drawable/button_background"
+                    android:layout_marginStart="@dimen/content_horizontal_margin"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+        </LinearLayout>
+
+        <LinearLayout android:id="@+id/view_group_rotate_menu"
+                      android:layout_below="@id/view_group_edit_actor_menu"
+                      android:layout_marginTop="@dimen/content_vertical_margin"
+                      android:orientation="horizontal"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content">
+
+            <Button android:id="@+id/button_rotate_in_x_axis"
+                    android:text="@string/button_x_axis"
+                    android:textColor="@drawable/button_text_color"
+                    android:background="@drawable/button_background"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+            <Button android:id="@+id/button_rotate_object_in_y_axis"
+                    android:text="@string/button_y_axis"
+                    android:textColor="@drawable/button_text_color"
+                    android:background="@drawable/button_background"
+                    android:layout_marginStart="@dimen/content_horizontal_margin"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+            <Button android:id="@+id/button_rotate_object_in_z_axis"
+                    android:text="@string/button_z_axis"
+                    android:textColor="@drawable/button_text_color"
+                    android:background="@drawable/button_background"
+                    android:layout_marginStart="@dimen/content_horizontal_margin"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+    <LinearLayout android:id="@+id/view_group_main_menu"
+                  android:layout_marginStart="@dimen/content_horizontal_margin"
+                  android:layout_marginEnd="@dimen/content_horizontal_margin"
+                  android:layout_marginTop="@dimen/content_vertical_margin"
+                  android:layout_marginBottom="@dimen/content_vertical_margin"
+                  android:orientation="horizontal"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content">
+
+        <ImageButton android:id="@+id/image_button_area_settings"
+                     android:background="@drawable/button_background_circle"
+                     android:src="@drawable/ic_map_black_24dp"
+                     android:tint="@color/foreground_overlay"
+                     android:layout_width="@dimen/touch_target_width"
+                     android:layout_height="@dimen/touch_target_height"/>
+
+        <ImageButton android:id="@+id/image_button_asset_list"
+                     android:background="@drawable/button_background_circle"
+                     android:src="@drawable/ic_image_black_24dp"
+                     android:tint="@color/foreground_overlay"
+                     android:layout_marginStart="@dimen/content_vertical_margin"
+                     android:layout_width="@dimen/touch_target_width"
+                     android:layout_height="@dimen/touch_target_height"/>
+
+        <ImageButton android:id="@+id/image_button_close"
+                     android:background="@drawable/button_background_circle"
+                     android:src="@drawable/ic_close_black_24dp"
+                     android:tint="@color/foreground_overlay"
+                     android:layout_marginStart="@dimen/content_vertical_margin"
+                     android:layout_width="@dimen/touch_target_width"
+                     android:layout_height="@dimen/touch_target_height"/>
+
+    </LinearLayout>
+
+    <FrameLayout android:id="@+id/asset_list_container"
+                 android:layout_gravity="bottom"
+                 android:layout_width="match_parent"
+                 android:layout_height="wrap_content"/>
+
+    <android.support.percent.PercentFrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+        <FrameLayout android:id="@+id/window_container"
+                     app:layout_widthPercent="50%"
+                     android:layout_gravity="right"
+                     android:layout_height="match_parent"/>
+
+    </android.support.percent.PercentFrameLayout>
+
+    <com.google.atap.tango.ux.TangoUxLayout
+            android:id="@+id/layout_tango_ux"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+
+</FrameLayout>
