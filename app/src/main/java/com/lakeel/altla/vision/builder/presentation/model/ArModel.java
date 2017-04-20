@@ -1,7 +1,7 @@
 package com.lakeel.altla.vision.builder.presentation.model;
 
-import com.lakeel.altla.android.binding.property.ObjectProperty;
-import com.lakeel.altla.android.binding.property.StringProperty;
+import com.lakeel.altla.android.property.ObjectProperty;
+import com.lakeel.altla.android.property.StringProperty;
 import com.lakeel.altla.vision.model.Scope;
 
 public final class ArModel {

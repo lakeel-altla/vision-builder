@@ -1,9 +1,9 @@
 package com.lakeel.altla.vision.builder.presentation.presenter;
 
 import com.lakeel.altla.android.binding.command.RelayCommand;
-import com.lakeel.altla.android.binding.property.IntProperty;
-import com.lakeel.altla.android.binding.property.LongProperty;
-import com.lakeel.altla.android.binding.property.StringProperty;
+import com.lakeel.altla.android.property.IntProperty;
+import com.lakeel.altla.android.property.LongProperty;
+import com.lakeel.altla.android.property.StringProperty;
 import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.helper.SnackbarEventHelper;

@@ -1,9 +1,9 @@
 package com.lakeel.altla.vision.builder.presentation.presenter;
 
 import com.lakeel.altla.android.binding.command.RelayCommand;
-import com.lakeel.altla.android.binding.property.IntProperty;
-import com.lakeel.altla.android.binding.property.ObjectProperty;
-import com.lakeel.altla.android.binding.property.StringProperty;
+import com.lakeel.altla.android.property.IntProperty;
+import com.lakeel.altla.android.property.ObjectProperty;
+import com.lakeel.altla.android.property.StringProperty;
 import com.lakeel.altla.vision.ArgumentNullException;
 import com.lakeel.altla.vision.api.CurrentUser;
 import com.lakeel.altla.vision.api.VisionService;
