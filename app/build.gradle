@@ -9,7 +9,7 @@ googleApiProperties.load(project.rootProject.file('google-api.properties').newDa
 
 android {
     compileSdkVersion 25
-    buildToolsVersion "25.0.1"
+    buildToolsVersion "25.0.2"
 
     defaultConfig {
         applicationId "com.lakeel.altla.vision.builder"
@@ -43,19 +43,17 @@ repositories {
 }
 
 dependencies {
-    compile 'com.android.support:multidex:1.0.1'
-    compile 'com.android.support:appcompat-v7:25.1.0'
-    compile 'com.android.support:design:25.1.0'
-    compile 'com.android.support:percent:25.1.0'
-    compile 'com.jakewharton:butterknife:8.4.0'
-    compile 'com.afollestad.material-dialogs:core:0.9.1.0'
+    compile 'com.android.support:appcompat-v7:25.3.1'
+    compile 'com.android.support:design:25.3.1'
+    compile 'com.android.support:percent:25.3.1'
+    compile 'com.afollestad.material-dialogs:core:0.9.4.4'
     compile 'com.squareup.picasso:picasso:2.5.2'
     compile "io.reactivex.rxjava2:rxjava:2.0.4"
     compile 'io.reactivex.rxjava2:rxandroid:2.0.1'
     compile 'org.greenrobot:eventbus:3.0.0'
 
-    compile 'com.google.dagger:dagger:2.7'
-    annotationProcessor 'com.google.dagger:dagger-compiler:2.7'
+    compile 'com.google.dagger:dagger:2.10'
+    annotationProcessor 'com.google.dagger:dagger-compiler:2.10'
 
     compile 'com.jakewharton:butterknife:8.5.1'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.5.1'
