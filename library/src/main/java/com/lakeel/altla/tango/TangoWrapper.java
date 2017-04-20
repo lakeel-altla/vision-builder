@@ -174,7 +174,10 @@ public final class TangoWrapper {
 
         try {
             tangoUx.stop();
-            tango.disconnect();
+
+            if (tango != null) {
+                tango.disconnect();
+            }
 
             tangoUpdateDispatcher.getOnPoseAvailableListeners().clear();
             tangoUpdateDispatcher.getOnPointCloudAvailableListeners().clear();
