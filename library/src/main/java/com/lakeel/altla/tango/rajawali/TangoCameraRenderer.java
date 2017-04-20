@@ -231,8 +231,6 @@ public class TangoCameraRenderer extends Renderer {
                                 getCameraMatrixTransformAtTime(updateTextureTimestamp);
                         if (transformData.statusCode == TangoPoseData.POSE_VALID) {
                             updateCameraTransform(transformData);
-                        } else {
-                            Log.v(TAG, "Can't get a valid camera pose at time: " + updateTextureTimestamp);
                         }
                     }
                 }
