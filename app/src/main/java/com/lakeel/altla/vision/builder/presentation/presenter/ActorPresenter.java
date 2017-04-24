@@ -111,7 +111,7 @@ public final class ActorPresenter extends BasePresenter<ActorPresenter.View> {
     }
 
     private void close() {
-        EventBus.getDefault().post(CloseViewEvent.INSTANCE);
+        eventBus.post(CloseViewEvent.INSTANCE);
     }
 
     public static final class CloseViewEvent {
