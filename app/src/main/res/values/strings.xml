@@ -40,7 +40,7 @@
     <string name="dialog_cancel">Cancel</string>
     <string name="dialog_content_confirm_delete_texture">Delete this texture?</string>
 
-    <string name="hint_edit_name">Input the name</string>
+    <string name="hint_name">Name</string>
 
     <string name="label_id">ID</string>
     <string name="label_place">Place</string>
@@ -76,5 +76,6 @@
     <string name="button_select">Select</string>
     <string name="label_area_mode_public">Public mode</string>
     <string name="label_area_mode_user">User mode</string>
+    <string name="button_save">Save</string>
 
 </resources>

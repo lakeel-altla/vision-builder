@@ -3,6 +3,7 @@ package com.lakeel.altla.vision.builder.presentation.view.fragment;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.presenter.ActorContainerPresenter;
+import com.lakeel.altla.vision.model.Actor;
 import com.lakeel.altla.vision.presentation.view.fragment.AbstractFragment;
 
 import android.content.Context;
@@ -61,6 +62,16 @@ public final class ActorContainerFragment
         if (savedInstanceState == null) {
             addFragment(ActorFragment.newInstance());
         }
+    }
+
+    @Override
+    public void showActorEditView(@NonNull Actor actor) {
+        addFragment(ActorEditFragment.newInstance(actor));
+    }
+
+    @Override
+    public void backView() {
+        backFragment();
     }
 
     private void addFragment(@NonNull Fragment fragment) {

@@ -2,6 +2,8 @@ package com.lakeel.altla.vision.builder.presentation.presenter;
 
 import com.lakeel.altla.android.binding.command.RelayCommand;
 import com.lakeel.altla.android.property.LongProperty;
+import com.lakeel.altla.android.property.ObjectProperty;
+import com.lakeel.altla.android.property.Property;
 import com.lakeel.altla.android.property.StringProperty;
 import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
@@ -13,6 +15,7 @@ import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 import org.greenrobot.eventbus.EventBus;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import javax.inject.Inject;
@@ -40,7 +43,16 @@ public final class ActorPresenter extends BasePresenter<ActorPresenter.View> {
 
     public final RelayCommand commandClose = new RelayCommand(this::close);
 
+    public final RelayCommand commandShowEdit = new RelayCommand(this::showEdit);
+
     private final CompositeDisposable compositeDisposable = new CompositeDisposable();
+
+    private final Property.OnValueChangedListener pickedActorOnValueChangedListener = sender -> {
+        loadActor();
+        commandShowEdit.raiseOnCanExecuteChanged();
+    };
+
+    private final ObjectProperty<Actor> actor = new ObjectProperty<>();
 
     @Inject
     public ActorPresenter() {
@@ -50,9 +62,21 @@ public final class ActorPresenter extends BasePresenter<ActorPresenter.View> {
     public void onCreate(@Nullable Bundle arguments, @Nullable Bundle savedInstanceState) {
         super.onCreate(arguments, savedInstanceState);
 
-        arModel.pickedActor.addOnValueChangedListener(sender -> {
-            loadActor();
-        });
+        actor.addOnValueChangedListener(sender -> commandShowEdit.raiseOnCanExecuteChanged());
+    }
+
+    @Override
+    protected void onStartOverride() {
+        super.onStartOverride();
+
+        arModel.pickedActor.addOnValueChangedListener(pickedActorOnValueChangedListener);
+    }
+
+    @Override
+    protected void onStopOverride() {
+        super.onStopOverride();
+
+        arModel.pickedActor.removeOnValueChangedListener(pickedActorOnValueChangedListener);
     }
 
     @Override
@@ -63,13 +87,14 @@ public final class ActorPresenter extends BasePresenter<ActorPresenter.View> {
     }
 
     private void loadActor() {
+        actor.set(null);
+        propertyName.set(null);
+        propertyCreatedAt.set(-1);
+        propertyUpdatedAt.set(-1);
+
         ArModel.PickedActor pickedActor = arModel.pickedActor.get();
 
-        if (pickedActor == null) {
-            propertyName.set(null);
-            propertyCreatedAt.set(-1);
-            propertyUpdatedAt.set(-1);
-        } else {
+        if (pickedActor != null) {
             Disposable disposable = Maybe
                     .<Actor>create(e -> {
                         switch (pickedActor.scope) {
@@ -96,6 +121,7 @@ public final class ActorPresenter extends BasePresenter<ActorPresenter.View> {
                         }
                     })
                     .subscribe(actor -> {
+                        this.actor.set(actor);
                         propertyName.set(actor.getName());
                         propertyCreatedAt.set(actor.getCreatedAtAsLong());
                         propertyUpdatedAt.set(actor.getUpdatedAtAsLong());
@@ -114,11 +140,32 @@ public final class ActorPresenter extends BasePresenter<ActorPresenter.View> {
         eventBus.post(CloseViewEvent.INSTANCE);
     }
 
+    private void showEdit() {
+        final Actor value = actor.get();
+        if (value != null) {
+            eventBus.post(new ShowActorEditViewEvent(value));
+        }
+    }
+
+    private boolean canShowEdit() {
+        return actor.get() != null;
+    }
+
     public static final class CloseViewEvent {
 
         private static final CloseViewEvent INSTANCE = new CloseViewEvent();
 
         private CloseViewEvent() {
+        }
+    }
+
+    public static final class ShowActorEditViewEvent {
+
+        @NonNull
+        public final Actor actor;
+
+        private ShowActorEditViewEvent(@NonNull Actor actor) {
+            this.actor = actor;
         }
     }
 

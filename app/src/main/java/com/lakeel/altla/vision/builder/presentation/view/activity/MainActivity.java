@@ -14,7 +14,6 @@ import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.di.component.ActivityComponent;
 import com.lakeel.altla.vision.builder.presentation.di.module.ActivityModule;
 import com.lakeel.altla.vision.builder.presentation.helper.ObservableHelper;
-import com.lakeel.altla.vision.builder.presentation.view.fragment.ActorEditFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.ArFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.SignInFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.TangoPermissionFragment;
@@ -41,8 +40,7 @@ public final class MainActivity extends AppCompatActivity
                    TangoWrapper.OnTangoReadyListener,
                    SignInFragment.InteractionListener,
                    TangoPermissionFragment.InteractionListener,
-                   ArFragment.InteractionListener,
-                   ActorEditFragment.InteractionListener {
+                   ArFragment.InteractionListener {
 
     private static final Log LOG = LogFactory.getLog(MainActivity.class);
 
@@ -142,16 +140,6 @@ public final class MainActivity extends AppCompatActivity
     @Override
     public void onTangoReady(Tango tango) {
         LOG.d("Tango is ready.");
-    }
-
-    @Override
-    public void onInvalidateOptionsMenu() {
-        invalidateOptionsMenu();
-    }
-
-    @Override
-    public void onBackView() {
-        onBackPressed();
     }
 
     @Override

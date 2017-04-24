@@ -65,5 +65,6 @@ public final class ActorFragment extends AbstractFragment<ActorPresenter.View, A
                .converter(new LongToDateFormatConverter(getContext()))
                .bind();
         factory.create(R.id.image_button_close, "onClick", presenter.commandClose).bind();
+        factory.create(R.id.image_button_show_edit, "onClick", presenter.commandShowEdit).bind();
     }
 }

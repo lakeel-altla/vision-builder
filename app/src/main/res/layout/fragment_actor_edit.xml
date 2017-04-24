@@ -1,156 +1,52 @@
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-            xmlns:tools="http://schemas.android.com/tools"
-            android:id="@+id/view_top"
-            android:paddingStart="@dimen/content_horizontal_margin"
-            android:paddingEnd="@dimen/content_horizontal_margin"
-            android:paddingTop="@dimen/content_vertical_margin"
-            android:paddingBottom="@dimen/content_vertical_margin"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:background="@color/background_overlay"
+              android:paddingStart="@dimen/content_horizontal_margin"
+              android:paddingEnd="@dimen/content_horizontal_margin"
+              android:paddingTop="@dimen/content_vertical_margin"
+              android:paddingBottom="@dimen/content_vertical_margin"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              tools:context="com.lakeel.altla.vision.builder.presentation.view.fragment.ActorEditFragment">
+
+    <FrameLayout android:layout_marginBottom="@dimen/content_vertical_margin"
+                 android:layout_width="match_parent"
+                 android:layout_height="wrap_content">
+
+        <ImageButton android:id="@+id/image_button_close"
+                     android:src="@drawable/ic_close_black_24dp"
+                     android:tint="@color/foreground_overlay"
+                     android:background="@drawable/button_background_overlay"
+                     android:layout_gravity="start"
+                     android:layout_width="@dimen/touch_target_width"
+                     android:layout_height="@dimen/touch_target_height"/>
+
+        <Button android:id="@+id/button_save"
+                android:text="@string/button_save"
+                android:textColor="@color/foreground_overlay"
+                android:background="@drawable/button_background_overlay"
+                android:layout_gravity="end"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+    </FrameLayout>
+
+    <android.support.design.widget.TextInputLayout
+            android:id="@+id/text_input_layout_name"
+            android:textColorHint="@color/foreground_overlay"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            tools:context="com.lakeel.altla.vision.builder.presentation.view.fragment.ActorEditFragment">
+            android:layout_height="wrap_content">
 
-    <LinearLayout android:orientation="vertical"
-                  android:layout_width="match_parent"
-                  android:layout_height="wrap_content">
-
-        <TextView android:text="@string/label_name"
-                  android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-                  android:layout_width="match_parent"
-                  android:layout_height="wrap_content"/>
-
-        <android.support.design.widget.TextInputLayout
-                android:id="@+id/text_input_layout_name"
+        <android.support.design.widget.TextInputEditText
+                android:id="@+id/text_input_edit_text_name"
+                android:inputType="text"
+                android:maxLength="25"
+                android:hint="@string/hint_name"
+                android:textColor="@color/foreground_overlay"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"/>
 
-            <android.support.design.widget.TextInputEditText
-                    android:id="@+id/text_input_edit_text_name"
-                    android:inputType="text"
-                    android:maxLength="25"
-                    android:hint="@string/hint_edit_name"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
+    </android.support.design.widget.TextInputLayout>
 
-        </android.support.design.widget.TextInputLayout>
-
-        <TextView android:text="@string/label_position"
-                  android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-                  android:layout_width="match_parent"
-                  android:layout_height="wrap_content"/>
-
-        <TextView android:text="@string/label_x"
-                  android:textAppearance="@style/TextAppearance.AppCompat.Caption"
-                  android:layout_width="match_parent"
-                  android:layout_height="wrap_content"/>
-
-        <EditText android:id="@+id/edit_text_position_x"
-                  android:inputType="numberDecimal"
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"/>
-
-        <TextView android:text="@string/label_y"
-                  android:textAppearance="@style/TextAppearance.AppCompat.Caption"
-                  android:layout_width="match_parent"
-                  android:layout_height="wrap_content"/>
-
-        <EditText android:id="@+id/edit_text_position_y"
-                  android:inputType="numberDecimal"
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"/>
-
-        <TextView android:text="@string/label_z"
-                  android:textAppearance="@style/TextAppearance.AppCompat.Caption"
-                  android:layout_width="match_parent"
-                  android:layout_height="wrap_content"/>
-
-        <EditText android:id="@+id/edit_text_position_z"
-                  android:inputType="numberDecimal"
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"/>
-
-        <TextView android:text="@string/label_orientation"
-                  android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-                  android:layout_marginTop="@dimen/content_vertical_margin"
-                  android:layout_width="match_parent"
-                  android:layout_height="wrap_content"/>
-
-        <TextView android:text="@string/label_x"
-                  android:textAppearance="@style/TextAppearance.AppCompat.Caption"
-                  android:layout_width="match_parent"
-                  android:layout_height="wrap_content"/>
-
-        <EditText android:id="@+id/edit_text_orientation_x"
-                  android:inputType="numberDecimal"
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"/>
-
-        <TextView android:text="@string/label_y"
-                  android:textAppearance="@style/TextAppearance.AppCompat.Caption"
-                  android:layout_width="match_parent"
-                  android:layout_height="wrap_content"/>
-
-        <EditText android:id="@+id/edit_text_orientation_y"
-                  android:inputType="numberDecimal"
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"/>
-
-        <TextView android:text="@string/label_z"
-                  android:textAppearance="@style/TextAppearance.AppCompat.Caption"
-                  android:layout_width="match_parent"
-                  android:layout_height="wrap_content"/>
-
-        <EditText android:id="@+id/edit_text_orientation_z"
-                  android:inputType="numberDecimal"
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"/>
-
-        <TextView android:text="@string/label_w"
-                  android:textAppearance="@style/TextAppearance.AppCompat.Caption"
-                  android:layout_width="match_parent"
-                  android:layout_height="wrap_content"/>
-
-        <EditText android:id="@+id/edit_text_orientation_w"
-                  android:inputType="numberDecimal"
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"/>
-
-        <TextView android:text="@string/label_scale"
-                  android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-                  android:layout_marginTop="@dimen/content_vertical_margin"
-                  android:layout_width="match_parent"
-                  android:layout_height="wrap_content"/>
-
-
-        <TextView android:text="@string/label_x"
-                  android:textAppearance="@style/TextAppearance.AppCompat.Caption"
-                  android:layout_width="match_parent"
-                  android:layout_height="wrap_content"/>
-
-        <EditText android:id="@+id/edit_text_scale_x"
-                  android:inputType="numberDecimal"
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"/>
-
-        <TextView android:text="@string/label_y"
-                  android:textAppearance="@style/TextAppearance.AppCompat.Caption"
-                  android:layout_width="match_parent"
-                  android:layout_height="wrap_content"/>
-
-        <EditText android:id="@+id/edit_text_scale_y"
-                  android:inputType="numberDecimal"
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"/>
-
-        <TextView android:text="@string/label_z"
-                  android:textAppearance="@style/TextAppearance.AppCompat.Caption"
-                  android:layout_width="match_parent"
-                  android:layout_height="wrap_content"/>
-
-        <EditText android:id="@+id/edit_text_scale_z"
-                  android:inputType="numberDecimal"
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"/>
-
-    </LinearLayout>
-
-</ScrollView>
+</LinearLayout>
