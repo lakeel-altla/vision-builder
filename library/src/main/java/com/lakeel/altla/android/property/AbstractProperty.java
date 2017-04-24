@@ -5,11 +5,11 @@ import android.support.annotation.NonNull;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class BaseProperty implements Property {
+public abstract class AbstractProperty implements Property {
 
     private final List<OnValueChangedListener> listeners = new ArrayList<>();
 
-    protected BaseProperty() {
+    protected AbstractProperty() {
     }
 
     @Override
@@ -20,6 +20,11 @@ public abstract class BaseProperty implements Property {
     @Override
     public final void removeOnValueChangedListener(@NonNull OnValueChangedListener listener) {
         listeners.remove(listener);
+    }
+
+    @Override
+    public final void clearOnValueChangedListeners() {
+        listeners.clear();
     }
 
     public final void raiseOnValueChanged() {

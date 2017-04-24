@@ -2,14 +2,14 @@ package com.lakeel.altla.android.property;
 
 import android.support.annotation.Nullable;
 
-public abstract class AbstractLongProperty extends AbstractProperty {
+public abstract class AbstractDoubleProperty extends AbstractProperty {
 
-    protected AbstractLongProperty() {
+    protected AbstractDoubleProperty() {
     }
 
-    public abstract long get();
+    public abstract double get();
 
-    public abstract void set(long value);
+    public abstract void set(double value);
 
     @Nullable
     @Override
@@ -19,6 +19,6 @@ public abstract class AbstractLongProperty extends AbstractProperty {
 
     @Override
     public final void setValue(@Nullable Object value) {
-        set(value == null ? 0 : (long) value);
+        set(value == null ? 0 : (double) value);
     }
 }
