@@ -61,6 +61,8 @@ public final class ActorEditFragment extends AbstractFragment<ActorEditPresenter
 
         ViewBindingFactory factory = new ViewBindingFactory(view);
         factory.create(R.id.text_input_edit_text_name, "text", presenter.propertyName).bind();
+        factory.create(R.id.text_input_layout_name, "error", presenter.propertyNameError).bind();
+        factory.create(R.id.text_input_layout_name, "errorEnabled", presenter.propertyNameHasError).bind();
         factory.create(R.id.image_button_close, "onClick", presenter.commandClose).bind();
         factory.create(R.id.button_save, "onClick", presenter.commandSave).bind();
     }

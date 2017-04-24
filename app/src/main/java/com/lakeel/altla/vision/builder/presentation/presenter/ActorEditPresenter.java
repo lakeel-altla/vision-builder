@@ -1,6 +1,7 @@
 package com.lakeel.altla.vision.builder.presentation.presenter;
 
 import com.lakeel.altla.android.binding.command.RelayCommand;
+import com.lakeel.altla.android.property.BooleanProperty;
 import com.lakeel.altla.android.property.StringProperty;
 import com.lakeel.altla.vision.ArgumentNullException;
 import com.lakeel.altla.vision.api.VisionService;
@@ -12,6 +13,7 @@ import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 import org.greenrobot.eventbus.EventBus;
 import org.parceler.Parcels;
 
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -32,7 +34,14 @@ public final class ActorEditPresenter extends BasePresenter<ActorEditPresenter.V
     @Inject
     EventBus eventBus;
 
+    @Inject
+    Resources resources;
+
     public final StringProperty propertyName = new StringProperty();
+
+    public final BooleanProperty propertyNameHasError = new BooleanProperty();
+
+    public final StringProperty propertyNameError = new StringProperty();
 
     public final RelayCommand commandClose = new RelayCommand(this::close);
 
@@ -69,7 +78,10 @@ public final class ActorEditPresenter extends BasePresenter<ActorEditPresenter.V
         }
 
         propertyName.set(actor.getName());
+        validateName();
+
         propertyName.addOnValueChangedListener(sender -> commandSave.raiseOnCanExecuteChanged());
+        propertyName.addOnValueChangedListener(sender -> validateName());
     }
 
     @Override
@@ -94,11 +106,23 @@ public final class ActorEditPresenter extends BasePresenter<ActorEditPresenter.V
     }
 
     private boolean canSave() {
-        return actor.getName() != null && actor.getName().length() != 0;
+        final String name = propertyName.get();
+        return name != null && name.length() != 0;
     }
 
     private void close() {
         eventBus.post(CloseViewEvent.INSTANCE);
+    }
+
+    private void validateName() {
+        String value = propertyName.get();
+        if (value == null || value.length() == 0) {
+            propertyNameError.set(resources.getString(R.string.input_error_required));
+            propertyNameHasError.set(true);
+        } else {
+            propertyNameError.set(null);
+            propertyNameHasError.set(false);
+        }
     }
 
     public static final class CloseViewEvent {
