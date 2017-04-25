@@ -3,7 +3,6 @@ package com.lakeel.altla.vision.builder.presentation.presenter;
 import com.lakeel.altla.android.property.IntProperty;
 import com.lakeel.altla.android.property.LongProperty;
 import com.lakeel.altla.android.property.StringProperty;
-import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.event.ActionBarTitleEvent;
 import com.lakeel.altla.vision.builder.presentation.event.ActionBarVisibleEvent;
@@ -14,9 +13,6 @@ import com.lakeel.altla.vision.builder.presentation.event.InvalidateOptionsMenuE
 import com.lakeel.altla.vision.builder.presentation.helper.SnackbarEventHelper;
 import com.lakeel.altla.vision.builder.presentation.helper.StringResourceHelper;
 import com.lakeel.altla.vision.builder.presentation.model.SelectAreaSettingsModel;
-import com.lakeel.altla.vision.model.Area;
-import com.lakeel.altla.vision.model.AreaDescription;
-import com.lakeel.altla.vision.model.AreaSettings;
 import com.lakeel.altla.vision.model.Scope;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 
@@ -30,15 +26,10 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import io.reactivex.Observable;
-import io.reactivex.Single;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 
 public final class AreaSettingsListPresenter extends BasePresenter<AreaSettingsListPresenter.View> {
-
-    @Inject
-    VisionService visionService;
 
     @Inject
     EventBus eventBus;
@@ -51,9 +42,9 @@ public final class AreaSettingsListPresenter extends BasePresenter<AreaSettingsL
 
     private final CompositeDisposable compositeDisposable = new CompositeDisposable();
 
-    private final List<Item> items = new ArrayList<>();
+    private final List<SelectAreaSettingsModel.AreaSettingsDetail> items = new ArrayList<>();
 
-    private Item selectedItem;
+    private SelectAreaSettingsModel.AreaSettingsDetail selectedItem;
 
     @Inject
     public AreaSettingsListPresenter() {
@@ -76,81 +67,10 @@ public final class AreaSettingsListPresenter extends BasePresenter<AreaSettingsL
         items.clear();
         getView().notifyDataSetChanged();
 
-        Disposable disposable = Single
-                .<List<AreaSettings>>create(e -> {
-                    visionService.getUserAreaSettingsApi()
-                                 .findAllUserAreaSettings(e::onSuccess, e::onError);
-                })
-                .flatMapObservable(Observable::fromIterable)
-                .map(Item::new)
-                .concatMap(item -> {
-                    return Observable.<Item>create(e -> {
-                        String areaId = item.areaSettings.getAreaId();
-                        if (areaId == null) {
-                            throw new IllegalStateException("Field 'areaId' is null.");
-                        }
-
-                        switch (item.areaSettings.getAreaScopeAsEnum()) {
-                            case PUBLIC:
-                                visionService.getPublicAreaApi()
-                                             .findAreaById(areaId, area -> {
-                                                 if (area != null) {
-                                                     item.area = area;
-                                                     e.onNext(item);
-                                                 }
-                                                 e.onComplete();
-                                             }, e::onError);
-                                break;
-                            case USER:
-                                visionService.getUserAreaApi()
-                                             .findAreaById(areaId, area -> {
-                                                 if (area != null) {
-                                                     item.area = area;
-                                                     e.onNext(item);
-                                                 }
-                                                 e.onComplete();
-                                             }, e::onError);
-                                break;
-                            default:
-                                throw new IllegalStateException("Unknown area scope.");
-                        }
-                    });
-                })
-                .concatMap(item -> {
-                    return Observable.<Item>create(e -> {
-                        String areaDescriptionId = item.areaSettings.getAreaDescriptionId();
-                        if (areaDescriptionId == null) {
-                            throw new IllegalStateException("Field 'areaId' is null.");
-                        }
-
-                        switch (item.areaSettings.getAreaScopeAsEnum()) {
-                            case PUBLIC:
-                                visionService.getPublicAreaDescriptionApi()
-                                             .findAreaDescriptionById(areaDescriptionId, areaDescription -> {
-                                                 if (areaDescription != null) {
-                                                     item.areaDescription = areaDescription;
-                                                     e.onNext(item);
-                                                 }
-                                                 e.onComplete();
-                                             }, e::onError);
-                                break;
-                            case USER:
-                                visionService.getUserAreaDescriptionApi()
-                                             .findAreaDescriptionById(areaDescriptionId, areaDescription -> {
-                                                 if (areaDescription != null) {
-                                                     item.areaDescription = areaDescription;
-                                                     e.onNext(item);
-                                                 }
-                                                 e.onComplete();
-                                             }, e::onError);
-                                break;
-                            default:
-                                throw new IllegalStateException("Unknown area scope.");
-                        }
-                    });
-                })
-                .subscribe(item -> {
-                    items.add(item);
+        final Disposable disposable = selectAreaSettingsModel
+                .loadAreaSettingsDetails()
+                .subscribe(detail -> {
+                    items.add(detail);
                     getView().notifyItemInserted(items.size() - 1);
                 }, e -> {
                     getLog().e("Failed.", e);
@@ -217,26 +137,13 @@ public final class AreaSettingsListPresenter extends BasePresenter<AreaSettingsL
         public final StringProperty propertyAreaDescriptionName = new StringProperty();
 
         public void onBind(int position) {
-            Item item = items.get(position);
+            final SelectAreaSettingsModel.AreaSettingsDetail item = items.get(position);
 
             propertyAreaMode.set(StringResourceHelper.resolveScopeStringResource(
                     item.areaSettings.getAreaScopeAsEnum()));
             propertyUpdatedAt.set(item.areaSettings.getUpdatedAtAsLong());
             propertyAreaName.set(item.area.getName());
             propertyAreaDescriptionName.set(item.areaDescription.getName());
-        }
-    }
-
-    private final class Item {
-
-        final AreaSettings areaSettings;
-
-        Area area;
-
-        AreaDescription areaDescription;
-
-        Item(@NonNull AreaSettings areaSettings) {
-            this.areaSettings = areaSettings;
         }
     }
 }

@@ -1,7 +1,5 @@
 package com.lakeel.altla.vision.builder.presentation.view.fragment;
 
-import com.google.android.gms.location.places.Place;
-
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.presenter.AreaByPlaceListPresenter;
@@ -39,11 +37,8 @@ public final class AreaByPlaceListFragment
     private Menu menu;
 
     @NonNull
-    public static AreaByPlaceListFragment newInstance(@NonNull Place place) {
-        AreaByPlaceListFragment fragment = new AreaByPlaceListFragment();
-        Bundle bundle = AreaByPlaceListPresenter.createArguments(place);
-        fragment.setArguments(bundle);
-        return fragment;
+    public static AreaByPlaceListFragment newInstance() {
+        return new AreaByPlaceListFragment();
     }
 
     @Override

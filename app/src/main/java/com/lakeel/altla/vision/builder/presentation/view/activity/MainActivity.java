@@ -275,7 +275,7 @@ public final class MainActivity extends AppCompatActivity
 
     @Subscribe
     public void onEvent(@NonNull ShowAreaByPlaceListViewEvent event) {
-        replaceFragmentAndAddToBackStack(AreaByPlaceListFragment.newInstance(event.place));
+        replaceFragmentAndAddToBackStack(AreaByPlaceListFragment.newInstance());
     }
 
     @Subscribe

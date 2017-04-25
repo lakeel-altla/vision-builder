@@ -3,7 +3,6 @@ package com.lakeel.altla.vision.builder.presentation.presenter;
 import com.lakeel.altla.android.binding.command.RelayCommand;
 import com.lakeel.altla.android.property.IntProperty;
 import com.lakeel.altla.android.property.StringProperty;
-import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.event.ActionBarTitleEvent;
 import com.lakeel.altla.vision.builder.presentation.event.ActionBarVisibleEvent;
@@ -30,9 +29,6 @@ import android.support.annotation.Nullable;
 import javax.inject.Inject;
 
 public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsPresenter.View> {
-
-    @Inject
-    VisionService visionService;
 
     @Inject
     EventBus eventBus;
