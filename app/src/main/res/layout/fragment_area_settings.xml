@@ -1,7 +1,5 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               xmlns:tools="http://schemas.android.com/tools"
-              android:id="@+id/view_top"
-              android:background="@color/background_overlay"
               android:paddingBottom="@dimen/content_vertical_margin"
               android:paddingLeft="@dimen/content_horizontal_margin"
               android:paddingRight="@dimen/content_horizontal_margin"
@@ -11,31 +9,8 @@
               android:layout_height="match_parent"
               tools:context="com.lakeel.altla.vision.builder.presentation.view.fragment.AreaSettingsFragment">
 
-    <FrameLayout android:layout_marginBottom="@dimen/content_vertical_margin"
-                 android:layout_width="match_parent"
-                 android:layout_height="wrap_content">
-
-        <ImageButton android:id="@+id/image_button_close"
-                     android:src="@drawable/ic_close_black_24dp"
-                     android:tint="@color/foreground_overlay"
-                     android:background="@drawable/button_background_overlay"
-                     android:layout_gravity="start"
-                     android:layout_width="@dimen/touch_target_width"
-                     android:layout_height="@dimen/touch_target_height"/>
-
-        <ImageButton android:id="@+id/image_button_history"
-                     android:src="@drawable/ic_history_black_24dp"
-                     android:tint="@color/foreground_overlay"
-                     android:background="@drawable/button_background_overlay"
-                     android:layout_gravity="end"
-                     android:layout_width="@dimen/touch_target_width"
-                     android:layout_height="@dimen/touch_target_height"/>
-
-    </FrameLayout>
-
     <TextView android:text="@string/label_area_mode"
               android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-              android:textColor="@color/foreground_overlay"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"/>
 
@@ -45,14 +20,13 @@
 
         <ImageButton android:id="@+id/image_button_area_mode"
                      android:src="@drawable/ic_mode_edit_black_24dp"
-                     android:tint="@color/foreground_overlay"
-                     android:background="@drawable/button_background_overlay"
+                     android:background="?android:attr/actionBarItemBackground"
+                     android:tint="@color/background_image_button"
                      android:layout_width="@dimen/touch_target_width"
                      android:layout_height="@dimen/touch_target_height"/>
 
         <TextView android:id="@+id/text_view_area_mode"
                   android:textAppearance="@style/TextAppearance.AppCompat.Caption"
-                  android:textColor="@color/foreground_overlay"
                   android:layout_marginStart="@dimen/content_horizontal_margin"
                   android:layout_gravity="center_vertical"
                   android:layout_width="match_parent"
@@ -62,7 +36,6 @@
 
     <TextView android:text="@string/label_area"
               android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-              android:textColor="@color/foreground_overlay"
               android:layout_marginTop="@dimen/content_vertical_margin"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"/>
@@ -73,14 +46,13 @@
 
         <ImageButton android:id="@+id/image_button_area_find"
                      android:src="@drawable/ic_mode_edit_black_24dp"
-                     android:tint="@color/foreground_overlay"
-                     android:background="@drawable/button_background_overlay"
+                     android:background="?android:attr/actionBarItemBackground"
+                     android:tint="@color/background_image_button"
                      android:layout_width="@dimen/touch_target_width"
                      android:layout_height="@dimen/touch_target_height"/>
 
         <TextView android:id="@+id/text_view_area_name"
                   android:textAppearance="@style/TextAppearance.AppCompat.Caption"
-                  android:textColor="@color/foreground_overlay"
                   android:layout_marginStart="@dimen/content_horizontal_margin"
                   android:layout_gravity="center_vertical"
                   android:layout_width="match_parent"
@@ -90,7 +62,6 @@
 
     <TextView android:text="@string/label_area_description"
               android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-              android:textColor="@color/foreground_overlay"
               android:layout_marginTop="@dimen/content_vertical_margin"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"/>
@@ -101,14 +72,13 @@
 
         <ImageButton android:id="@+id/image_button_area_description_list"
                      android:src="@drawable/ic_mode_edit_black_24dp"
-                     android:tint="@color/foreground_overlay"
-                     android:background="@drawable/button_background_overlay"
+                     android:background="?android:attr/actionBarItemBackground"
+                     android:tint="@color/background_image_button"
                      android:layout_width="@dimen/touch_target_width"
                      android:layout_height="@dimen/touch_target_height"/>
 
         <TextView android:id="@+id/text_view_area_description_name"
                   android:textAppearance="@style/TextAppearance.AppCompat.Caption"
-                  android:textColor="@color/foreground_overlay"
                   android:layout_marginStart="@dimen/content_horizontal_margin"
                   android:layout_gravity="center_vertical"
                   android:layout_width="match_parent"
@@ -118,8 +88,8 @@
 
     <Button android:id="@+id/button_start"
             android:text="@string/button_start"
-            android:textColor="@color/foreground_overlay"
-            android:background="@color/background_overlay_button_pressed"
+            android:background="@color/background_button"
+            android:textColor="@color/foreground_button"
             android:layout_marginTop="@dimen/content_vertical_margin"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>

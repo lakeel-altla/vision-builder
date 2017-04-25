@@ -10,7 +10,6 @@ import com.lakeel.altla.android.binding.ViewBindingFactory;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.presenter.AreaFindPresenter;
-import com.lakeel.altla.vision.model.Scope;
 import com.lakeel.altla.vision.presentation.view.fragment.AbstractFragment;
 
 import android.app.Activity;
@@ -43,11 +42,8 @@ public final class AreaFindFragment extends AbstractFragment<AreaFindPresenter.V
     private Place pickedPlace;
 
     @NonNull
-    public static AreaFindFragment newInstance(@NonNull Scope scope) {
-        AreaFindFragment fragment = new AreaFindFragment();
-        Bundle bundle = AreaFindPresenter.createArguments(scope);
-        fragment.setArguments(bundle);
-        return fragment;
+    public static AreaFindFragment newInstance() {
+        return new AreaFindFragment();
     }
 
     @Override
@@ -80,7 +76,6 @@ public final class AreaFindFragment extends AbstractFragment<AreaFindPresenter.V
 
         ViewBindingFactory factory = new ViewBindingFactory(view);
         factory.create(R.id.button_place_picker, "onClick", presenter.commandShowPlacePicker).bind();
-        factory.create(R.id.image_button_close, "onClick", presenter.commandClose).bind();
     }
 
     @Override

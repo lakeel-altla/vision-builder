@@ -1,11 +1,16 @@
 package com.lakeel.altla.vision.builder.presentation.presenter;
 
-import com.lakeel.altla.android.binding.command.RelayCommand;
 import com.lakeel.altla.android.property.StringProperty;
-import com.lakeel.altla.vision.ArgumentNullException;
 import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
+import com.lakeel.altla.vision.builder.presentation.event.ActionBarTitleEvent;
+import com.lakeel.altla.vision.builder.presentation.event.ActionBarVisibleEvent;
+import com.lakeel.altla.vision.builder.presentation.event.BackViewEvent;
+import com.lakeel.altla.vision.builder.presentation.event.HomeAsUpIndicatorEvent;
+import com.lakeel.altla.vision.builder.presentation.event.HomeAsUpVisibleEvent;
+import com.lakeel.altla.vision.builder.presentation.event.InvalidateOptionsMenuEvent;
 import com.lakeel.altla.vision.builder.presentation.helper.SnackbarEventHelper;
+import com.lakeel.altla.vision.builder.presentation.model.SelectAreaSettingsModel;
 import com.lakeel.altla.vision.helper.AreaDescriptionNameComparater;
 import com.lakeel.altla.vision.model.Area;
 import com.lakeel.altla.vision.model.AreaDescription;
@@ -13,11 +18,9 @@ import com.lakeel.altla.vision.model.Scope;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 
 import org.greenrobot.eventbus.EventBus;
-import org.parceler.Parcels;
 
-import android.os.Bundle;
+import android.content.res.Resources;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,58 +35,26 @@ import io.reactivex.disposables.Disposable;
 public final class AreaDescriptionByAreaListPresenter
         extends BasePresenter<AreaDescriptionByAreaListPresenter.View> {
 
-    private static final String ARG_SCOPE = "scrope";
-
-    private static final String ARG_AREA = "area";
-
     @Inject
     VisionService visionService;
 
     @Inject
     EventBus eventBus;
 
-    public final RelayCommand commandClose = new RelayCommand(this::close);
+    @Inject
+    Resources resources;
 
-    public final RelayCommand commandSelect = new RelayCommand(this::select, this::canSelect);
+    @Inject
+    SelectAreaSettingsModel selectAreaSettingsModel;
 
     private final CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     private final List<AreaDescription> items = new ArrayList<>();
 
-    private Scope scope;
-
-    private Area area;
-
-    private AreaDescription selectedAreaDescription;
+    private AreaDescription selectedItem;
 
     @Inject
     public AreaDescriptionByAreaListPresenter() {
-    }
-
-    @NonNull
-    public static Bundle createArguments(@NonNull Scope scope, @NonNull Area area) {
-        Bundle bundle = new Bundle();
-        bundle.putParcelable(ARG_SCOPE, Parcels.wrap(scope));
-        bundle.putParcelable(ARG_AREA, Parcels.wrap(area));
-        return bundle;
-    }
-
-    @Override
-    public void onCreate(@Nullable Bundle arguments, @Nullable Bundle savedInstanceState) {
-        super.onCreate(arguments, savedInstanceState);
-
-        if (arguments == null) throw new ArgumentNullException("arguments");
-
-        scope = Parcels.unwrap(arguments.getParcelable(ARG_SCOPE));
-        if (scope == null) {
-            throw new IllegalArgumentException(String.format("Argument '%s' is required.", ARG_SCOPE));
-        }
-
-
-        area = Parcels.unwrap(arguments.getParcelable(ARG_AREA));
-        if (area == null) {
-            throw new IllegalArgumentException(String.format("Argument '%s' must be not null.", ARG_AREA));
-        }
     }
 
     @Override
@@ -92,6 +63,9 @@ public final class AreaDescriptionByAreaListPresenter
 
         items.clear();
         getView().onDataSetChanged();
+
+        final Scope scope = selectAreaSettingsModel.getAreaScope();
+        final Area area = selectAreaSettingsModel.getArea();
 
         Disposable disposable = Single.<List<AreaDescription>>create(e -> {
             switch (scope) {
@@ -123,10 +97,24 @@ public final class AreaDescriptionByAreaListPresenter
     }
 
     @Override
+    protected void onCreateViewOverride() {
+        super.onCreateViewOverride();
+
+        eventBus.post(ActionBarVisibleEvent.VISIBLE);
+        eventBus.post(new ActionBarTitleEvent(resources.getString(R.string.title_area_description_by_area_list_view)));
+        eventBus.post(HomeAsUpVisibleEvent.VISIBLE);
+        eventBus.post(new HomeAsUpIndicatorEvent(resources.getDrawable(R.drawable.ic_arrow_back_white_24dp)));
+    }
+
+    @Override
     protected void onStopOverride() {
         super.onStopOverride();
 
         compositeDisposable.clear();
+    }
+
+    public void prepareOptionsMenu() {
+        getView().setActionSelectEnabled(selectedItem != null);
     }
 
     public int getItemCount() {
@@ -140,48 +128,24 @@ public final class AreaDescriptionByAreaListPresenter
 
     public void onItemSelected(int position) {
         if (0 <= position) {
-            selectedAreaDescription = items.get(position);
+            selectedItem = items.get(position);
         } else {
-            selectedAreaDescription = null;
+            selectedItem = null;
         }
 
-        commandSelect.raiseOnCanExecuteChanged();
+        eventBus.post(InvalidateOptionsMenuEvent.INSTANCE);
     }
 
-    private void close() {
-        eventBus.post(CloseViewEvent.INSTANCE);
-    }
-
-    private void select() {
-        eventBus.post(new AreaDescriptionSelectedEvent(selectedAreaDescription));
-        close();
-    }
-
-    private boolean canSelect() {
-        return selectedAreaDescription != null;
+    public void select() {
+        selectAreaSettingsModel.selectAreaDescriptiob(selectedItem);
+        eventBus.post(new BackViewEvent(getView()));
     }
 
     public interface View {
 
         void onDataSetChanged();
-    }
 
-    public final class AreaDescriptionSelectedEvent {
-
-        @NonNull
-        public final AreaDescription areaDescription;
-
-        public AreaDescriptionSelectedEvent(@NonNull AreaDescription areaDescription) {
-            this.areaDescription = areaDescription;
-        }
-    }
-
-    public static final class CloseViewEvent {
-
-        private static final CloseViewEvent INSTANCE = new CloseViewEvent();
-
-        private CloseViewEvent() {
-        }
+        void setActionSelectEnabled(boolean enabled);
     }
 
     public final class ItemPresenter {

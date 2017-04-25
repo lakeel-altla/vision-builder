@@ -1,40 +1,5 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:tools="http://schemas.android.com/tools"
-              android:background="@color/background_overlay"
-              android:paddingBottom="@dimen/content_vertical_margin"
-              android:paddingLeft="@dimen/content_horizontal_margin"
-              android:paddingRight="@dimen/content_horizontal_margin"
-              android:paddingTop="@dimen/content_vertical_margin"
-              android:orientation="vertical"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              tools:context="com.lakeel.altla.vision.builder.presentation.view.fragment.AreaSettingsListFragment">
-
-    <FrameLayout android:layout_marginBottom="@dimen/content_vertical_margin"
-                 android:layout_width="match_parent"
-                 android:layout_height="wrap_content">
-
-        <ImageButton android:id="@+id/image_button_close"
-                     android:src="@drawable/ic_close_black_24dp"
-                     android:tint="@color/foreground_overlay"
-                     android:background="@drawable/button_background_overlay"
-                     android:layout_gravity="start"
-                     android:layout_width="@dimen/touch_target_width"
-                     android:layout_height="@dimen/touch_target_height"/>
-
-        <Button android:id="@+id/button_select"
-                android:text="@string/button_select"
-                android:textColor="@color/foreground_overlay"
-                android:background="@drawable/button_background_overlay"
-                android:layout_gravity="end"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-
-    </FrameLayout>
-
-    <android.support.v7.widget.RecyclerView
-            android:id="@+id/recycler_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
-
-</LinearLayout>
+<android.support.v7.widget.RecyclerView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>

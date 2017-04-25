@@ -11,6 +11,17 @@
     <!-- transparent -->
     <color name="transparent">#00000000</color>
 
+    <!-- royalblue (25%) -->
+    <color name="background_item_selected">#444169e1</color>
+    <!-- royalblue -->
+    <color name="background_image_button">#FF4169e1</color>
+    <!-- white (75%)  -->
+    <color name="background_image_button_disabled">#ccffffff</color>
+    <!-- royalblue -->
+    <color name="background_button">#FF4169e1</color>
+    <!-- white -->
+    <color name="foreground_button">#ffffff</color>
+
     <!-- white (75%)  -->
     <color name="foreground_overlay">#ccffffff</color>
     <!-- white (25%)  -->

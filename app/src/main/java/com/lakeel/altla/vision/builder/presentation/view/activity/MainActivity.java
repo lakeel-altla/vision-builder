@@ -13,17 +13,42 @@ import com.lakeel.altla.vision.builder.presentation.app.MyApplication;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.di.component.ActivityComponent;
 import com.lakeel.altla.vision.builder.presentation.di.module.ActivityModule;
+import com.lakeel.altla.vision.builder.presentation.event.ActionBarTitleEvent;
+import com.lakeel.altla.vision.builder.presentation.event.ActionBarVisibleEvent;
+import com.lakeel.altla.vision.builder.presentation.event.BackViewEvent;
+import com.lakeel.altla.vision.builder.presentation.event.HomeAsUpIndicatorEvent;
+import com.lakeel.altla.vision.builder.presentation.event.HomeAsUpVisibleEvent;
+import com.lakeel.altla.vision.builder.presentation.event.InvalidateOptionsMenuEvent;
+import com.lakeel.altla.vision.builder.presentation.event.ShowAreaByPlaceListViewEvent;
+import com.lakeel.altla.vision.builder.presentation.event.ShowAreaDescriptionByAreaListViewEvent;
+import com.lakeel.altla.vision.builder.presentation.event.ShowAreaFindViewEvent;
+import com.lakeel.altla.vision.builder.presentation.event.ShowAreaModeViewEvent;
+import com.lakeel.altla.vision.builder.presentation.event.ShowAreaSettingsListViewEvent;
+import com.lakeel.altla.vision.builder.presentation.event.ShowAreaSettingsViewEvent;
 import com.lakeel.altla.vision.builder.presentation.helper.ObservableHelper;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.ArFragment;
+import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaByPlaceListFragment;
+import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaDescriptionByAreaListFragment;
+import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaFindFragment;
+import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaModeFragment;
+import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaSettingsFragment;
+import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaSettingsListFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.SignInFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.TangoPermissionFragment;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
 import android.view.View;
 
 import javax.inject.Inject;
@@ -46,6 +71,9 @@ public final class MainActivity extends AppCompatActivity
 
     @Inject
     VisionService visionService;
+
+    @Inject
+    EventBus eventBus;
 
     @BindView(R.id.toolbar)
     Toolbar toolbar;
@@ -78,10 +106,23 @@ public final class MainActivity extends AppCompatActivity
     }
 
     @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                backView();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
     protected void onStart() {
         super.onStart();
 
         FirebaseAuth.getInstance().addAuthStateListener(this);
+
+        eventBus.register(this);
     }
 
     @Override
@@ -89,6 +130,8 @@ public final class MainActivity extends AppCompatActivity
         super.onStop();
 
         FirebaseAuth.getInstance().removeAuthStateListener(this);
+
+        eventBus.unregister(this);
 
         // Unsubscribe the connection.
         if (observeConnectionDisposable != null) {
@@ -157,10 +200,15 @@ public final class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onUpdateActionBarVisible(boolean visible) {
+    public void onShowSignInView() {
+        showSignInView();
+    }
+
+    @Subscribe
+    public void onEvent(@NonNull ActionBarVisibleEvent event) {
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
-            if (visible) {
+            if (event.visible) {
                 actionBar.show();
             } else {
                 actionBar.hide();
@@ -168,9 +216,77 @@ public final class MainActivity extends AppCompatActivity
         }
     }
 
-    @Override
-    public void onShowSignInView() {
-        showSignInView();
+    @Subscribe
+    public void onEvent(@NonNull ActionBarTitleEvent event) {
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setTitle(event.title);
+        }
+    }
+
+    @Subscribe
+    public void onEvent(@NonNull InvalidateOptionsMenuEvent event) {
+        invalidateOptionsMenu();
+    }
+
+    @Subscribe
+    public void onEvent(@NonNull HomeAsUpVisibleEvent event) {
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(event.visible);
+        }
+    }
+
+    @Subscribe
+    public void onEvent(@NonNull HomeAsUpIndicatorEvent event) {
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setHomeAsUpIndicator(event.indicator);
+        }
+    }
+
+    @Subscribe
+    public void onEvent(@NonNull BackViewEvent event) {
+        Fragment fragment = (Fragment) event.view;
+        if (getSupportFragmentManager().findFragmentByTag(fragment.getTag()) != null) {
+            backView();
+        }
+    }
+
+    @Subscribe
+    public void onEvent(@NonNull ShowAreaSettingsViewEvent event) {
+        replaceFragmentAndAddToBackStack(AreaSettingsFragment.newInstance());
+    }
+
+    @Subscribe
+    public void onEvent(@NonNull ShowAreaSettingsListViewEvent event) {
+        replaceFragmentAndAddToBackStack(AreaSettingsListFragment.newInstance());
+    }
+
+    @Subscribe
+    public void onEvent(@NonNull ShowAreaModeViewEvent event) {
+        replaceFragmentAndAddToBackStack(AreaModeFragment.newInstance());
+    }
+
+    @Subscribe
+    public void onEvent(@NonNull ShowAreaFindViewEvent event) {
+        replaceFragmentAndAddToBackStack(AreaFindFragment.newInstance());
+    }
+
+    @Subscribe
+    public void onEvent(@NonNull ShowAreaByPlaceListViewEvent event) {
+        replaceFragmentAndAddToBackStack(AreaByPlaceListFragment.newInstance(event.place));
+    }
+
+    @Subscribe
+    public void onEvent(@NonNull ShowAreaDescriptionByAreaListViewEvent event) {
+        replaceFragmentAndAddToBackStack(AreaDescriptionByAreaListFragment.newInstance());
+    }
+
+    private void backView() {
+        if (0 < getSupportFragmentManager().getBackStackEntryCount()) {
+            getSupportFragmentManager().popBackStack();
+        }
     }
 
     private void showSignInView() {
@@ -179,9 +295,20 @@ public final class MainActivity extends AppCompatActivity
         replaceFragment(SignInFragment.newInstance());
     }
 
+    private void addFragmentAndAddToBackStack(Fragment fragment) {
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+
+        Fragment topFragment = getTopFragment();
+        if (topFragment != null) transaction.hide(topFragment);
+
+        transaction.addToBackStack(fragment.getClass().getName())
+                   .add(R.id.fragment_container, fragment, fragment.getClass().getName())
+                   .commit();
+    }
+
     private void replaceFragmentAndAddToBackStack(Fragment fragment) {
         getSupportFragmentManager().beginTransaction()
-                                   .addToBackStack(null)
+                                   .addToBackStack(fragment.getClass().getName())
                                    .replace(R.id.fragment_container, fragment, fragment.getClass().getName())
                                    .commit();
     }
@@ -190,5 +317,18 @@ public final class MainActivity extends AppCompatActivity
         getSupportFragmentManager().beginTransaction()
                                    .replace(R.id.fragment_container, fragment, fragment.getClass().getName())
                                    .commit();
+    }
+
+    @Nullable
+    private Fragment getTopFragment() {
+        FragmentManager manager = getSupportFragmentManager();
+
+        int index = manager.getBackStackEntryCount() - 1;
+        if (index < 0) {
+            return null;
+        } else {
+            FragmentManager.BackStackEntry entry = manager.getBackStackEntryAt(index);
+            return manager.findFragmentByTag(entry.getName());
+        }
     }
 }

@@ -1,7 +1,5 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               xmlns:tools="http://schemas.android.com/tools"
-              android:id="@+id/view_top"
-              android:background="@color/background_overlay"
               android:paddingBottom="@dimen/content_vertical_margin"
               android:paddingLeft="@dimen/content_horizontal_margin"
               android:paddingRight="@dimen/content_horizontal_margin"
@@ -11,39 +9,19 @@
               android:layout_height="match_parent"
               tools:context="com.lakeel.altla.vision.builder.presentation.view.fragment.AreaFindFragment">
 
-    <FrameLayout android:layout_marginBottom="@dimen/content_vertical_margin"
-                 android:layout_width="match_parent"
-                 android:layout_height="wrap_content">
+    <Button android:id="@+id/button_place_picker"
+            android:text="@string/button_find_by_place"
+            android:background="@color/background_button"
+            android:textColor="@color/foreground_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
 
-        <ImageButton android:id="@+id/image_button_close"
-                     android:src="@drawable/ic_close_black_24dp"
-                     android:tint="@color/foreground_overlay"
-                     android:background="@drawable/button_background_overlay"
-                     android:layout_gravity="start"
-                     android:layout_width="@dimen/touch_target_width"
-                     android:layout_height="@dimen/touch_target_height"/>
-
-    </FrameLayout>
-
-    <LinearLayout android:orientation="vertical"
-                  android:layout_width="match_parent"
-                  android:layout_height="wrap_content">
-
-        <Button android:id="@+id/button_place_picker"
-                android:text="@string/button_find_by_place"
-                android:textColor="@color/foreground_overlay"
-                android:background="@color/background_overlay_button_pressed"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-
-        <Button android:id="@+id/button_find_by_name"
-                android:text="@string/button_find_by_name"
-                android:textColor="@color/foreground_overlay"
-                android:background="@color/background_overlay_button_pressed"
-                android:layout_marginTop="@dimen/content_vertical_margin"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-
-    </LinearLayout>
+    <Button android:id="@+id/button_find_by_name"
+            android:text="@string/button_find_by_name"
+            android:background="@color/background_button"
+            android:textColor="@color/foreground_button"
+            android:layout_marginTop="@dimen/content_vertical_margin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
 
 </LinearLayout>

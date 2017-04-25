@@ -65,9 +65,12 @@
     <string name="label_area_mode_public">Public mode</string>
     <string name="label_area_mode_user">User mode</string>
 
-    <string name="title_project">Project</string>
-    <string name="title_select_area">Select Area</string>
-    <string name="title_user_area_description_list_in_area">Select Area Description</string>
+    <string name="title_area_settings_view">Area Settings</string>
+    <string name="title_area_settings_list_view">History</string>
+    <string name="title_area_mode_view">Select Area Mode</string>
+    <string name="title_area_find_view">Find Area</string>
+    <string name="title_area_by_place_list_view">Select Area</string>
+    <string name="title_area_description_by_area_list_view">Select Area Description</string>
 
     <string name="action_create">Create</string>
     <string name="action_debug">Debug ON/OFF</string>
@@ -75,6 +78,8 @@
     <string name="action_edit">Edit</string>
     <string name="action_save">Save</string>
     <string name="action_pick_place">Pick Place</string>
+    <string name="action_history">History</string>
+    <string name="action_select">Select</string>
 
     <string name="input_error_required">Required.</string>
 

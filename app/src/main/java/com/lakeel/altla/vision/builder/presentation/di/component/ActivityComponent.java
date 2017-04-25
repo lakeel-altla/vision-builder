@@ -12,7 +12,6 @@ import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaByPlaceLis
 import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaDescriptionByAreaListFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaFindFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaModeFragment;
-import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaSettingsContainerFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaSettingsFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaSettingsListFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.ConsoleFragment;
@@ -41,8 +40,6 @@ public interface ActivityComponent {
     void inject(AreaDescriptionByAreaListFragment fragment);
 
     void inject(ArFragment fragment);
-
-    void inject(AreaSettingsContainerFragment fragment);
 
     void inject(AreaSettingsFragment fragment);
 

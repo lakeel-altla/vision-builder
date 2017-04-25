@@ -4,7 +4,6 @@ import com.lakeel.altla.android.binding.ViewBindingFactory;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.presenter.AreaModePresenter;
-import com.lakeel.altla.vision.model.Scope;
 import com.lakeel.altla.vision.presentation.view.fragment.AbstractFragment;
 
 import android.content.Context;
@@ -12,6 +11,9 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -24,11 +26,8 @@ public final class AreaModeFragment extends AbstractFragment<AreaModePresenter.V
     AreaModePresenter presenter;
 
     @NonNull
-    public static AreaModeFragment newInstance(@NonNull Scope scope) {
-        AreaModeFragment fragment = new AreaModeFragment();
-        Bundle bundle = AreaModePresenter.createArguments(scope);
-        fragment.setArguments(bundle);
-        return fragment;
+    public static AreaModeFragment newInstance() {
+        return new AreaModeFragment();
     }
 
     @Override
@@ -61,7 +60,28 @@ public final class AreaModeFragment extends AbstractFragment<AreaModePresenter.V
 
         ViewBindingFactory factory = new ViewBindingFactory(view);
         factory.create(R.id.radio_group_scope, "checkedButton", presenter.propertyChckedButton).bind();
-        factory.create(R.id.button_select, "onClick", presenter.commandSelect).bind();
-        factory.create(R.id.image_button_close, "onClick", presenter.commandClose).bind();
+    }
+
+    @Override
+    protected void onCreateViewOverride(@Nullable View view, @Nullable Bundle savedInstanceState) {
+        super.onCreateViewOverride(view, savedInstanceState);
+
+        setHasOptionsMenu(true);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.fragment_area_mode, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_select:
+                presenter.select();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 }

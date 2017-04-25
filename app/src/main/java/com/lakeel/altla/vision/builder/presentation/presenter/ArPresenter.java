@@ -18,6 +18,8 @@ import com.lakeel.altla.vision.api.CurrentUser;
 import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.module.Names;
+import com.lakeel.altla.vision.builder.presentation.event.ActionBarVisibleEvent;
+import com.lakeel.altla.vision.builder.presentation.event.ShowAreaSettingsViewEvent;
 import com.lakeel.altla.vision.builder.presentation.event.SnackbarEvent;
 import com.lakeel.altla.vision.builder.presentation.model.ActorDragConstants;
 import com.lakeel.altla.vision.builder.presentation.model.ActorEditMode;
@@ -65,8 +67,6 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import io.reactivex.Maybe;
-import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
@@ -80,8 +80,6 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
                    OnPoseAvailableListener,
                    MainRenderer.OnCurrentCameraTransformUpdatedListener,
                    MainRenderer.OnActorPickedListener {
-
-    private static final String STATE_AREA_SETTINGS_ID = "areaSettingsId";
 
     private static final float ACTOR_DROP_POSITION_ADJUSTMENT = 2f;
 
@@ -127,10 +125,6 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
 
     private final Vector3 cameraForward = new Vector3();
 
-    private String areaSettingsId;
-
-    private AreaSettings areaSettings;
-
     private TangoLocalizationState tangoLocalizationState;
 
     private ActorManager actorManager;
@@ -155,30 +149,9 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
     public void onCreate(@Nullable Bundle arguments, @Nullable Bundle savedInstanceState) {
         super.onCreate(arguments, savedInstanceState);
 
-        if (savedInstanceState != null) {
-            areaSettingsId = savedInstanceState.getString(STATE_AREA_SETTINGS_ID);
-            if (areaSettingsId == null) {
-                throw new IllegalStateException(String.format("Model '%s' is null.", STATE_AREA_SETTINGS_ID));
-            }
-        }
-
         visionService.getTangoWrapper().setStartTangoUx(false);
         visionService.getTangoWrapper().setCoordinateFramePairs(FRAME_PAIRS);
         visionService.getTangoWrapper().setTangoConfigFactory(this::createTangoConfig);
-
-        arModel.areaSettingsId.addOnValueChangedListener(sender -> {
-            String value = arModel.areaSettingsId.get();
-            if (value != null) {
-                startAr(value);
-            }
-        });
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-
-        outState.putParcelable(STATE_AREA_SETTINGS_ID, Parcels.wrap(areaSettings));
     }
 
     @Override
@@ -199,6 +172,8 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
         getView().onUpdateRotateMenuVisible(false);
         getView().onUpdateTranslateAxisSelected(Axis.X, true);
         getView().onUpdateRotateAxisSelected(Axis.Y, true);
+
+        eventBus.post(ActionBarVisibleEvent.INVISIBLE);
     }
 
     @Override
@@ -227,32 +202,7 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
         tangoLocalizationState = TangoLocalizationState.UNKNOWN;
         getView().onUpdateImageButtonAssetListVisible(false);
 
-        if (areaSettingsId == null) {
-            connectTango();
-        } else {
-            Disposable disposable = Maybe
-                    .<AreaSettings>create(e -> {
-                        visionService.getUserAreaSettingsApi()
-                                     .findUserAreaSettingsById(areaSettingsId, areaSettings -> {
-                                         if (areaSettings == null) {
-                                             e.onComplete();
-                                         } else {
-                                             e.onSuccess(areaSettings);
-                                         }
-                                     }, e::onError);
-                    })
-                    .subscribe(areaSettings -> {
-                        this.areaSettings = areaSettings;
-                        connectTango();
-                    }, e -> {
-                        getLog().e("Failed.", e);
-                        getView().onSnackbar(R.string.snackbar_failed);
-                    }, () -> {
-                        getLog().e("Entity not found.");
-                        getView().onSnackbar(R.string.snackbar_failed);
-                    });
-            compositeDisposable.add(disposable);
-        }
+        connectTango();
     }
 
     @Override
@@ -262,7 +212,7 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
         disconnectTango();
 
         // Pause the thread for OpenGL in the texture view.
-        getView().onPauseTextureView();
+        getView().pauseTextureView();
         getView().onUpdateImageButtonAssetListVisible(true);
     }
 
@@ -271,7 +221,9 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
         renderer.connectToTangoCamera(tango);
 
         // Resume the texture view after the tango becomes ready.
-        getView().onResumeTextureView();
+        getView().resumeTextureView();
+
+        final AreaSettings areaSettings = arModel.getAreaSettings();
 
         if (areaSettings != null) {
             if (areaSettings.getAreaId() == null) {
@@ -282,57 +234,15 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
                 getView().onUpdateImageButtonAssetListVisible(true);
             });
 
-            if (areaSettings.getAreaScopeAsEnum() == Scope.PUBLIC) {
-                Disposable disposable = Observable
-                        .<Actor>concat(e -> {
-                            visionService.getPublicActorApi()
-                                         .findActorsByAreaId(areaSettings.getAreaId(),
-                                                             actors -> {
-                                                                 for (Actor actor : actors) {
-                                                                     e.onNext(actor);
-                                                                 }
-                                                                 e.onComplete();
-                                                             },
-                                                             e::onError);
-                        }, e -> {
-                            visionService.getUserActorApi()
-                                         .findActorsByAreaId(areaSettings.getAreaId(),
-                                                             actors -> {
-                                                                 for (Actor actor : actors) {
-                                                                     e.onNext(actor);
-                                                                 }
-                                                                 e.onComplete();
-                                                             },
-                                                             e::onError);
-                        })
-                        .subscribe(actor -> {
-                            actorManager.addActor(actor);
-                        }, e -> {
-                            getLog().e("Failed.", e);
-                            getView().onSnackbar(R.string.snackbar_failed);
-                        });
-                compositeDisposable.add(disposable);
-            } else if (areaSettings.getAreaScopeAsEnum() == Scope.USER) {
-                Disposable disposable = Observable
-                        .<Actor>create(e -> {
-                            visionService.getUserActorApi()
-                                         .findActorsByAreaId(areaSettings.getAreaId(),
-                                                             actors -> {
-                                                                 for (Actor actor : actors) {
-                                                                     e.onNext(actor);
-                                                                 }
-                                                                 e.onComplete();
-                                                             },
-                                                             e::onError);
-                        })
-                        .subscribe(actor -> {
-                            actorManager.addActor(actor);
-                        }, e -> {
-                            getLog().e("Failed.", e);
-                            getView().onSnackbar(R.string.snackbar_failed);
-                        });
-                compositeDisposable.add(disposable);
-            }
+            Disposable disposable = arModel
+                    .loadActors()
+                    .subscribe(actor -> {
+                        actorManager.addActor(actor);
+                    }, e -> {
+                        getLog().e("Failed.", e);
+                        getView().onSnackbar(R.string.snackbar_failed);
+                    });
+            compositeDisposable.add(disposable);
         }
     }
 
@@ -380,7 +290,7 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
 
     @Override
     public void onActorPicked(@Nullable ActorModel actorModel) {
-        if (areaSettings != null) {
+        if (arModel.getAreaSettings() != null) {
             pickedActorModel = actorModel;
 
             getView().onUpdateActorContainerViewVisible(true);
@@ -396,17 +306,16 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
         }
     }
 
-    public void onClickButtonAreaSettings() {
-        getView().onUpdateAreaSettingsContainerViewVisible(true);
-        getView().onUpdateMainMenuVisible(false);
+    public void showAreaSettingsView() {
+        eventBus.post(ShowAreaSettingsViewEvent.INSTANCE);
     }
 
-    public void onClickButtonAssetList() {
+    public void showAssetListView() {
         getView().onUpdateAssetListVisible(true);
         getView().onUpdateMainMenuVisible(false);
     }
 
-    public void onClickButtonClose() {
+    public void closeView() {
         visionService.getUserDeviceConnectionApi()
                      .markUserDeviceConnectionAsOffline(aVoid -> {
                          FirebaseAuth.getInstance().signOut();
@@ -493,7 +402,7 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
 
         Actor actor = new Actor();
         actor.setUserId(CurrentUser.getInstance().getUserId());
-        actor.setAreaId(areaSettings.getAreaId());
+        actor.setAreaId(arModel.getAreaSettings().getAreaId());
         // TODO: handle other asset types.
         actor.setAssetTypeAsEnum(AssetType.IMAGE);
         actor.setAssetId(asset.getId());
@@ -580,12 +489,6 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
     }
 
     @Subscribe
-    public void onEvent(@NonNull AreaSettingsPresenter.CloseViewEvent event) {
-        getView().onUpdateAreaSettingsContainerViewVisible(false);
-        getView().onUpdateMainMenuVisible(true);
-    }
-
-    @Subscribe
     public void onEvent(@NonNull ActorPresenter.CloseViewEvent event) {
         getView().onUpdateActorContainerViewVisible(false);
         getView().onUpdateMainMenuVisible(true);
@@ -595,38 +498,38 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
     public void onEvent(@NonNull SnackbarEvent event) {
         getView().onSnackbar(event.resource);
     }
-
-    private void startAr(@NonNull String areaSettingsId) {
-        Disposable disposable = Maybe
-                .<AreaSettings>create(e -> {
-                    visionService.getUserAreaSettingsApi()
-                                 .findUserAreaSettingsById(areaSettingsId, areaSettings -> {
-                                     if (areaSettings == null) {
-                                         e.onComplete();
-                                     } else {
-                                         e.onSuccess(areaSettings);
-                                     }
-                                 }, e::onError);
-                })
-                .subscribe(areaSettings -> {
-                    this.areaSettings = areaSettings;
-
-                    disconnectTango();
-
-                    // Pause the thread for OpenGL in the texture view.
-                    getView().onPauseTextureView();
-                    getView().onUpdateImageButtonAssetListVisible(true);
-
-                    connectTango();
-                }, e -> {
-                    getLog().e("Failed.", e);
-                    getView().onSnackbar(R.string.snackbar_failed);
-                }, () -> {
-                    getLog().e("Entity not found.");
-                    getView().onSnackbar(R.string.snackbar_failed);
-                });
-        compositeDisposable.add(disposable);
-    }
+//
+//    private void startAr(@NonNull String areaSettingsId) {
+//        Disposable disposable = Maybe
+//                .<AreaSettings>create(e -> {
+//                    visionService.getUserAreaSettingsApi()
+//                                 .findUserAreaSettingsById(areaSettingsId, areaSettings -> {
+//                                     if (areaSettings == null) {
+//                                         e.onComplete();
+//                                     } else {
+//                                         e.onSuccess(areaSettings);
+//                                     }
+//                                 }, e::onError);
+//                })
+//                .subscribe(areaSettings -> {
+//                    this.areaSettings = areaSettings;
+//
+//                    disconnectTango();
+//
+//                    // Pause the thread for OpenGL in the texture view.
+//                    getView().pauseTextureView();
+//                    getView().onUpdateImageButtonAssetListVisible(true);
+//
+//                    connectTango();
+//                }, e -> {
+//                    getLog().e("Failed.", e);
+//                    getView().onSnackbar(R.string.snackbar_failed);
+//                }, () -> {
+//                    getLog().e("Entity not found.");
+//                    getView().onSnackbar(R.string.snackbar_failed);
+//                });
+//        compositeDisposable.add(disposable);
+//    }
 
     @NonNull
     private TangoConfig createTangoConfig(@NonNull Tango tango) {
@@ -642,6 +545,7 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
         // Javadoc says, "LEARNINGMODE and loading AREADESCRIPTION cannot be used if drift correction is enabled."
 //        config.putBoolean(TangoConfig.KEY_BOOLEAN_DRIFT_CORRECTION, true);
 
+        final AreaSettings areaSettings = arModel.getAreaSettings();
         if (areaSettings != null && areaSettings.getAreaDescriptionId() != null) {
             config.putString(TangoConfig.KEY_STRING_AREADESCRIPTION, areaSettings.getAreaDescriptionId());
         }
@@ -797,15 +701,13 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
 
         void setSurfaceRenderer(ISurfaceRenderer renderer);
 
-        void onResumeTextureView();
+        void resumeTextureView();
 
-        void onPauseTextureView();
+        void pauseTextureView();
 
         void onUpdateMainMenuVisible(boolean visible);
 
         void onUpdateImageButtonAssetListVisible(boolean visible);
-
-        void onUpdateAreaSettingsContainerViewVisible(boolean visible);
 
         void onUpdateActorContainerViewVisible(boolean visible);
 

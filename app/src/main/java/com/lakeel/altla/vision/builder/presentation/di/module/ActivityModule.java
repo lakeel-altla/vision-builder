@@ -6,6 +6,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScope;
 import com.lakeel.altla.vision.builder.presentation.model.ArModel;
+import com.lakeel.altla.vision.builder.presentation.model.SelectAreaSettingsModel;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -55,8 +56,14 @@ public final class ActivityModule {
 
     @ActivityScope
     @Provides
-    ArModel provideArModel() {
-        return new ArModel();
+    ArModel provideArModel(VisionService visionService) {
+        return new ArModel(visionService);
+    }
+
+    @ActivityScope
+    @Provides
+    SelectAreaSettingsModel provideSelectAreaSettingsModel(VisionService visionService, ArModel arModel) {
+        return new SelectAreaSettingsModel(visionService, arModel);
     }
 
     @ActivityScope

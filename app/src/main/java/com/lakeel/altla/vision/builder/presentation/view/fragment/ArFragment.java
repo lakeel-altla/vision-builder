@@ -203,8 +203,6 @@ public final class ArFragment extends AbstractFragment<ArPresenter.View, ArPrese
 
             return false;
         });
-
-        interactionListener.onUpdateActionBarVisible(false);
     }
 
     @Override
@@ -218,12 +216,12 @@ public final class ArFragment extends AbstractFragment<ArPresenter.View, ArPrese
     }
 
     @Override
-    public void onResumeTextureView() {
+    public void resumeTextureView() {
         textureView.onResume();
     }
 
     @Override
-    public void onPauseTextureView() {
+    public void pauseTextureView() {
         textureView.onPause();
     }
 
@@ -235,21 +233,6 @@ public final class ArFragment extends AbstractFragment<ArPresenter.View, ArPrese
     @Override
     public void onUpdateImageButtonAssetListVisible(boolean visible) {
         imageButtonAssetList.setVisibility(visible ? View.VISIBLE : View.GONE);
-    }
-
-    @Override
-    public void onUpdateAreaSettingsContainerViewVisible(boolean visible) {
-        AreaSettingsContainerFragment fragment = findFragment(AreaSettingsContainerFragment.class);
-
-        if (visible) {
-            if (fragment == null) {
-                replaceWindowFragment(AreaSettingsContainerFragment.newInstance());
-            }
-        } else {
-            if (fragment != null) {
-                removeFragment(fragment);
-            }
-        }
     }
 
     @Override
@@ -341,17 +324,17 @@ public final class ArFragment extends AbstractFragment<ArPresenter.View, ArPrese
 
     @OnClick(R.id.image_button_area_settings)
     void onClickButtonAreaSettings() {
-        presenter.onClickButtonAreaSettings();
+        presenter.showAreaSettingsView();
     }
 
     @OnClick(R.id.image_button_asset_list)
     void onClickButtonAssetList() {
-        presenter.onClickButtonAssetList();
+        presenter.showAssetListView();
     }
 
     @OnClick(R.id.image_button_close)
     void onClickButtonClose() {
-        presenter.onClickButtonClose();
+        presenter.closeView();
     }
 
     //
@@ -476,7 +459,7 @@ public final class ArFragment extends AbstractFragment<ArPresenter.View, ArPrese
 
     public interface InteractionListener {
 
-        void onUpdateActionBarVisible(boolean visible);
+//        void onUpdateActionBarVisible(boolean visible);
 
         void onShowSignInView();
     }

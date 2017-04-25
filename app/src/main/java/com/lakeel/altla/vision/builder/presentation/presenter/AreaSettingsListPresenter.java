@@ -1,13 +1,19 @@
 package com.lakeel.altla.vision.builder.presentation.presenter;
 
-import com.lakeel.altla.android.binding.command.RelayCommand;
 import com.lakeel.altla.android.property.IntProperty;
 import com.lakeel.altla.android.property.LongProperty;
 import com.lakeel.altla.android.property.StringProperty;
 import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
+import com.lakeel.altla.vision.builder.presentation.event.ActionBarTitleEvent;
+import com.lakeel.altla.vision.builder.presentation.event.ActionBarVisibleEvent;
+import com.lakeel.altla.vision.builder.presentation.event.BackViewEvent;
+import com.lakeel.altla.vision.builder.presentation.event.HomeAsUpIndicatorEvent;
+import com.lakeel.altla.vision.builder.presentation.event.HomeAsUpVisibleEvent;
+import com.lakeel.altla.vision.builder.presentation.event.InvalidateOptionsMenuEvent;
 import com.lakeel.altla.vision.builder.presentation.helper.SnackbarEventHelper;
 import com.lakeel.altla.vision.builder.presentation.helper.StringResourceHelper;
+import com.lakeel.altla.vision.builder.presentation.model.SelectAreaSettingsModel;
 import com.lakeel.altla.vision.model.Area;
 import com.lakeel.altla.vision.model.AreaDescription;
 import com.lakeel.altla.vision.model.AreaSettings;
@@ -16,6 +22,7 @@ import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 
 import org.greenrobot.eventbus.EventBus;
 
+import android.content.res.Resources;
 import android.support.annotation.NonNull;
 
 import java.util.ArrayList;
@@ -36,9 +43,11 @@ public final class AreaSettingsListPresenter extends BasePresenter<AreaSettingsL
     @Inject
     EventBus eventBus;
 
-    public final RelayCommand commandClose = new RelayCommand(this::close);
+    @Inject
+    Resources resources;
 
-    public final RelayCommand commandSelect = new RelayCommand(this::select, this::canSelect);
+    @Inject
+    SelectAreaSettingsModel selectAreaSettingsModel;
 
     private final CompositeDisposable compositeDisposable = new CompositeDisposable();
 
@@ -51,11 +60,21 @@ public final class AreaSettingsListPresenter extends BasePresenter<AreaSettingsL
     }
 
     @Override
+    protected void onCreateViewOverride() {
+        super.onCreateViewOverride();
+
+        eventBus.post(ActionBarVisibleEvent.VISIBLE);
+        eventBus.post(new ActionBarTitleEvent(resources.getString(R.string.title_area_settings_list_view)));
+        eventBus.post(HomeAsUpVisibleEvent.VISIBLE);
+        eventBus.post(new HomeAsUpIndicatorEvent(resources.getDrawable(R.drawable.ic_arrow_back_white_24dp)));
+    }
+
+    @Override
     protected void onStartOverride() {
         super.onStartOverride();
 
         items.clear();
-        getView().onDataSetChanged();
+        getView().notifyDataSetChanged();
 
         Disposable disposable = Single
                 .<List<AreaSettings>>create(e -> {
@@ -132,7 +151,7 @@ public final class AreaSettingsListPresenter extends BasePresenter<AreaSettingsL
                 })
                 .subscribe(item -> {
                     items.add(item);
-                    getView().onItemInserted(items.size() - 1);
+                    getView().notifyItemInserted(items.size() - 1);
                 }, e -> {
                     getLog().e("Failed.", e);
                     SnackbarEventHelper.post(eventBus, R.string.snackbar_done);
@@ -145,6 +164,10 @@ public final class AreaSettingsListPresenter extends BasePresenter<AreaSettingsL
         super.onStopOverride();
 
         compositeDisposable.clear();
+    }
+
+    public void prepareOptionsMenu() {
+        getView().setActionSelectEnabled(selectedItem != null);
     }
 
     public int getItemCount() {
@@ -163,56 +186,23 @@ public final class AreaSettingsListPresenter extends BasePresenter<AreaSettingsL
             selectedItem = null;
         }
 
-        commandSelect.raiseOnCanExecuteChanged();
+        eventBus.post(InvalidateOptionsMenuEvent.INSTANCE);
     }
 
-    private void close() {
-        eventBus.post(CloseViewEvent.INSTANCE);
-    }
-
-    private void select() {
-        eventBus.post(new AreaSettingsSelectedEvent(selectedItem.areaSettings,
-                                                    selectedItem.area,
-                                                    selectedItem.areaDescription));
-        close();
-    }
-
-    private boolean canSelect() {
-        return selectedItem != null;
+    public void select() {
+        selectAreaSettingsModel.selectAreaSettings(selectedItem.areaSettings,
+                                                   selectedItem.area,
+                                                   selectedItem.areaDescription);
+        eventBus.post(new BackViewEvent(getView()));
     }
 
     public interface View {
 
-        void onItemInserted(int position);
+        void notifyItemInserted(int position);
 
-        void onDataSetChanged();
-    }
+        void notifyDataSetChanged();
 
-    public static final class AreaSettingsSelectedEvent {
-
-        @NonNull
-        public final AreaSettings areaSettings;
-
-        @NonNull
-        public final Area area;
-
-        @NonNull
-        public final AreaDescription areaDescription;
-
-        public AreaSettingsSelectedEvent(@NonNull AreaSettings areaSettings, @NonNull Area area,
-                                         @NonNull AreaDescription areaDescription) {
-            this.areaSettings = areaSettings;
-            this.area = area;
-            this.areaDescription = areaDescription;
-        }
-    }
-
-    public static final class CloseViewEvent {
-
-        private static final CloseViewEvent INSTANCE = new CloseViewEvent();
-
-        private CloseViewEvent() {
-        }
+        void setActionSelectEnabled(boolean enabled);
     }
 
     public final class ItemPresenter {
