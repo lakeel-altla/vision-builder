@@ -52,6 +52,7 @@ public final class AreaByPlaceListAdapter extends RecyclerView.Adapter<AreaByPla
                     presenter.onItemSelected(position);
                 } else {
                     if (selectedItem == itemView) {
+                        selectedItem = null;
                         itemView.setSelected(false);
                         presenter.onItemSelected(-1);
                     } else {
