@@ -149,17 +149,19 @@ public final class SelectAreaSettingsModel {
         return Single.create(e -> {
             switch (areaScope) {
                 case PUBLIC: {
-                    visionService.getPublicAreaApi().findAreasByPlaceId(placeId, areas -> {
-                        Collections.sort(areas, AreaNameComparater.INSTANCE);
-                        e.onSuccess(areas);
-                    }, e::onError);
+                    visionService.getPublicAreaApi()
+                                 .findAreasByPlaceId(placeId, areas -> {
+                                     Collections.sort(areas, AreaNameComparater.INSTANCE);
+                                     e.onSuccess(areas);
+                                 }, e::onError);
                     break;
                 }
                 case USER: {
-                    visionService.getUserAreaApi().findAreasByPlaceId(placeId, areas -> {
-                        Collections.sort(areas, AreaNameComparater.INSTANCE);
-                        e.onSuccess(areas);
-                    }, e::onError);
+                    visionService.getUserAreaApi()
+                                 .findAreasByPlaceId(placeId, areas -> {
+                                     Collections.sort(areas, AreaNameComparater.INSTANCE);
+                                     e.onSuccess(areas);
+                                 }, e::onError);
                     break;
                 }
             }

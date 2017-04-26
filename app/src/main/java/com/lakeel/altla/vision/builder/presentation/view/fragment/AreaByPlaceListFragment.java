@@ -107,7 +107,7 @@ public final class AreaByPlaceListFragment
     }
 
     @Override
-    public void onDataSetChanged() {
+    public void notifyDataSetChanged() {
         recyclerView.getAdapter().notifyDataSetChanged();
     }
 

@@ -61,13 +61,13 @@ public final class AreaByPlaceListPresenter extends BasePresenter<AreaByPlaceLis
         super.onStartOverride();
 
         items.clear();
-        getView().onDataSetChanged();
+        getView().notifyDataSetChanged();
 
         final Disposable disposable = selectAreaSettingsModel
                 .loadAreasByPlace()
                 .subscribe(areas -> {
                     items.addAll(areas);
-                    getView().onDataSetChanged();
+                    getView().notifyDataSetChanged();
                 }, e -> {
                     getLog().e("Failed.", e);
                     SnackbarEventHelper.post(eventBus, R.string.snackbar_done);
@@ -112,7 +112,7 @@ public final class AreaByPlaceListPresenter extends BasePresenter<AreaByPlaceLis
 
     public interface View {
 
-        void onDataSetChanged();
+        void notifyDataSetChanged();
 
         void setActionSelectEnabled(boolean enabled);
     }
