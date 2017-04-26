@@ -4,6 +4,7 @@ import com.lakeel.altla.android.property.StringProperty;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.event.ActionBarTitleEvent;
 import com.lakeel.altla.vision.builder.presentation.event.ActionBarVisibleEvent;
+import com.lakeel.altla.vision.builder.presentation.event.CloseAreaByPlaceListViewEvent;
 import com.lakeel.altla.vision.builder.presentation.event.HomeAsUpIndicatorEvent;
 import com.lakeel.altla.vision.builder.presentation.event.HomeAsUpVisibleEvent;
 import com.lakeel.altla.vision.builder.presentation.event.InvalidateOptionsMenuEvent;
@@ -107,7 +108,7 @@ public final class AreaByPlaceListPresenter extends BasePresenter<AreaByPlaceLis
 
     public void select() {
         selectAreaSettingsModel.selectArea(selectedItem);
-        eventBus.post(CloseViewEvent.INSTANCE);
+        eventBus.post(CloseAreaByPlaceListViewEvent.INSTANCE);
     }
 
     public interface View {
@@ -115,14 +116,6 @@ public final class AreaByPlaceListPresenter extends BasePresenter<AreaByPlaceLis
         void notifyDataSetChanged();
 
         void setActionSelectEnabled(boolean enabled);
-    }
-
-    public static final class CloseViewEvent {
-
-        private static final CloseViewEvent INSTANCE = new CloseViewEvent();
-
-        private CloseViewEvent() {
-        }
     }
 
     public final class ItemPresenter {

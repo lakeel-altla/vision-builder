@@ -16,6 +16,7 @@ import com.lakeel.altla.vision.builder.presentation.di.module.ActivityModule;
 import com.lakeel.altla.vision.builder.presentation.event.ActionBarTitleEvent;
 import com.lakeel.altla.vision.builder.presentation.event.ActionBarVisibleEvent;
 import com.lakeel.altla.vision.builder.presentation.event.BackViewEvent;
+import com.lakeel.altla.vision.builder.presentation.event.CloseAreaByPlaceListViewEvent;
 import com.lakeel.altla.vision.builder.presentation.event.HomeAsUpIndicatorEvent;
 import com.lakeel.altla.vision.builder.presentation.event.HomeAsUpVisibleEvent;
 import com.lakeel.altla.vision.builder.presentation.event.InvalidateOptionsMenuEvent;
@@ -41,10 +42,8 @@ import org.greenrobot.eventbus.Subscribe;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -283,6 +282,12 @@ public final class MainActivity extends AppCompatActivity
         replaceFragmentAndAddToBackStack(AreaDescriptionByAreaListFragment.newInstance());
     }
 
+    @Subscribe
+    public void onEvent(@NonNull CloseAreaByPlaceListViewEvent event) {
+        getSupportFragmentManager().popBackStack(AreaFindFragment.class.getName(),
+                                                 FragmentManager.POP_BACK_STACK_INCLUSIVE);
+    }
+
     private void backView() {
         if (0 < getSupportFragmentManager().getBackStackEntryCount()) {
             getSupportFragmentManager().popBackStack();
@@ -293,17 +298,6 @@ public final class MainActivity extends AppCompatActivity
         toolbar.setVisibility(View.INVISIBLE);
 
         replaceFragment(SignInFragment.newInstance());
-    }
-
-    private void addFragmentAndAddToBackStack(Fragment fragment) {
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-
-        Fragment topFragment = getTopFragment();
-        if (topFragment != null) transaction.hide(topFragment);
-
-        transaction.addToBackStack(fragment.getClass().getName())
-                   .add(R.id.fragment_container, fragment, fragment.getClass().getName())
-                   .commit();
     }
 
     private void replaceFragmentAndAddToBackStack(Fragment fragment) {
@@ -317,18 +311,5 @@ public final class MainActivity extends AppCompatActivity
         getSupportFragmentManager().beginTransaction()
                                    .replace(R.id.fragment_container, fragment, fragment.getClass().getName())
                                    .commit();
-    }
-
-    @Nullable
-    private Fragment getTopFragment() {
-        FragmentManager manager = getSupportFragmentManager();
-
-        int index = manager.getBackStackEntryCount() - 1;
-        if (index < 0) {
-            return null;
-        } else {
-            FragmentManager.BackStackEntry entry = manager.getBackStackEntryAt(index);
-            return manager.findFragmentByTag(entry.getName());
-        }
     }
 }
