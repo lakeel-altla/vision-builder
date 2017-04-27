@@ -16,6 +16,7 @@ import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaSettingsFr
 import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaSettingsListFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.ConsoleFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.ImageAssetListFragment;
+import com.lakeel.altla.vision.builder.presentation.view.fragment.SettingsFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.SignInFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.TangoPermissionFragment;
 
@@ -48,6 +49,8 @@ public interface ActivityComponent {
     void inject(AreaModeFragment fragment);
 
     void inject(AreaFindFragment fragment);
+
+    void inject(SettingsFragment fragment);
 
     void inject(ActorContainerFragment fragment);
 

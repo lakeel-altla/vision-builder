@@ -71,6 +71,7 @@
     <string name="title_area_find_view">Find Area</string>
     <string name="title_area_by_place_list_view">Select Area</string>
     <string name="title_area_description_by_area_list_view">Select Area Description</string>
+    <string name="title_settings_view">Settings</string>
 
     <string name="action_create">Create</string>
     <string name="action_debug">Debug ON/OFF</string>
@@ -82,5 +83,6 @@
     <string name="action_select">Select</string>
 
     <string name="input_error_required">Required.</string>
+    <string name="button_sign_out">Sign Out</string>
 
 </resources>

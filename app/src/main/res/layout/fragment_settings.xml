@@ -1,0 +1,22 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:tools="http://schemas.android.com/tools"
+            android:paddingBottom="@dimen/content_vertical_margin"
+            android:paddingLeft="@dimen/content_horizontal_margin"
+            android:paddingRight="@dimen/content_horizontal_margin"
+            android:paddingTop="@dimen/content_vertical_margin"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:context="com.lakeel.altla.vision.builder.presentation.view.fragment.SettingsFragment">
+
+    <LinearLayout android:orientation="vertical"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content">
+
+        <Button android:id="@+id/button_sign_out"
+                android:text="@string/button_sign_out"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+
+</ScrollView>

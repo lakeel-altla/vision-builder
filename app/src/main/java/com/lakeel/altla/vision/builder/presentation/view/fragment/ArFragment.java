@@ -4,6 +4,7 @@ package com.lakeel.altla.vision.builder.presentation.view.fragment;
 import com.google.atap.tango.ux.TangoUx;
 import com.google.atap.tango.ux.TangoUxLayout;
 
+import com.lakeel.altla.android.binding.ViewBindingFactory;
 import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
@@ -99,8 +100,6 @@ public final class ArFragment extends AbstractFragment<ArPresenter.View, ArPrese
 
     private boolean scrolling;
 
-    private InteractionListener interactionListener;
-
     @NonNull
     public static Fragment newInstance() {
         return new ArFragment();
@@ -121,14 +120,6 @@ public final class ArFragment extends AbstractFragment<ArPresenter.View, ArPrese
         super.onAttachOverride(context);
 
         ActivityScopeContext.class.cast(context).getActivityComponent().inject(this);
-        interactionListener = InteractionListener.class.cast(context);
-    }
-
-    @Override
-    protected void onDetachOverride() {
-        super.onDetachOverride();
-
-        interactionListener = null;
     }
 
     @Nullable
@@ -203,6 +194,9 @@ public final class ArFragment extends AbstractFragment<ArPresenter.View, ArPrese
 
             return false;
         });
+
+        ViewBindingFactory factory = new ViewBindingFactory(view);
+        factory.create(R.id.image_button_show_settings, "onClick", presenter.commandShowSettings).bind();
     }
 
     @Override
@@ -313,12 +307,7 @@ public final class ArFragment extends AbstractFragment<ArPresenter.View, ArPrese
     }
 
     @Override
-    public void onShowSignInView() {
-        interactionListener.onShowSignInView();
-    }
-
-    @Override
-    public void onSnackbar(@StringRes int resId) {
+    public void showSnackbar(@StringRes int resId) {
         Snackbar.make(viewTop, resId, Snackbar.LENGTH_SHORT).show();
     }
 
@@ -330,11 +319,6 @@ public final class ArFragment extends AbstractFragment<ArPresenter.View, ArPrese
     @OnClick(R.id.image_button_asset_list)
     void onClickButtonAssetList() {
         presenter.showAssetListView();
-    }
-
-    @OnClick(R.id.image_button_close)
-    void onClickButtonClose() {
-        presenter.closeView();
     }
 
     //
@@ -455,12 +439,5 @@ public final class ArFragment extends AbstractFragment<ArPresenter.View, ArPrese
         getChildFragmentManager().beginTransaction()
                                  .remove(fragment)
                                  .commit();
-    }
-
-    public interface InteractionListener {
-
-//        void onUpdateActionBarVisible(boolean visible);
-
-        void onShowSignInView();
     }
 }

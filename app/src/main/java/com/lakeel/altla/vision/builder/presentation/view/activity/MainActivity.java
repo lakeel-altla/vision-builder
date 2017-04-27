@@ -26,6 +26,8 @@ import com.lakeel.altla.vision.builder.presentation.event.ShowAreaFindViewEvent;
 import com.lakeel.altla.vision.builder.presentation.event.ShowAreaModeViewEvent;
 import com.lakeel.altla.vision.builder.presentation.event.ShowAreaSettingsListViewEvent;
 import com.lakeel.altla.vision.builder.presentation.event.ShowAreaSettingsViewEvent;
+import com.lakeel.altla.vision.builder.presentation.event.ShowSettingsViewEvent;
+import com.lakeel.altla.vision.builder.presentation.event.ShowSignInViewEvent;
 import com.lakeel.altla.vision.builder.presentation.helper.ObservableHelper;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.ArFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaByPlaceListFragment;
@@ -34,6 +36,7 @@ import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaFindFragme
 import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaModeFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaSettingsFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaSettingsListFragment;
+import com.lakeel.altla.vision.builder.presentation.view.fragment.SettingsFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.SignInFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.TangoPermissionFragment;
 
@@ -63,8 +66,7 @@ public final class MainActivity extends AppCompatActivity
                    FirebaseAuth.AuthStateListener,
                    TangoWrapper.OnTangoReadyListener,
                    SignInFragment.InteractionListener,
-                   TangoPermissionFragment.InteractionListener,
-                   ArFragment.InteractionListener {
+                   TangoPermissionFragment.InteractionListener {
 
     private static final Log LOG = LogFactory.getLog(MainActivity.class);
 
@@ -198,11 +200,6 @@ public final class MainActivity extends AppCompatActivity
         replaceFragment(ArFragment.newInstance());
     }
 
-    @Override
-    public void onShowSignInView() {
-        showSignInView();
-    }
-
     @Subscribe
     public void onEvent(@NonNull ActionBarVisibleEvent event) {
         ActionBar actionBar = getSupportActionBar();
@@ -253,6 +250,11 @@ public final class MainActivity extends AppCompatActivity
     }
 
     @Subscribe
+    public void onEvent(@NonNull ShowSignInViewEvent event) {
+        showSignInView();
+    }
+
+    @Subscribe
     public void onEvent(@NonNull ShowAreaSettingsViewEvent event) {
         replaceFragmentAndAddToBackStack(AreaSettingsFragment.newInstance());
     }
@@ -280,6 +282,11 @@ public final class MainActivity extends AppCompatActivity
     @Subscribe
     public void onEvent(@NonNull ShowAreaDescriptionByAreaListViewEvent event) {
         replaceFragmentAndAddToBackStack(AreaDescriptionByAreaListFragment.newInstance());
+    }
+
+    @Subscribe
+    public void onEvent(@NonNull ShowSettingsViewEvent event) {
+        replaceFragmentAndAddToBackStack(SettingsFragment.newInstance());
     }
 
     @Subscribe

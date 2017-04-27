@@ -6,8 +6,8 @@ import com.google.atap.tangoservice.TangoCameraIntrinsics;
 import com.google.atap.tangoservice.TangoConfig;
 import com.google.atap.tangoservice.TangoCoordinateFramePair;
 import com.google.atap.tangoservice.TangoPoseData;
-import com.google.firebase.auth.FirebaseAuth;
 
+import com.lakeel.altla.android.binding.command.RelayCommand;
 import com.lakeel.altla.rajawali.pool.Pool;
 import com.lakeel.altla.rajawali.pool.QuaternionPool;
 import com.lakeel.altla.rajawali.pool.Vector3Pool;
@@ -20,6 +20,7 @@ import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.module.Names;
 import com.lakeel.altla.vision.builder.presentation.event.ActionBarVisibleEvent;
 import com.lakeel.altla.vision.builder.presentation.event.ShowAreaSettingsViewEvent;
+import com.lakeel.altla.vision.builder.presentation.event.ShowSettingsViewEvent;
 import com.lakeel.altla.vision.builder.presentation.event.SnackbarEvent;
 import com.lakeel.altla.vision.builder.presentation.model.ActorDragConstants;
 import com.lakeel.altla.vision.builder.presentation.model.ActorEditMode;
@@ -116,6 +117,8 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
 
     @Inject
     ArModel arModel;
+
+    public final RelayCommand commandShowSettings = new RelayCommand(this::showSettingsView);
 
     private final CompositeDisposable compositeDisposable = new CompositeDisposable();
 
@@ -240,7 +243,7 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
                         actorManager.addActor(actor);
                     }, e -> {
                         getLog().e("Failed.", e);
-                        getView().onSnackbar(R.string.snackbar_failed);
+                        getView().showSnackbar(R.string.snackbar_failed);
                     });
             compositeDisposable.add(disposable);
         }
@@ -313,18 +316,6 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
     public void showAssetListView() {
         getView().onUpdateAssetListVisible(true);
         getView().onUpdateMainMenuVisible(false);
-    }
-
-    public void closeView() {
-        visionService.getUserDeviceConnectionApi()
-                     .markUserDeviceConnectionAsOffline(aVoid -> {
-                         FirebaseAuth.getInstance().signOut();
-                         getView().onShowSignInView();
-                     }, e -> {
-                         getLog().e("Failed.", e);
-                         FirebaseAuth.getInstance().signOut();
-                         getView().onShowSignInView();
-                     });
     }
 
     public void onTouchButtonTranslate() {
@@ -496,40 +487,8 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
 
     @Subscribe
     public void onEvent(@NonNull SnackbarEvent event) {
-        getView().onSnackbar(event.resource);
+        getView().showSnackbar(event.resource);
     }
-//
-//    private void startAr(@NonNull String areaSettingsId) {
-//        Disposable disposable = Maybe
-//                .<AreaSettings>create(e -> {
-//                    visionService.getUserAreaSettingsApi()
-//                                 .findUserAreaSettingsById(areaSettingsId, areaSettings -> {
-//                                     if (areaSettings == null) {
-//                                         e.onComplete();
-//                                     } else {
-//                                         e.onSuccess(areaSettings);
-//                                     }
-//                                 }, e::onError);
-//                })
-//                .subscribe(areaSettings -> {
-//                    this.areaSettings = areaSettings;
-//
-//                    disconnectTango();
-//
-//                    // Pause the thread for OpenGL in the texture view.
-//                    getView().pauseTextureView();
-//                    getView().onUpdateImageButtonAssetListVisible(true);
-//
-//                    connectTango();
-//                }, e -> {
-//                    getLog().e("Failed.", e);
-//                    getView().onSnackbar(R.string.snackbar_failed);
-//                }, () -> {
-//                    getLog().e("Entity not found.");
-//                    getView().onSnackbar(R.string.snackbar_failed);
-//                });
-//        compositeDisposable.add(disposable);
-//    }
 
     @NonNull
     private TangoConfig createTangoConfig(@NonNull Tango tango) {
@@ -569,6 +528,10 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
         visionService.getTangoWrapper().removeOnFrameAvailableListener(this);
         visionService.getTangoWrapper().removeOnPoseAvailableListener(this);
         visionService.getTangoWrapper().disconnect();
+    }
+
+    private void showSettingsView() {
+        eventBus.post(ShowSettingsViewEvent.INSTANCE);
     }
 
     private void translateUserActor(float distance) {
@@ -729,9 +692,7 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
 
         void onUpdateScaleSelected(boolean selected);
 
-        void onShowSignInView();
-
-        void onSnackbar(@StringRes int resId);
+        void showSnackbar(@StringRes int resId);
     }
 
     private final class ActorManager {
