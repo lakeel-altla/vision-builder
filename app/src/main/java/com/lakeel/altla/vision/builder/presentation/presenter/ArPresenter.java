@@ -300,11 +300,10 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
             final boolean picked = (pickedActorModel != null);
             if (picked) {
                 // picked.
-                // TODO: use the scope of the targeted actor, not the current area.
-                arModel.pickedActor.set(new ArModel.PickedActor(Scope.USER, pickedActorModel.actor.getId()));
+                arModel.setSelectedActor(pickedActorModel.actor);
             } else {
                 // unpicked.
-                arModel.pickedActor.set(null);
+                arModel.setSelectedActor(null);
             }
 
             getView().setActorViewVisible(picked);
@@ -396,6 +395,7 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
 
         Actor actor = new Actor();
         actor.setUserId(CurrentUser.getInstance().getUserId());
+        actor.setScopeAsEnum(Scope.USER);
         actor.setAreaId(arModel.getAreaSettings().getAreaId());
         // TODO: handle other asset types.
         actor.setAssetTypeAsEnum(AssetType.IMAGE);
@@ -483,7 +483,7 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
     }
 
     @Subscribe
-    public void onEvent(@NonNull ActorPresenter.CloseViewEvent event) {
+    public void onEvent(@NonNull ActorPresenter.ActorViewVisibleEvent event) {
         getView().setActorViewVisible(false);
         getView().setMainMenuVisible(true);
     }

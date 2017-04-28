@@ -1,6 +1,5 @@
 package com.lakeel.altla.vision.builder.presentation.model;
 
-import com.lakeel.altla.android.property.ObjectProperty;
 import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.model.Actor;
 import com.lakeel.altla.vision.model.AreaSettings;
@@ -18,7 +17,7 @@ public final class ArModel {
 
     private AreaSettings areaSettings;
 
-    public final ObjectProperty<PickedActor> pickedActor = new ObjectProperty<>();
+    private Actor selectedActor;
 
     public ArModel(@NonNull VisionService visionService) {
         this.visionService = visionService;
@@ -76,6 +75,15 @@ public final class ArModel {
                                                  e::onError);
             });
         }
+    }
+
+    @Nullable
+    public Actor getSelectedActor() {
+        return selectedActor;
+    }
+
+    public void setSelectedActor(@Nullable Actor selectedActor) {
+        this.selectedActor = selectedActor;
     }
 
     public static final class PickedActor {

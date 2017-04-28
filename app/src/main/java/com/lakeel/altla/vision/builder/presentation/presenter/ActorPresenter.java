@@ -4,8 +4,6 @@ import com.lakeel.altla.android.binding.command.RelayCommand;
 import com.lakeel.altla.android.property.LongProperty;
 import com.lakeel.altla.android.property.StringProperty;
 import com.lakeel.altla.vision.api.VisionService;
-import com.lakeel.altla.vision.builder.R;
-import com.lakeel.altla.vision.builder.presentation.helper.SnackbarEventHelper;
 import com.lakeel.altla.vision.builder.presentation.model.ArModel;
 import com.lakeel.altla.vision.model.Actor;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
@@ -13,10 +11,6 @@ import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 import org.greenrobot.eventbus.EventBus;
 
 import javax.inject.Inject;
-
-import io.reactivex.Maybe;
-import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.disposables.Disposable;
 
 public final class ActorPresenter extends BasePresenter<ActorPresenter.View> {
 
@@ -37,8 +31,6 @@ public final class ActorPresenter extends BasePresenter<ActorPresenter.View> {
 
     public final RelayCommand commandClose = new RelayCommand(this::close);
 
-    private final CompositeDisposable compositeDisposable = new CompositeDisposable();
-
     @Inject
     public ActorPresenter() {
     }
@@ -51,64 +43,23 @@ public final class ActorPresenter extends BasePresenter<ActorPresenter.View> {
     }
 
     private void loadActor() {
-        propertyName.set(null);
-        propertyCreatedAt.set(-1);
-        propertyUpdatedAt.set(-1);
+        final Actor actor = arModel.getSelectedActor();
+        if (actor == null) throw new IllegalStateException("No actor is selected.");
 
-        ArModel.PickedActor pickedActor = arModel.pickedActor.get();
-
-        if (pickedActor != null) {
-            Disposable disposable = Maybe
-                    .<Actor>create(e -> {
-                        switch (pickedActor.scope) {
-                            case PUBLIC:
-                                visionService.getPublicActorApi()
-                                             .findActorById(pickedActor.actorId, actor -> {
-                                                 if (actor == null) {
-                                                     e.onComplete();
-                                                 } else {
-                                                     e.onSuccess(actor);
-                                                 }
-                                             }, e::onError);
-                                break;
-                            case USER:
-                                visionService.getUserActorApi()
-                                             .findActorById(pickedActor.actorId, actor -> {
-                                                 if (actor == null) {
-                                                     e.onComplete();
-                                                 } else {
-                                                     e.onSuccess(actor);
-                                                 }
-                                             }, e::onError);
-                                break;
-                            default:
-                                throw new IllegalStateException("Invalid scope: " + pickedActor.scope);
-                        }
-                    })
-                    .subscribe(actor -> {
-                        propertyName.set(actor.getName());
-                        propertyCreatedAt.set(actor.getCreatedAtAsLong());
-                        propertyUpdatedAt.set(actor.getUpdatedAtAsLong());
-                    }, e -> {
-                        getLog().e("Failed.", e);
-                        SnackbarEventHelper.post(eventBus, R.string.snackbar_done);
-                    }, () -> {
-                        getLog().e("Entity not found.");
-                        SnackbarEventHelper.post(eventBus, R.string.snackbar_done);
-                    });
-            compositeDisposable.add(disposable);
-        }
+        propertyName.set(actor.getName());
+        propertyCreatedAt.set(actor.getCreatedAtAsLong());
+        propertyUpdatedAt.set(actor.getUpdatedAtAsLong());
     }
 
     private void close() {
-        eventBus.post(CloseViewEvent.INSTANCE);
+        eventBus.post(ActorViewVisibleEvent.INSTANCE);
     }
 
-    public static final class CloseViewEvent {
+    public static final class ActorViewVisibleEvent {
 
-        private static final CloseViewEvent INSTANCE = new CloseViewEvent();
+        public static final ActorViewVisibleEvent INSTANCE = new ActorViewVisibleEvent();
 
-        private CloseViewEvent() {
+        private ActorViewVisibleEvent() {
         }
     }
 
