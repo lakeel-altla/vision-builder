@@ -1,12 +1,10 @@
 package com.lakeel.altla.vision.builder.presentation.view.fragment;
 
-import com.lakeel.altla.tango.TangoIntents;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.presenter.TangoPermissionPresenter;
 import com.lakeel.altla.vision.presentation.view.fragment.AbstractFragment;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -19,16 +17,12 @@ import android.view.ViewGroup;
 
 import javax.inject.Inject;
 
-import butterknife.ButterKnife;
-
 public final class TangoPermissionFragment
         extends AbstractFragment<TangoPermissionPresenter.View, TangoPermissionPresenter>
         implements TangoPermissionPresenter.View {
 
     @Inject
     TangoPermissionPresenter presenter;
-
-    private InteractionListener interactionListener;
 
     public static TangoPermissionFragment newInstance() {
         return new TangoPermissionFragment();
@@ -48,15 +42,7 @@ public final class TangoPermissionFragment
     protected void onAttachOverride(@NonNull Context context) {
         super.onAttachOverride(context);
 
-        ActivityScopeContext.class.cast(getContext()).getActivityComponent().inject(this);
-        interactionListener = InteractionListener.class.cast(context);
-    }
-
-    @Override
-    protected void onDetachOverride() {
-        super.onDetachOverride();
-
-        interactionListener = null;
+        ((ActivityScopeContext) context).getActivityComponent().inject(this);
     }
 
     @Nullable
@@ -67,41 +53,17 @@ public final class TangoPermissionFragment
     }
 
     @Override
-    protected void onBindView(@NonNull View view) {
-        super.onBindView(view);
-
-        ButterKnife.bind(this, view);
-    }
-
-    @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
-        boolean isCanceled = (Activity.RESULT_CANCELED == resultCode);
-        presenter.onTangoPermissionResult(isCanceled);
+        presenter.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
-    public void onCloseTangoPermissionView() {
-        interactionListener.onCloseTangoPermissionView();
-    }
-
-    @Override
-    public void onShowAreaLearningPermissionRequiredSnackbar() {
+    public void showAreaLearningPermissionRequiredSnackbar() {
         if (getView() != null) {
             Snackbar.make(getView(), R.string.snackbar_area_learning_permission_required, Snackbar.LENGTH_SHORT)
-                    .setAction(R.string.snackbar_action_request_permission, view -> presenter.onConfirmPermission())
+                    .setAction(R.string.snackbar_action_request_permission, view -> presenter.confirmPermission())
                     .show();
         }
-    }
-
-    @Override
-    public void onShowTangoPermissionActivity() {
-        startActivityForResult(TangoIntents.createAdfLoadSaveRequestPermissionIntent(), 0);
-    }
-
-    public interface InteractionListener {
-
-        void onCloseTangoPermissionView();
     }
 }

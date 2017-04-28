@@ -84,5 +84,6 @@
 
     <string name="input_error_required">Required.</string>
     <string name="button_sign_out">Sign Out</string>
+    <string name="title_sign_in_view">Sign In</string>
 
 </resources>

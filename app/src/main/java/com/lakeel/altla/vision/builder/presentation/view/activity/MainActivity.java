@@ -1,12 +1,10 @@
 package com.lakeel.altla.vision.builder.presentation.view.activity;
 
-import com.google.atap.tangoservice.Tango;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import com.lakeel.altla.android.log.Log;
 import com.lakeel.altla.android.log.LogFactory;
-import com.lakeel.altla.tango.TangoWrapper;
 import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.app.MyApplication;
@@ -16,10 +14,12 @@ import com.lakeel.altla.vision.builder.presentation.di.module.ActivityModule;
 import com.lakeel.altla.vision.builder.presentation.event.ActionBarTitleEvent;
 import com.lakeel.altla.vision.builder.presentation.event.ActionBarVisibleEvent;
 import com.lakeel.altla.vision.builder.presentation.event.BackViewEvent;
+import com.lakeel.altla.vision.builder.presentation.event.ClearBackStackEvent;
 import com.lakeel.altla.vision.builder.presentation.event.CloseAreaByPlaceListViewEvent;
 import com.lakeel.altla.vision.builder.presentation.event.HomeAsUpIndicatorEvent;
 import com.lakeel.altla.vision.builder.presentation.event.HomeAsUpVisibleEvent;
 import com.lakeel.altla.vision.builder.presentation.event.InvalidateOptionsMenuEvent;
+import com.lakeel.altla.vision.builder.presentation.event.ShowArViewEvent;
 import com.lakeel.altla.vision.builder.presentation.event.ShowAreaByPlaceListViewEvent;
 import com.lakeel.altla.vision.builder.presentation.event.ShowAreaDescriptionByAreaListViewEvent;
 import com.lakeel.altla.vision.builder.presentation.event.ShowAreaFindViewEvent;
@@ -28,6 +28,7 @@ import com.lakeel.altla.vision.builder.presentation.event.ShowAreaSettingsListVi
 import com.lakeel.altla.vision.builder.presentation.event.ShowAreaSettingsViewEvent;
 import com.lakeel.altla.vision.builder.presentation.event.ShowSettingsViewEvent;
 import com.lakeel.altla.vision.builder.presentation.event.ShowSignInViewEvent;
+import com.lakeel.altla.vision.builder.presentation.event.ShowTangoPermissionViewEvent;
 import com.lakeel.altla.vision.builder.presentation.helper.ObservableHelper;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.ArFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaByPlaceListFragment;
@@ -45,13 +46,13 @@ import org.greenrobot.eventbus.Subscribe;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
-import android.view.View;
 
 import javax.inject.Inject;
 
@@ -63,10 +64,7 @@ import io.reactivex.disposables.Disposable;
 
 public final class MainActivity extends AppCompatActivity
         implements ActivityScopeContext,
-                   FirebaseAuth.AuthStateListener,
-                   TangoWrapper.OnTangoReadyListener,
-                   SignInFragment.InteractionListener,
-                   TangoPermissionFragment.InteractionListener {
+                   FirebaseAuth.AuthStateListener {
 
     private static final Log LOG = LogFactory.getLog(MainActivity.class);
 
@@ -95,6 +93,8 @@ public final class MainActivity extends AppCompatActivity
                                          .activityComponent(new ActivityModule(this));
         activityComponent.inject(this);
 
+        eventBus.register(this);
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
@@ -102,8 +102,15 @@ public final class MainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
 
         if (savedInstanceState == null) {
-            showSignInView();
+            replaceFragment(SignInFragment.newInstance());
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        eventBus.unregister(this);
     }
 
     @Override
@@ -122,8 +129,6 @@ public final class MainActivity extends AppCompatActivity
         super.onStart();
 
         FirebaseAuth.getInstance().addAuthStateListener(this);
-
-        eventBus.register(this);
     }
 
     @Override
@@ -131,8 +136,6 @@ public final class MainActivity extends AppCompatActivity
         super.onStop();
 
         FirebaseAuth.getInstance().removeAuthStateListener(this);
-
-        eventBus.unregister(this);
 
         // Unsubscribe the connection.
         if (observeConnectionDisposable != null) {
@@ -182,22 +185,20 @@ public final class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onTangoReady(Tango tango) {
-        LOG.d("Tango is ready.");
-    }
+    public void onBackPressed() {
+        FragmentManager manager = getSupportFragmentManager();
 
-    @Override
-    public void onCloseSignInView() {
-        toolbar.setVisibility(View.INVISIBLE);
-
-        replaceFragment(TangoPermissionFragment.newInstance());
-    }
-
-    @Override
-    public void onCloseTangoPermissionView() {
-        toolbar.setVisibility(View.VISIBLE);
-
-        replaceFragment(ArFragment.newInstance());
+        int top = manager.getBackStackEntryCount() - 1;
+        if (0 <= top) {
+            FragmentManager.BackStackEntry entry = manager.getBackStackEntryAt(top);
+            if (ArFragment.class.getName().equals(entry.getName())) {
+                finish();
+            } else {
+                super.onBackPressed();
+            }
+        } else {
+            super.onBackPressed();
+        }
     }
 
     @Subscribe
@@ -209,6 +210,8 @@ public final class MainActivity extends AppCompatActivity
             } else {
                 actionBar.hide();
             }
+        } else {
+            LOG.w("ActionBar is null.");
         }
     }
 
@@ -217,6 +220,8 @@ public final class MainActivity extends AppCompatActivity
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setTitle(event.title);
+        } else {
+            LOG.w("ActionBar is null.");
         }
     }
 
@@ -230,6 +235,8 @@ public final class MainActivity extends AppCompatActivity
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(event.visible);
+        } else {
+            LOG.w("ActionBar is null.");
         }
     }
 
@@ -238,6 +245,8 @@ public final class MainActivity extends AppCompatActivity
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setHomeAsUpIndicator(event.indicator);
+        } else {
+            LOG.w("ActionBar is null.");
         }
     }
 
@@ -246,12 +255,29 @@ public final class MainActivity extends AppCompatActivity
         Fragment fragment = (Fragment) event.view;
         if (getSupportFragmentManager().findFragmentByTag(fragment.getTag()) != null) {
             backView();
+        } else {
+            LOG.w("No such view exists: tag = %s", fragment.getTag());
         }
     }
 
     @Subscribe
+    public void onEvent(@NonNull ClearBackStackEvent event) {
+        getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+    }
+
+    @Subscribe
     public void onEvent(@NonNull ShowSignInViewEvent event) {
-        showSignInView();
+        replaceFragment(SignInFragment.newInstance());
+    }
+
+    @Subscribe
+    public void onEvent(@NonNull ShowTangoPermissionViewEvent event) {
+        replaceFragment(TangoPermissionFragment.newInstance());
+    }
+
+    @Subscribe
+    public void onEvent(@NonNull ShowArViewEvent event) {
+        replaceFragmentAndAddToBackStack(ArFragment.newInstance());
     }
 
     @Subscribe
@@ -301,12 +327,6 @@ public final class MainActivity extends AppCompatActivity
         }
     }
 
-    private void showSignInView() {
-        toolbar.setVisibility(View.INVISIBLE);
-
-        replaceFragment(SignInFragment.newInstance());
-    }
-
     private void replaceFragmentAndAddToBackStack(Fragment fragment) {
         getSupportFragmentManager().beginTransaction()
                                    .addToBackStack(fragment.getClass().getName())
@@ -318,5 +338,11 @@ public final class MainActivity extends AppCompatActivity
         getSupportFragmentManager().beginTransaction()
                                    .replace(R.id.fragment_container, fragment, fragment.getClass().getName())
                                    .commit();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Nullable
+    private <T extends Fragment> T findFragment(@NonNull Class<T> clazz) {
+        return (T) getSupportFragmentManager().findFragmentByTag(clazz.getName());
     }
 }

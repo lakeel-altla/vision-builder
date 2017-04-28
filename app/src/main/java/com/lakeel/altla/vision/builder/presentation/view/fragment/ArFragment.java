@@ -195,6 +195,14 @@ public final class ArFragment extends AbstractFragment<ArPresenter.View, ArPrese
             return false;
         });
 
+        // IMPORTANT!!
+        //
+        // Undesirable gimmick that focuses on the top view explicitly.
+        // onKeyEvent/onBackPressed is never called if the view losts the focus.
+        view.setFocusable(true);
+        view.setFocusableInTouchMode(true);
+        view.requestFocus();
+
         ViewBindingFactory factory = new ViewBindingFactory(view);
         factory.create(R.id.image_button_show_settings, "onClick", presenter.commandShowSettings).bind();
     }

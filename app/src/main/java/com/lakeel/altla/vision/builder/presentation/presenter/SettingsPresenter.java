@@ -7,6 +7,7 @@ import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.event.ActionBarTitleEvent;
 import com.lakeel.altla.vision.builder.presentation.event.ActionBarVisibleEvent;
+import com.lakeel.altla.vision.builder.presentation.event.ClearBackStackEvent;
 import com.lakeel.altla.vision.builder.presentation.event.HomeAsUpIndicatorEvent;
 import com.lakeel.altla.vision.builder.presentation.event.HomeAsUpVisibleEvent;
 import com.lakeel.altla.vision.builder.presentation.event.ShowSignInViewEvent;
@@ -49,10 +50,12 @@ public final class SettingsPresenter extends BasePresenter<SettingsPresenter.Vie
         visionService.getUserDeviceConnectionApi()
                      .markUserDeviceConnectionAsOffline(aVoid -> {
                          FirebaseAuth.getInstance().signOut();
+                         eventBus.post(ClearBackStackEvent.INSTANCE);
                          eventBus.post(ShowSignInViewEvent.INSTANCE);
                      }, e -> {
                          getLog().e("Failed.", e);
                          FirebaseAuth.getInstance().signOut();
+                         eventBus.post(ClearBackStackEvent.INSTANCE);
                          eventBus.post(ShowSignInViewEvent.INSTANCE);
                      });
     }

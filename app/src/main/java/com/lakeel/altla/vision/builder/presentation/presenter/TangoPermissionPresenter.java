@@ -1,10 +1,22 @@
 package com.lakeel.altla.vision.builder.presentation.presenter;
 
+import com.lakeel.altla.tango.TangoIntents;
+import com.lakeel.altla.vision.builder.presentation.event.ShowArViewEvent;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
+
+import org.greenrobot.eventbus.EventBus;
+
+import android.app.Activity;
+import android.content.Intent;
 
 import javax.inject.Inject;
 
 public final class TangoPermissionPresenter extends BasePresenter<TangoPermissionPresenter.View> {
+
+    private static final int REQUEST_CODE = 888;
+
+    @Inject
+    EventBus eventBus;
 
     @Inject
     public TangoPermissionPresenter() {
@@ -14,27 +26,27 @@ public final class TangoPermissionPresenter extends BasePresenter<TangoPermissio
     protected void onCreateViewOverride() {
         super.onCreateViewOverride();
 
-        onConfirmPermission();
+        confirmPermission();
     }
 
-    public void onConfirmPermission() {
-        getView().onShowTangoPermissionActivity();
+    public void confirmPermission() {
+        getView().startActivityForResult(TangoIntents.createAdfLoadSaveRequestPermissionIntent(), REQUEST_CODE);
     }
 
-    public void onTangoPermissionResult(boolean isCanceled) {
-        if (!isCanceled) {
-            getView().onCloseTangoPermissionView();
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (REQUEST_CODE != requestCode) return;
+
+        if (Activity.RESULT_CANCELED != resultCode) {
+            eventBus.post(ShowArViewEvent.INSTANCE);
         } else {
-            getView().onShowAreaLearningPermissionRequiredSnackbar();
+            getView().showAreaLearningPermissionRequiredSnackbar();
         }
     }
 
     public interface View {
 
-        void onCloseTangoPermissionView();
+        void startActivityForResult(Intent intent, int requestCode);
 
-        void onShowAreaLearningPermissionRequiredSnackbar();
-
-        void onShowTangoPermissionActivity();
+        void showAreaLearningPermissionRequiredSnackbar();
     }
 }

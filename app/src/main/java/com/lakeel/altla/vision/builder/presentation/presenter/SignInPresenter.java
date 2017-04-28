@@ -9,11 +9,17 @@ import com.google.firebase.auth.FirebaseUser;
 
 import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
+import com.lakeel.altla.vision.builder.presentation.event.ActionBarTitleEvent;
+import com.lakeel.altla.vision.builder.presentation.event.ActionBarVisibleEvent;
+import com.lakeel.altla.vision.builder.presentation.event.HomeAsUpVisibleEvent;
+import com.lakeel.altla.vision.builder.presentation.event.ShowTangoPermissionViewEvent;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
+
+import org.greenrobot.eventbus.EventBus;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.support.annotation.NonNull;
+import android.content.res.Resources;
 import android.support.annotation.StringRes;
 
 import javax.inject.Inject;
@@ -27,13 +33,19 @@ import io.reactivex.disposables.Disposable;
  */
 public final class SignInPresenter extends BasePresenter<SignInPresenter.View> {
 
-    private static final int REQUEST_CODE_GOOGLE_SIGN_IN = 0;
+    private static final int REQUEST_CODE_GOOGLE_SIGN_IN = 999;
 
     @Inject
     VisionService visionService;
 
     @Inject
     GoogleApiClient googleApiClient;
+
+    @Inject
+    EventBus eventBus;
+
+    @Inject
+    Resources resources;
 
     private final CompositeDisposable compositeDisposable = new CompositeDisposable();
 
@@ -53,7 +65,7 @@ public final class SignInPresenter extends BasePresenter<SignInPresenter.View> {
                 if (!signedInDetected) {
                     getLog().i("Signed in to firebase: %s", user.getUid());
                     if (!signInButtonClicked) {
-                        getView().onCloseSignInView();
+                        eventBus.post(ShowTangoPermissionViewEvent.INSTANCE);
                     }
                     signedInDetected = true;
                 } else {
@@ -63,6 +75,15 @@ public final class SignInPresenter extends BasePresenter<SignInPresenter.View> {
                 getLog().d("Signed out.");
             }
         };
+    }
+
+    @Override
+    protected void onCreateViewOverride() {
+        super.onCreateViewOverride();
+
+        eventBus.post(ActionBarVisibleEvent.VISIBLE);
+        eventBus.post(new ActionBarTitleEvent(resources.getString(R.string.title_sign_in_view)));
+        eventBus.post(HomeAsUpVisibleEvent.INVISIBLE);
     }
 
     @Override
@@ -80,12 +101,12 @@ public final class SignInPresenter extends BasePresenter<SignInPresenter.View> {
         FirebaseAuth.getInstance().removeAuthStateListener(authStateListener);
     }
 
-    public void onSignIn() {
+    public void signIn() {
         signInButtonClicked = true;
 
         Intent intent = Auth.GoogleSignInApi.getSignInIntent(googleApiClient);
 
-        getView().onStartActivityForResult(intent, REQUEST_CODE_GOOGLE_SIGN_IN);
+        getView().startActivityForResult(intent, REQUEST_CODE_GOOGLE_SIGN_IN);
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -96,21 +117,27 @@ public final class SignInPresenter extends BasePresenter<SignInPresenter.View> {
 
         if (resultCode != Activity.RESULT_OK) {
             getLog().d("Canceled to sign in to Google.");
-            getView().onSnackbar(R.string.snackbar_google_sign_in_reqiured);
+            getView().showSnackbar(R.string.snackbar_google_sign_in_reqiured);
             return;
         }
 
         GoogleSignInResult googleSignInResult = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+        if (googleSignInResult == null) {
+            getLog().e("GoogleSignInResult is null.");
+            getView().showSnackbar(R.string.snackbar_google_sign_in_failed);
+            return;
+        }
+
         if (!googleSignInResult.isSuccess()) {
             getLog().e("Failed to sign in to Google.");
-            getView().onSnackbar(R.string.snackbar_google_sign_in_failed);
+            getView().showSnackbar(R.string.snackbar_google_sign_in_failed);
             return;
         }
 
         GoogleSignInAccount googleSignInAccount = googleSignInResult.getSignInAccount();
         if (googleSignInAccount == null) {
-            getLog().e("GoogleSignInAccount is null");
-            getView().onSnackbar(R.string.snackbar_google_sign_in_failed);
+            getLog().e("GoogleSignInAccount is null.");
+            getView().showSnackbar(R.string.snackbar_google_sign_in_failed);
             return;
         }
 
@@ -120,27 +147,24 @@ public final class SignInPresenter extends BasePresenter<SignInPresenter.View> {
                         e.onComplete();
                     }, e::onError);
                 })
-                .doOnSubscribe(_subscription -> getView().onShowProgressDialog())
-                .doOnTerminate(() -> getView().onHideProgressDialog())
+                .doOnSubscribe(_subscription -> getView().showProgressDialog())
+                .doOnTerminate(() -> getView().hideProgressDialog())
                 .subscribe(() -> {
-                               getView().onCloseSignInView();
-                           },
-                           e -> {
-                               getLog().e("Failed to sign in to Firebase.", e);
-                           });
+                    eventBus.post(ShowTangoPermissionViewEvent.INSTANCE);
+                }, e -> {
+                    getLog().e("Failed to sign in to Firebase.", e);
+                });
         compositeDisposable.add(disposable);
     }
 
     public interface View {
 
-        void onCloseSignInView();
+        void startActivityForResult(Intent intent, int requestCode);
 
-        void onStartActivityForResult(@NonNull Intent intent, int requestCode);
+        void showSnackbar(@StringRes int resId);
 
-        void onSnackbar(@StringRes int resId);
+        void showProgressDialog();
 
-        void onShowProgressDialog();
-
-        void onHideProgressDialog();
+        void hideProgressDialog();
     }
 }

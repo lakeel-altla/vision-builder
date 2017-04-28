@@ -167,6 +167,7 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
         renderer.setOnCurrentCameraTransformUpdatedListener(this);
         renderer.setOnActorPickedListener(this);
         getView().setSurfaceRenderer(renderer);
+        getView().pauseTextureView();
 
         getView().onUpdateObjectMenuVisible(false);
         getView().onUpdateTranslateSelected(false);

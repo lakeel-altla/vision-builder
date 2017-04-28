@@ -28,8 +28,6 @@ public final class SignInFragment extends AbstractFragment<SignInPresenter.View,
     @Inject
     SignInPresenter presenter;
 
-    private InteractionListener interactionListener;
-
     private ProgressDialog progressDialog;
 
     public static SignInFragment newInstance() {
@@ -50,15 +48,7 @@ public final class SignInFragment extends AbstractFragment<SignInPresenter.View,
     protected void onAttachOverride(@NonNull Context context) {
         super.onAttachOverride(context);
 
-        ActivityScopeContext.class.cast(context).getActivityComponent().inject(this);
-        interactionListener = InteractionListener.class.cast(context);
-    }
-
-    @Override
-    protected void onDetachOverride() {
-        super.onDetachOverride();
-
-        interactionListener = null;
+        ((ActivityScopeContext) context).getActivityComponent().inject(this);
     }
 
     @Nullable
@@ -82,24 +72,14 @@ public final class SignInFragment extends AbstractFragment<SignInPresenter.View,
     }
 
     @Override
-    public void onCloseSignInView() {
-        interactionListener.onCloseSignInView();
-    }
-
-    @Override
-    public void onStartActivityForResult(@NonNull Intent intent, int requestCode) {
-        startActivityForResult(intent, requestCode);
-    }
-
-    @Override
-    public void onSnackbar(@StringRes int resId) {
+    public void showSnackbar(@StringRes int resId) {
         if (getView() != null) {
             Snackbar.make(getView(), resId, Snackbar.LENGTH_SHORT).show();
         }
     }
 
     @Override
-    public void onShowProgressDialog() {
+    public void showProgressDialog() {
         progressDialog = new ProgressDialog(getContext());
         progressDialog.setMessage(getString(R.string.progress_dialog_signin_in));
         progressDialog.setIndeterminate(true);
@@ -108,7 +88,7 @@ public final class SignInFragment extends AbstractFragment<SignInPresenter.View,
     }
 
     @Override
-    public void onHideProgressDialog() {
+    public void hideProgressDialog() {
         if (progressDialog != null && progressDialog.isShowing()) {
             progressDialog.hide();
             progressDialog = null;
@@ -117,11 +97,6 @@ public final class SignInFragment extends AbstractFragment<SignInPresenter.View,
 
     @OnClick(R.id.button_sign_in)
     void onClickButtonSignIn() {
-        presenter.onSignIn();
-    }
-
-    public interface InteractionListener {
-
-        void onCloseSignInView();
+        presenter.signIn();
     }
 }
