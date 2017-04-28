@@ -1,27 +1,23 @@
 package com.lakeel.altla.vision.model;
 
-import org.parceler.Parcel;
+import com.google.firebase.database.Exclude;
 
+import org.parceler.Parcel;
+import org.parceler.Transient;
+
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 @Parcel(Parcel.Serialization.BEAN)
 public final class Actor extends BaseEntity {
 
-    public static final int ASSET_TYPE_UNKNOWN = 0;
-
-    public static final int ASSET_TYPE_IMAGE = 1;
-
-    public static final int LAYER_COMMERCIAL = 0;
-
-    public static final int LAYER_NONCOMMERCIAL = 1;
-
     private String areaId;
 
-    private int assetType;
+    private String assetType = AssetType.UNKNOWN.name();
 
     private String assetId;
 
-    private int layer;
+    private String layer = Layer.UNKNOWN.name();
 
     private String name;
 
@@ -54,12 +50,24 @@ public final class Actor extends BaseEntity {
         this.areaId = areaId;
     }
 
-    public int getAssetType() {
+    @NonNull
+    public String getAssetType() {
         return assetType;
     }
 
-    public void setAssetType(int assetType) {
+    public void setAssetType(@NonNull String assetType) {
         this.assetType = assetType;
+    }
+
+    @Exclude
+    @Transient
+    @NonNull
+    public AssetType getAssetTypeAsEnum() {
+        return AssetType.valueOf(assetType);
+    }
+
+    public void setAssetTypeAsEnum(@NonNull AssetType assetType) {
+        this.assetType = assetType.name();
     }
 
     @Nullable
@@ -71,12 +79,24 @@ public final class Actor extends BaseEntity {
         this.assetId = assetId;
     }
 
-    public int getLayer() {
+    @NonNull
+    public String getLayer() {
         return layer;
     }
 
-    public void setLayer(int layer) {
+    public void setLayer(@NonNull String layer) {
         this.layer = layer;
+    }
+
+    @Exclude
+    @Transient
+    @NonNull
+    public Layer getLayerAsEnum() {
+        return Layer.valueOf(layer);
+    }
+
+    public void setLayerAsEnum(@NonNull Layer layer) {
+        this.layer = layer.name();
     }
 
     @Nullable

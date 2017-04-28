@@ -11,17 +11,18 @@ import android.support.annotation.Nullable;
 @Parcel(Parcel.Serialization.BEAN)
 public final class AreaSettings extends BaseEntity {
 
-    private String areaScope;
+    private String areaScope = Scope.UNKNOWN.name();
 
     private String areaId;
 
     private String areaDescriptionId;
 
+    @NonNull
     public String getAreaScope() {
         return areaScope;
     }
 
-    public void setAreaScope(String areaScope) {
+    public void setAreaScope(@NonNull String areaScope) {
         this.areaScope = areaScope;
     }
 
