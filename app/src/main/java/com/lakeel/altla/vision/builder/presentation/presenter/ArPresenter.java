@@ -297,16 +297,18 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
         if (arModel.getAreaSettings() != null) {
             pickedActorModel = actorModel;
 
-            getView().onUpdateActorContainerViewVisible(true);
-            getView().onUpdateMainMenuVisible(false);
-
-            // TODO: use the scope of the targeted actor, not the current area.
-            final String actorId = pickedActorModel == null ? null : pickedActorModel.actor.getId();
-            if (actorId == null) {
-                arModel.pickedActor.set(null);
+            final boolean picked = (pickedActorModel != null);
+            if (picked) {
+                // picked.
+                // TODO: use the scope of the targeted actor, not the current area.
+                arModel.pickedActor.set(new ArModel.PickedActor(Scope.USER, pickedActorModel.actor.getId()));
             } else {
-                arModel.pickedActor.set(new ArModel.PickedActor(Scope.USER, actorId));
+                // unpicked.
+                arModel.pickedActor.set(null);
             }
+
+            getView().setActorViewVisible(picked);
+            getView().setMainMenuVisible(!picked);
         }
     }
 
@@ -316,7 +318,7 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
 
     public void showAssetListView() {
         getView().onUpdateAssetListVisible(true);
-        getView().onUpdateMainMenuVisible(false);
+        getView().setMainMenuVisible(false);
     }
 
     public void onTouchButtonTranslate() {
@@ -482,8 +484,8 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
 
     @Subscribe
     public void onEvent(@NonNull ActorPresenter.CloseViewEvent event) {
-        getView().onUpdateActorContainerViewVisible(false);
-        getView().onUpdateMainMenuVisible(true);
+        getView().setActorViewVisible(false);
+        getView().setMainMenuVisible(true);
     }
 
     @Subscribe
@@ -669,11 +671,11 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
 
         void pauseTextureView();
 
-        void onUpdateMainMenuVisible(boolean visible);
+        void setMainMenuVisible(boolean visible);
 
         void onUpdateImageButtonAssetListVisible(boolean visible);
 
-        void onUpdateActorContainerViewVisible(boolean visible);
+        void setActorViewVisible(boolean visible);
 
         void onUpdateAssetListVisible(boolean visible);
 

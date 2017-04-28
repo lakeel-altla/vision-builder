@@ -228,7 +228,7 @@ public final class ArFragment extends AbstractFragment<ArPresenter.View, ArPrese
     }
 
     @Override
-    public void onUpdateMainMenuVisible(boolean visible) {
+    public void setMainMenuVisible(boolean visible) {
         viewGroupMainMenu.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
     }
 
@@ -238,12 +238,12 @@ public final class ArFragment extends AbstractFragment<ArPresenter.View, ArPrese
     }
 
     @Override
-    public void onUpdateActorContainerViewVisible(boolean visible) {
-        ActorContainerFragment fragment = findFragment(ActorContainerFragment.class);
+    public void setActorViewVisible(boolean visible) {
+        ActorFragment fragment = findFragment(ActorFragment.class);
 
         if (visible) {
             if (fragment == null) {
-                replaceWindowFragment(ActorContainerFragment.newInstance());
+                replaceWindowFragment(ActorFragment.newInstance());
             }
         } else {
             if (fragment != null) {

@@ -4,7 +4,6 @@ import com.lakeel.altla.vision.builder.presentation.di.ActivityScope;
 import com.lakeel.altla.vision.builder.presentation.di.module.ActivityModule;
 import com.lakeel.altla.vision.builder.presentation.di.module.GoogleApiModule;
 import com.lakeel.altla.vision.builder.presentation.view.activity.MainActivity;
-import com.lakeel.altla.vision.builder.presentation.view.fragment.ActorContainerFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.ActorEditFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.ActorFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.ArFragment;
@@ -51,8 +50,6 @@ public interface ActivityComponent {
     void inject(AreaFindFragment fragment);
 
     void inject(SettingsFragment fragment);
-
-    void inject(ActorContainerFragment fragment);
 
     void inject(ActorFragment fragment);
 

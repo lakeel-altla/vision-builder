@@ -111,7 +111,7 @@ public final class ImageAssetListFragment
     @Override
     public void onCloseView() {
         interactionListener.onUpdateAssetListVisible(false);
-        interactionListener.onUpdateMainMenuVisible(true);
+        interactionListener.setMainMenuVisible(true);
     }
 
     @Override
@@ -128,6 +128,6 @@ public final class ImageAssetListFragment
 
         void onUpdateAssetListVisible(boolean visible);
 
-        void onUpdateMainMenuVisible(boolean visible);
+        void setMainMenuVisible(boolean visible);
     }
 }
