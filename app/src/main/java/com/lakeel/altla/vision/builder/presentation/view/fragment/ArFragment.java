@@ -5,6 +5,7 @@ import com.google.atap.tango.ux.TangoUx;
 import com.google.atap.tango.ux.TangoUxLayout;
 
 import com.lakeel.altla.android.binding.ViewBindingFactory;
+import com.lakeel.altla.android.binding.converter.BooleanToVisibilityConverter;
 import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
@@ -204,7 +205,15 @@ public final class ArFragment extends AbstractFragment<ArPresenter.View, ArPrese
         view.requestFocus();
 
         ViewBindingFactory factory = new ViewBindingFactory(view);
+        factory.create(R.id.image_button_switch_to_edit_mode, "visibility", presenter.propertySwitchToEditModeVisible)
+               .converter(BooleanToVisibilityConverter.INSTANCE)
+               .bind();
+        factory.create(R.id.image_button_switch_to_view_mode, "visibility", presenter.propertySwitchToViewModeVisible)
+               .converter(BooleanToVisibilityConverter.INSTANCE)
+               .bind();
         factory.create(R.id.image_button_show_settings, "onClick", presenter.commandShowSettings).bind();
+        factory.create(R.id.image_button_switch_to_edit_mode, "onClick", presenter.commandSwitchToEditMode).bind();
+        factory.create(R.id.image_button_switch_to_view_mode, "onClick", presenter.commandSwitchToViewMode).bind();
     }
 
     @Override

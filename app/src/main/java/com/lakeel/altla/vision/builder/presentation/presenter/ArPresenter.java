@@ -8,6 +8,7 @@ import com.google.atap.tangoservice.TangoCoordinateFramePair;
 import com.google.atap.tangoservice.TangoPoseData;
 
 import com.lakeel.altla.android.binding.command.RelayCommand;
+import com.lakeel.altla.android.property.BooleanProperty;
 import com.lakeel.altla.rajawali.pool.Pool;
 import com.lakeel.altla.rajawali.pool.QuaternionPool;
 import com.lakeel.altla.rajawali.pool.Vector3Pool;
@@ -118,7 +119,15 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
     @Inject
     ArModel arModel;
 
+    public final BooleanProperty propertySwitchToEditModeVisible = new BooleanProperty();
+
+    public final BooleanProperty propertySwitchToViewModeVisible = new BooleanProperty();
+
     public final RelayCommand commandShowSettings = new RelayCommand(this::showSettingsView);
+
+    public final RelayCommand commandSwitchToEditMode = new RelayCommand(this::switchToEditMode);
+
+    public final RelayCommand commandSwitchToViewMode = new RelayCommand(this::switchToViewMode);
 
     private final CompositeDisposable compositeDisposable = new CompositeDisposable();
 
@@ -144,6 +153,10 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
 
     private Axis rotateAxis = Axis.Y;
 
+    private boolean isAreaLoaded;
+
+    private boolean isEditMode;
+
     @Inject
     public ArPresenter() {
     }
@@ -155,6 +168,9 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
         visionService.getTangoWrapper().setStartTangoUx(false);
         visionService.getTangoWrapper().setCoordinateFramePairs(FRAME_PAIRS);
         visionService.getTangoWrapper().setTangoConfigFactory(this::createTangoConfig);
+
+        propertySwitchToEditModeVisible.set(false);
+        propertySwitchToViewModeVisible.set(false);
     }
 
     @Override
@@ -235,6 +251,8 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
             }
 
             runOnUiThread(() -> {
+                isAreaLoaded = true;
+                propertySwitchToEditModeVisible.set(true);
                 getView().onUpdateImageButtonAssetListVisible(true);
             });
 
@@ -535,6 +553,20 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
 
     private void showSettingsView() {
         eventBus.post(ShowSettingsViewEvent.INSTANCE);
+    }
+
+    private void switchToEditMode() {
+        isEditMode = true;
+        propertySwitchToEditModeVisible.set(false);
+        propertySwitchToViewModeVisible.set(true);
+        // TODO
+    }
+
+    private void switchToViewMode() {
+        isEditMode = false;
+        propertySwitchToEditModeVisible.set(true);
+        propertySwitchToViewModeVisible.set(false);
+        // TODO
     }
 
     private void translateUserActor(float distance) {
