@@ -11,6 +11,8 @@ import android.support.annotation.Nullable;
 @Parcel(Parcel.Serialization.BEAN)
 public final class Actor extends BaseEntity {
 
+    private String scope = Scope.UNKNOWN.name();
+
     private String areaId;
 
     private String assetType = AssetType.UNKNOWN.name();
@@ -40,6 +42,26 @@ public final class Actor extends BaseEntity {
     private double scaleY = 1;
 
     private double scaleZ = 1;
+
+    @NonNull
+    public String getScope() {
+        return scope;
+    }
+
+    public void setScope(@NonNull String scope) {
+        this.scope = scope;
+    }
+
+    @Exclude
+    @Transient
+    @NonNull
+    public Scope getScopeAsEnum() {
+        return Scope.valueOf(scope);
+    }
+
+    public void setScopeAsEnum(@NonNull Scope scope) {
+        this.scope = scope.name();
+    }
 
     @Nullable
     public String getAreaId() {
