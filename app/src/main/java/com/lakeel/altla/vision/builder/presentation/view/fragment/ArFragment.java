@@ -65,7 +65,7 @@ public final class ArFragment extends AbstractFragment<ArPresenter.View, ArPrese
     @BindView(R.id.image_button_asset_list)
     ImageButton imageButtonAssetList;
 
-    @BindView(R.id.view_group_main_menu)
+    @BindView(R.id.view_group_view_mode_menu)
     ViewGroup viewGroupMainMenu;
 
     @BindView(R.id.view_group_edit_user_actor_menu)
@@ -205,10 +205,13 @@ public final class ArFragment extends AbstractFragment<ArPresenter.View, ArPrese
         view.requestFocus();
 
         ViewBindingFactory factory = new ViewBindingFactory(view);
-        factory.create(R.id.image_button_switch_to_edit_mode, "visibility", presenter.propertySwitchToEditModeVisible)
+        factory.create(R.id.view_group_view_mode_menu, "visibility", presenter.propertyViewModeMenuVisible)
                .converter(BooleanToVisibilityConverter.INSTANCE)
                .bind();
-        factory.create(R.id.image_button_switch_to_view_mode, "visibility", presenter.propertySwitchToViewModeVisible)
+        factory.create(R.id.view_group_edit_mode_menu, "visibility", presenter.propertyEditModeMenuVisible)
+               .converter(BooleanToVisibilityConverter.INSTANCE)
+               .bind();
+        factory.create(R.id.image_button_switch_to_edit_mode, "visibility", presenter.propertySwitchToEditModeVisible)
                .converter(BooleanToVisibilityConverter.INSTANCE)
                .bind();
         factory.create(R.id.image_button_show_settings, "onClick", presenter.commandShowSettings).bind();

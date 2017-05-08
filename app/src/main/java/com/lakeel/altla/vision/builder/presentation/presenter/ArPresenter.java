@@ -119,9 +119,11 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
     @Inject
     ArModel arModel;
 
-    public final BooleanProperty propertySwitchToEditModeVisible = new BooleanProperty();
+    public final BooleanProperty propertyViewModeMenuVisible = new BooleanProperty(true);
 
-    public final BooleanProperty propertySwitchToViewModeVisible = new BooleanProperty();
+    public final BooleanProperty propertyEditModeMenuVisible = new BooleanProperty();
+
+    public final BooleanProperty propertySwitchToEditModeVisible = new BooleanProperty();
 
     public final RelayCommand commandShowSettings = new RelayCommand(this::showSettingsView);
 
@@ -153,10 +155,6 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
 
     private Axis rotateAxis = Axis.Y;
 
-    private boolean isAreaLoaded;
-
-    private boolean isEditMode;
-
     @Inject
     public ArPresenter() {
     }
@@ -168,9 +166,6 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
         visionService.getTangoWrapper().setStartTangoUx(false);
         visionService.getTangoWrapper().setCoordinateFramePairs(FRAME_PAIRS);
         visionService.getTangoWrapper().setTangoConfigFactory(this::createTangoConfig);
-
-        propertySwitchToEditModeVisible.set(false);
-        propertySwitchToViewModeVisible.set(false);
     }
 
     @Override
@@ -251,7 +246,6 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
             }
 
             runOnUiThread(() -> {
-                isAreaLoaded = true;
                 propertySwitchToEditModeVisible.set(true);
                 getView().onUpdateImageButtonAssetListVisible(true);
             });
@@ -556,16 +550,14 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
     }
 
     private void switchToEditMode() {
-        isEditMode = true;
-        propertySwitchToEditModeVisible.set(false);
-        propertySwitchToViewModeVisible.set(true);
+        propertyViewModeMenuVisible.set(false);
+        propertyEditModeMenuVisible.set(true);
         // TODO
     }
 
     private void switchToViewMode() {
-        isEditMode = false;
-        propertySwitchToEditModeVisible.set(true);
-        propertySwitchToViewModeVisible.set(false);
+        propertyViewModeMenuVisible.set(true);
+        propertyEditModeMenuVisible.set(false);
         // TODO
     }
 
