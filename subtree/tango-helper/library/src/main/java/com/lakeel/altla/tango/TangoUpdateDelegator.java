@@ -6,7 +6,7 @@ import com.google.atap.tangoservice.TangoPointCloudData;
 import com.google.atap.tangoservice.TangoPoseData;
 import com.google.atap.tangoservice.TangoXyzIjData;
 
-public final class TangoUpdateDelegator implements Tango.OnTangoUpdateListener {
+public final class TangoUpdateDelegator extends Tango.TangoUpdateCallback {
 
     private OnPoseAvailableListener mOnPoseAvailableListener;
 

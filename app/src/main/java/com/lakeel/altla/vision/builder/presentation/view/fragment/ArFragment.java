@@ -1,9 +1,6 @@
 package com.lakeel.altla.vision.builder.presentation.view.fragment;
 
 
-import com.google.atap.tango.ux.TangoUx;
-import com.google.atap.tango.ux.TangoUxLayout;
-
 import com.lakeel.altla.android.binding.ViewBindingFactory;
 import com.lakeel.altla.android.binding.converter.BooleanToVisibilityConverter;
 import com.lakeel.altla.vision.api.VisionService;
@@ -55,9 +52,6 @@ public final class ArFragment extends AbstractFragment<ArPresenter.View, ArPrese
 
     @BindView(R.id.view_top)
     ViewGroup viewTop;
-
-    @BindView(R.id.layout_tango_ux)
-    TangoUxLayout tangoUxLayout;
 
     @BindView(R.id.texture_view)
     TextureView textureView;
@@ -217,11 +211,6 @@ public final class ArFragment extends AbstractFragment<ArPresenter.View, ArPrese
         factory.create(R.id.image_button_show_settings, "onClick", presenter.commandShowSettings).bind();
         factory.create(R.id.image_button_switch_to_edit_mode, "onClick", presenter.commandSwitchToEditMode).bind();
         factory.create(R.id.image_button_switch_to_view_mode, "onClick", presenter.commandSwitchToViewMode).bind();
-    }
-
-    @Override
-    public void setTangoUxLayout(TangoUx tangoUx) {
-        tangoUx.setLayout(tangoUxLayout);
     }
 
     @Override

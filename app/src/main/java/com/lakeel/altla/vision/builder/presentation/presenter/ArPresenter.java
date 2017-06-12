@@ -1,6 +1,5 @@
 package com.lakeel.altla.vision.builder.presentation.presenter;
 
-import com.google.atap.tango.ux.TangoUx;
 import com.google.atap.tangoservice.Tango;
 import com.google.atap.tangoservice.TangoCameraIntrinsics;
 import com.google.atap.tangoservice.TangoConfig;
@@ -163,7 +162,6 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
     public void onCreate(@Nullable Bundle arguments, @Nullable Bundle savedInstanceState) {
         super.onCreate(arguments, savedInstanceState);
 
-        visionService.getTangoWrapper().setStartTangoUx(false);
         visionService.getTangoWrapper().setCoordinateFramePairs(FRAME_PAIRS);
         visionService.getTangoWrapper().setTangoConfigFactory(this::createTangoConfig);
     }
@@ -171,8 +169,6 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
     @Override
     protected void onCreateViewOverride() {
         super.onCreateViewOverride();
-
-        getView().setTangoUxLayout(visionService.getTangoWrapper().getTangoUx());
 
         renderer = new MainRenderer(context);
         renderer.setOnCurrentCameraTransformUpdatedListener(this);
@@ -686,8 +682,6 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
     }
 
     public interface View {
-
-        void setTangoUxLayout(TangoUx tangoUx);
 
         void setSurfaceRenderer(ISurfaceRenderer renderer);
 

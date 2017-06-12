@@ -205,9 +205,4 @@
 
     </android.support.percent.PercentFrameLayout>
 
-    <com.google.atap.tango.ux.TangoUxLayout
-            android:id="@+id/layout_tango_ux"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
-
 </FrameLayout>

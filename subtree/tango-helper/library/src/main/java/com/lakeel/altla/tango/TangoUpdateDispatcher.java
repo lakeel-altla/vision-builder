@@ -9,7 +9,7 @@ import com.google.atap.tangoservice.TangoXyzIjData;
 import java.util.LinkedList;
 import java.util.List;
 
-public final class TangoUpdateDispatcher implements Tango.OnTangoUpdateListener {
+public final class TangoUpdateDispatcher extends Tango.TangoUpdateCallback {
 
     private final Listeners<OnPoseAvailableListener> mOnPoseAvailableListeners = new Listeners<>();
 
