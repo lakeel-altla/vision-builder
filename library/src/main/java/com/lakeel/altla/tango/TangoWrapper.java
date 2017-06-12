@@ -1,6 +1,5 @@
 package com.lakeel.altla.tango;
 
-import com.google.atap.tango.ux.TangoUx;
 import com.google.atap.tangoservice.Tango;
 import com.google.atap.tangoservice.TangoConfig;
 import com.google.atap.tangoservice.TangoCoordinateFramePair;
@@ -24,8 +23,6 @@ public final class TangoWrapper {
 
     private final Context context;
 
-    private final TangoUx tangoUx;
-
     private final TangoUpdateDispatcher tangoUpdateDispatcher = new TangoUpdateDispatcher();
 
     private boolean connected;
@@ -44,7 +41,6 @@ public final class TangoWrapper {
 
     public TangoWrapper(@NonNull Context context) {
         this.context = context;
-        tangoUx = new TangoUx(context);
     }
 
     public void setTangoConfigFactory(TangoConfigFactory tangoConfigFactory) {
@@ -65,10 +61,6 @@ public final class TangoWrapper {
 
     public Tango getTango() {
         return tango;
-    }
-
-    public TangoUx getTangoUx() {
-        return tangoUx;
     }
 
     public synchronized void addOnPoseAvailableListener(@NonNull OnPoseAvailableListener listener) {
@@ -118,10 +110,6 @@ public final class TangoWrapper {
     public void connect() {
         Log.d(TAG, "Connecting...");
 
-        if (startTangoUx) {
-            tangoUx.start(new TangoUx.StartParams());
-        }
-
         tango = new Tango(context, new Runnable() {
             @Override
             public void run() {
@@ -142,18 +130,12 @@ public final class TangoWrapper {
                             tangoConfig = tangoConfigFactory.create(tango);
                         }
                         tango.connect(tangoConfig);
-
-                        TangoUxListener tangoUxListener = new TangoUxListener(tangoUx);
-                        tangoUpdateDispatcher.getOnPoseAvailableListeners().add(tangoUxListener);
-                        tangoUpdateDispatcher.getOnTangoEventListeners().add(tangoUxListener);
                         tango.connectListener(coordinateFramePairs, tangoUpdateDispatcher);
 
                         connected = true;
 
                         Log.d(TAG, "Connected.");
                     } catch (TangoOutOfDateException e) {
-                        tangoUx.showTangoOutOfDate();
-
                         Log.e(TAG, "Tango service outdated.", e);
                     } catch (TangoErrorException e) {
                         Log.e(TAG, "Tango error occurred.", e);
@@ -173,8 +155,6 @@ public final class TangoWrapper {
         Log.d(TAG, "Disconnecting...");
 
         try {
-            tangoUx.stop();
-
             if (tango != null) {
                 tango.disconnect();
             }
