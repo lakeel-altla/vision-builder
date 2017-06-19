@@ -7,6 +7,8 @@ import com.google.atap.tangoservice.TangoCoordinateFramePair;
 import com.google.atap.tangoservice.TangoPoseData;
 
 import com.lakeel.altla.android.binding.command.RelayCommand;
+import com.lakeel.altla.android.log.Log;
+import com.lakeel.altla.android.log.LogFactory;
 import com.lakeel.altla.android.property.BooleanProperty;
 import com.lakeel.altla.rajawali.pool.Pool;
 import com.lakeel.altla.rajawali.pool.QuaternionPool;
@@ -37,7 +39,6 @@ import com.lakeel.altla.vision.model.Asset;
 import com.lakeel.altla.vision.model.AssetType;
 import com.lakeel.altla.vision.model.Layer;
 import com.lakeel.altla.vision.model.Scope;
-import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
@@ -55,6 +56,8 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
@@ -75,12 +78,13 @@ import io.reactivex.disposables.Disposable;
 /**
  * Defines the presenter for {@link View}.
  */
-public final class ArPresenter extends BasePresenter<ArPresenter.View>
-        implements TangoWrapper.OnTangoReadyListener,
-                   OnFrameAvailableListener,
-                   OnPoseAvailableListener,
-                   MainRenderer.OnCurrentCameraTransformUpdatedListener,
-                   MainRenderer.OnActorPickedListener {
+public final class ArPresenter implements TangoWrapper.OnTangoReadyListener,
+                                          OnFrameAvailableListener,
+                                          OnPoseAvailableListener,
+                                          MainRenderer.OnCurrentCameraTransformUpdatedListener,
+                                          MainRenderer.OnActorPickedListener {
+
+    private static final Log LOG = LogFactory.getLog(ArPresenter.class);
 
     private static final float ACTOR_DROP_POSITION_ADJUSTMENT = 2f;
 
@@ -130,6 +134,8 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
 
     public final RelayCommand commandSwitchToViewMode = new RelayCommand(this::switchToViewMode);
 
+    private final Handler handler = new Handler(Looper.getMainLooper());
+
     private final CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     private final Vector3 cameraPosition = new Vector3();
@@ -137,6 +143,8 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
     private final Quaternion cameraOrientation = new Quaternion();
 
     private final Vector3 cameraForward = new Vector3();
+
+    private View view;
 
     private TangoLocalizationState tangoLocalizationState;
 
@@ -158,38 +166,32 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
     public ArPresenter() {
     }
 
-    @Override
-    public void onCreate(@Nullable Bundle arguments, @Nullable Bundle savedInstanceState) {
-        super.onCreate(arguments, savedInstanceState);
-
+    public void onCreate(@Nullable Intent intent, @Nullable Bundle savedInstanceState) {
         visionService.getTangoWrapper().setCoordinateFramePairs(FRAME_PAIRS);
         visionService.getTangoWrapper().setTangoConfigFactory(this::createTangoConfig);
     }
 
-    @Override
-    protected void onCreateViewOverride() {
-        super.onCreateViewOverride();
+    public void onCreateView(View view) {
+        this.view = view;
 
         renderer = new MainRenderer(context);
         renderer.setOnCurrentCameraTransformUpdatedListener(this);
         renderer.setOnActorPickedListener(this);
-        getView().setSurfaceRenderer(renderer);
-        getView().pauseTextureView();
+        view.setSurfaceRenderer(renderer);
+        view.pauseTextureView();
 
-        getView().onUpdateObjectMenuVisible(false);
-        getView().onUpdateTranslateSelected(false);
-        getView().onUpdateRotateSelected(false);
-        getView().onUpdateTranslateMenuVisible(false);
-        getView().onUpdateRotateMenuVisible(false);
-        getView().onUpdateTranslateAxisSelected(Axis.X, true);
-        getView().onUpdateRotateAxisSelected(Axis.Y, true);
+        view.onUpdateObjectMenuVisible(false);
+        view.onUpdateTranslateSelected(false);
+        view.onUpdateRotateSelected(false);
+        view.onUpdateTranslateMenuVisible(false);
+        view.onUpdateRotateMenuVisible(false);
+        view.onUpdateTranslateAxisSelected(Axis.X, true);
+        view.onUpdateRotateAxisSelected(Axis.Y, true);
 
         eventBus.post(ActionBarVisibleEvent.INVISIBLE);
     }
 
-    @Override
-    protected void onStartOverride() {
-        super.onStartOverride();
+    public void onStart() {
 
         // Instantiate ActorManager here to clear the bitmap cache in Picasso.
         actorManager = new ActorManager(context);
@@ -197,34 +199,25 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
         eventBus.register(this);
     }
 
-    @Override
-    protected void onStopOverride() {
-        super.onStopOverride();
-
+    public void onStop() {
         compositeDisposable.clear();
 
         eventBus.unregister(this);
     }
 
-    @Override
-    protected void onResumeOverride() {
-        super.onResumeOverride();
-
+    public void onResume() {
         tangoLocalizationState = TangoLocalizationState.UNKNOWN;
-        getView().onUpdateImageButtonAssetListVisible(false);
+        view.onUpdateImageButtonAssetListVisible(false);
 
         connectTango();
     }
 
-    @Override
-    protected void onPauseOverride() {
-        super.onPauseOverride();
-
+    public void onPause() {
         disconnectTango();
 
         // Pause the thread for OpenGL in the texture view.
-        getView().pauseTextureView();
-        getView().onUpdateImageButtonAssetListVisible(true);
+        view.pauseTextureView();
+        view.onUpdateImageButtonAssetListVisible(true);
     }
 
     @Override
@@ -232,7 +225,7 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
         renderer.connectToTangoCamera(tango);
 
         // Resume the texture view after the tango becomes ready.
-        getView().resumeTextureView();
+        view.resumeTextureView();
 
         final AreaSettings areaSettings = arModel.getAreaSettings();
 
@@ -243,7 +236,7 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
 
             runOnUiThread(() -> {
                 propertySwitchToEditModeVisible.set(true);
-                getView().onUpdateImageButtonAssetListVisible(true);
+                view.onUpdateImageButtonAssetListVisible(true);
             });
 
             Disposable disposable = arModel
@@ -251,8 +244,8 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
                     .subscribe(actor -> {
                         actorManager.addActor(actor);
                     }, e -> {
-                        getLog().e("Failed.", e);
-                        getView().showSnackbar(R.string.snackbar_failed);
+                        LOG.e("Failed.", e);
+                        view.showSnackbar(R.string.snackbar_failed);
                     });
             compositeDisposable.add(disposable);
         }
@@ -274,7 +267,7 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
                 if (tangoLocalizationState == TangoLocalizationState.UNKNOWN ||
                     tangoLocalizationState == TangoLocalizationState.NOT_LOCALIZED) {
 
-                    getLog().d("Localized.");
+                    LOG.d("Localized.");
                     tangoLocalizationState = TangoLocalizationState.LOCALIZED;
                     renderer.setTangoLocalized(true);
                 }
@@ -282,7 +275,7 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
                 if (tangoLocalizationState == TangoLocalizationState.UNKNOWN ||
                     tangoLocalizationState == TangoLocalizationState.LOCALIZED) {
 
-                    getLog().d("Not localized.");
+                    LOG.d("Not localized.");
                     tangoLocalizationState = TangoLocalizationState.NOT_LOCALIZED;
                     renderer.setTangoLocalized(false);
                 }
@@ -314,8 +307,8 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
                 arModel.setSelectedActor(null);
             }
 
-            getView().setActorViewVisible(picked);
-            getView().setMainMenuVisible(!picked);
+            view.setActorViewVisible(picked);
+            view.setMainMenuVisible(!picked);
         }
     }
 
@@ -324,60 +317,60 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
     }
 
     public void showAssetListView() {
-        getView().onUpdateAssetListVisible(true);
-        getView().setMainMenuVisible(false);
+        view.onUpdateAssetListVisible(true);
+        view.setMainMenuVisible(false);
     }
 
     public void onTouchButtonTranslate() {
         actorEditMode = ActorEditMode.TRANSLATE;
 
-        getView().onUpdateTranslateSelected(true);
-        getView().onUpdateTranslateMenuVisible(true);
-        getView().onUpdateRotateSelected(false);
-        getView().onUpdateRotateMenuVisible(false);
-        getView().onUpdateScaleSelected(false);
+        view.onUpdateTranslateSelected(true);
+        view.onUpdateTranslateMenuVisible(true);
+        view.onUpdateRotateSelected(false);
+        view.onUpdateRotateMenuVisible(false);
+        view.onUpdateScaleSelected(false);
     }
 
     public void onTouchButtonRotateObject() {
         actorEditMode = ActorEditMode.ROTATE;
 
-        getView().onUpdateTranslateSelected(false);
-        getView().onUpdateTranslateMenuVisible(false);
-        getView().onUpdateRotateSelected(true);
-        getView().onUpdateRotateMenuVisible(true);
-        getView().onUpdateScaleSelected(false);
+        view.onUpdateTranslateSelected(false);
+        view.onUpdateTranslateMenuVisible(false);
+        view.onUpdateRotateSelected(true);
+        view.onUpdateRotateMenuVisible(true);
+        view.onUpdateScaleSelected(false);
     }
 
     public void onTouchButtonTranslateAxis(Axis axis) {
         translateAxis = axis;
 
-        getView().onUpdateTranslateAxisSelected(Axis.X, axis == Axis.X);
-        getView().onUpdateTranslateAxisSelected(Axis.Y, axis == Axis.Y);
-        getView().onUpdateTranslateAxisSelected(Axis.Z, axis == Axis.Z);
+        view.onUpdateTranslateAxisSelected(Axis.X, axis == Axis.X);
+        view.onUpdateTranslateAxisSelected(Axis.Y, axis == Axis.Y);
+        view.onUpdateTranslateAxisSelected(Axis.Z, axis == Axis.Z);
     }
 
     public void onTouchButtonRotateAxis(Axis axis) {
         rotateAxis = axis;
 
-        getView().onUpdateRotateAxisSelected(Axis.X, axis == Axis.X);
-        getView().onUpdateRotateAxisSelected(Axis.Y, axis == Axis.Y);
-        getView().onUpdateRotateAxisSelected(Axis.Z, axis == Axis.Z);
+        view.onUpdateRotateAxisSelected(Axis.X, axis == Axis.X);
+        view.onUpdateRotateAxisSelected(Axis.Y, axis == Axis.Y);
+        view.onUpdateRotateAxisSelected(Axis.Z, axis == Axis.Z);
     }
 
     public void onTouchButtonScale() {
         actorEditMode = ActorEditMode.SCALE;
 
-        getView().onUpdateTranslateSelected(false);
-        getView().onUpdateTranslateMenuVisible(false);
-        getView().onUpdateRotateSelected(false);
-        getView().onUpdateRotateMenuVisible(false);
-        getView().onUpdateScaleSelected(true);
+        view.onUpdateTranslateSelected(false);
+        view.onUpdateTranslateMenuVisible(false);
+        view.onUpdateRotateSelected(false);
+        view.onUpdateRotateMenuVisible(false);
+        view.onUpdateScaleSelected(true);
     }
 
     public void onTouchButtonDetail() {
 //        if (pickedActorModel == null) return;
 //
-//        getView().onShowUserActorView(pickedActorModel.actor.getAreaId(), pickedActorModel.actor.getId());
+//        view.onShowUserActorView(pickedActorModel.actor.getAreaId(), pickedActorModel.actor.getId());
     }
 
     public void onClickButtonDelete() {
@@ -492,13 +485,13 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
 
     @Subscribe
     public void onEvent(@NonNull ActorPresenter.ActorViewVisibleEvent event) {
-        getView().setActorViewVisible(false);
-        getView().setMainMenuVisible(true);
+        view.setActorViewVisible(false);
+        view.setMainMenuVisible(true);
     }
 
     @Subscribe
     public void onEvent(@NonNull SnackbarEvent event) {
-        getView().showSnackbar(event.resource);
+        view.showSnackbar(event.resource);
     }
 
     @NonNull
@@ -681,6 +674,10 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
         renderer.updateActorModel(pickedActorModel);
     }
 
+    private final void runOnUiThread(@NonNull Runnable runnable) {
+        handler.post(runnable);
+    }
+
     public interface View {
 
         void setSurfaceRenderer(ISurfaceRenderer renderer);
@@ -727,41 +724,41 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
         }
 
         void addActor(@NonNull Actor actor) {
-            getLog().v("Adding the actor: id = %s", actor.getId());
+            LOG.v("Adding the actor: id = %s", actor.getId());
 
             switch (actor.getAssetTypeAsEnum()) {
                 case IMAGE:
                     addImageActor(actor);
                     break;
                 default:
-                    getLog().e("Unexpected asset type: actorId = %s, assetType = %s",
+                    LOG.e("Unexpected asset type: actorId = %s, assetType = %s",
                                actor.getId(), actor.getAssetTypeAsEnum());
                     break;
             }
         }
 
         void updateActor(@NonNull Actor actor) {
-            getLog().v("Updating the actor: id = %s", actor.getId());
+            LOG.v("Updating the actor: id = %s", actor.getId());
 
             switch (actor.getAssetTypeAsEnum()) {
                 case IMAGE:
                     updateImageActor(actor);
                     break;
                 default:
-                    getLog().e("Unexpected asset type: actorId = %s, assetType = %s",
+                    LOG.e("Unexpected asset type: actorId = %s, assetType = %s",
                                actor.getId(), actor.getAssetTypeAsEnum());
                     break;
             }
         }
 
         void removeActor(@NonNull String actorId) {
-            getLog().v("Removing the actor: actorId = %s", actorId);
+            LOG.v("Removing the actor: actorId = %s", actorId);
 
             renderer.removeActor(actorId);
         }
 
         void clearAllActors() {
-            getLog().v("Clearing all actors.");
+            LOG.v("Clearing all actors.");
 
             renderer.clearAllActors();
         }
@@ -779,7 +776,7 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
                 Target target = new Target() {
                     @Override
                     public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                        getLog().d("onBitmapLoaded: actorId = %s, uri = %s", model.actor.getId(), uri);
+                        LOG.d("onBitmapLoaded: actorId = %s, uri = %s", model.actor.getId(), uri);
 
                         model.bitmap = bitmap;
 
@@ -791,7 +788,7 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
 
                     @Override
                     public void onBitmapFailed(Drawable errorDrawable) {
-                        getLog().e("onBitmapFailed: actorId = %s, uri = %s", model.actor.getId(), uri);
+                        LOG.e("onBitmapFailed: actorId = %s, uri = %s", model.actor.getId(), uri);
 
                         // TODO
 
@@ -810,7 +807,7 @@ public final class ArPresenter extends BasePresenter<ArPresenter.View>
                 picasso.load(uri)
                        .into(target);
             }, e -> {
-                getLog().e("Failed.", e);
+                LOG.e("Failed.", e);
             });
             compositeDisposable.add(disposable);
         }

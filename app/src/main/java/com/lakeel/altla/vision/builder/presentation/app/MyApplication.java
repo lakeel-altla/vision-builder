@@ -46,6 +46,13 @@ public final class MyApplication extends Application {
         FirebaseDatabase.getInstance().setPersistenceEnabled(true);
     }
 
+    @Override
+    public void onTerminate() {
+        super.onTerminate();
+
+
+    }
+
     /**
      * Gets the {@link ApplicationComponent} instance that is managed in the specified activity.
      *

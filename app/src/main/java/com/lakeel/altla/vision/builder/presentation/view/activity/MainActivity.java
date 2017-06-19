@@ -30,7 +30,6 @@ import com.lakeel.altla.vision.builder.presentation.event.ShowSettingsViewEvent;
 import com.lakeel.altla.vision.builder.presentation.event.ShowSignInViewEvent;
 import com.lakeel.altla.vision.builder.presentation.event.ShowTangoPermissionViewEvent;
 import com.lakeel.altla.vision.builder.presentation.helper.ObservableHelper;
-import com.lakeel.altla.vision.builder.presentation.view.fragment.ArFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaByPlaceListFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaDescriptionByAreaListFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaFindFragment;
@@ -44,6 +43,7 @@ import com.lakeel.altla.vision.builder.presentation.view.fragment.TangoPermissio
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -184,23 +184,6 @@ public final class MainActivity extends AppCompatActivity
         }
     }
 
-    @Override
-    public void onBackPressed() {
-        FragmentManager manager = getSupportFragmentManager();
-
-        int top = manager.getBackStackEntryCount() - 1;
-        if (0 <= top) {
-            FragmentManager.BackStackEntry entry = manager.getBackStackEntryAt(top);
-            if (ArFragment.class.getName().equals(entry.getName())) {
-                finish();
-            } else {
-                super.onBackPressed();
-            }
-        } else {
-            super.onBackPressed();
-        }
-    }
-
     @Subscribe
     public void onEvent(@NonNull ActionBarVisibleEvent event) {
         ActionBar actionBar = getSupportActionBar();
@@ -277,7 +260,9 @@ public final class MainActivity extends AppCompatActivity
 
     @Subscribe
     public void onEvent(@NonNull ShowArViewEvent event) {
-        replaceFragmentAndAddToBackStack(ArFragment.newInstance());
+        Intent intent = ArActivity.createIntent(this);
+        startActivity(intent);
+        finish();
     }
 
     @Subscribe

@@ -1,20 +1,24 @@
-package com.lakeel.altla.vision.builder.presentation.view.fragment;
-
+package com.lakeel.altla.vision.builder.presentation.view.activity;
 
 import com.lakeel.altla.android.binding.ViewBindingFactory;
 import com.lakeel.altla.android.binding.converter.BooleanToVisibilityConverter;
-import com.lakeel.altla.vision.api.VisionService;
+import com.lakeel.altla.android.log.Log;
+import com.lakeel.altla.android.log.LogFactory;
 import com.lakeel.altla.vision.builder.R;
-import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
+import com.lakeel.altla.vision.builder.presentation.app.MyApplication;
+import com.lakeel.altla.vision.builder.presentation.di.component.ActivityComponent;
+import com.lakeel.altla.vision.builder.presentation.di.module.ActivityModule;
 import com.lakeel.altla.vision.builder.presentation.model.Axis;
 import com.lakeel.altla.vision.builder.presentation.presenter.ArPresenter;
-import com.lakeel.altla.vision.presentation.view.fragment.AbstractFragment;
+import com.lakeel.altla.vision.builder.presentation.view.fragment.ActorFragment;
+import com.lakeel.altla.vision.builder.presentation.view.fragment.ImageAssetListFragment;
 
 import org.rajawali3d.renderer.ISurfaceRenderer;
 import org.rajawali3d.view.ISurface;
 import org.rajawali3d.view.TextureView;
 
-import android.content.Context;
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -22,9 +26,9 @@ import android.support.annotation.StringRes;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.GestureDetectorCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.view.DragEvent;
 import android.view.GestureDetector;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,16 +43,15 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.OnTouch;
 
-public final class ArFragment extends AbstractFragment<ArPresenter.View, ArPresenter>
-        implements ArPresenter.View,
-                   ImageAssetListFragment.InteractionListener {
+public final class ArActivity extends AppCompatActivity implements ArPresenter.View {
+
+    private static final Log LOG = LogFactory.getLog(ArActivity.class);
 
     @Inject
     ArPresenter presenter;
 
-    // TODO
-    @Inject
-    VisionService visionService;
+//    @Inject
+//    EventBus eventBus;
 
     @BindView(R.id.view_top)
     ViewGroup viewTop;
@@ -91,44 +94,35 @@ public final class ArFragment extends AbstractFragment<ArPresenter.View, ArPrese
     @BindView(R.id.button_detail)
     Button buttonEdit;
 
+    private ActivityComponent activityComponent;
+
     private GestureDetectorCompat gestureDetector;
 
     private boolean scrolling;
 
     @NonNull
-    public static Fragment newInstance() {
-        return new ArFragment();
+    public static Intent createIntent(@NonNull Activity activity) {
+        return new Intent(activity, ArActivity.class);
     }
 
     @Override
-    protected ArPresenter getPresenter() {
-        return presenter;
-    }
+    protected void onCreate(Bundle savedInstanceState) {
+        // NOTE:
+        //
+        // Any injection must be done before super.onCreate()
+        // because fragments are already attached to an activity when they are resumed or instant-run.
+        activityComponent = MyApplication.getApplicationComponent(this)
+                                         .activityComponent(new ActivityModule(this));
+        activityComponent.inject(this);
 
-    @Override
-    protected ArPresenter.View getViewInterface() {
-        return this;
-    }
+//        eventBus.register(this);
 
-    @Override
-    protected void onAttachOverride(@NonNull Context context) {
-        super.onAttachOverride(context);
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_ar);
 
-        ActivityScopeContext.class.cast(context).getActivityComponent().inject(this);
-    }
+        presenter.onCreate(getIntent(), savedInstanceState);
 
-    @Nullable
-    @Override
-    protected View onCreateViewCore(LayoutInflater inflater, @Nullable ViewGroup container,
-                                    @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_ar, container, false);
-    }
-
-    @Override
-    protected void onBindView(@NonNull View view) {
-        super.onBindView(view);
-
-        ButterKnife.bind(this, view);
+        ButterKnife.bind(this, this);
 
         textureView.setFrameRate(60d);
         textureView.setRenderMode(ISurface.RENDERMODE_WHEN_DIRTY);
@@ -153,23 +147,23 @@ public final class ArFragment extends AbstractFragment<ArPresenter.View, ArPrese
             return false;
         });
 
-        gestureDetector = new GestureDetectorCompat(getContext(), new GestureDetector.SimpleOnGestureListener() {
+        gestureDetector = new GestureDetectorCompat(this, new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onSingleTapUp(MotionEvent e) {
-                getLog().d("onSingleTapUp");
+                LOG.d("onSingleTapUp");
                 return presenter.onSingleTapUp(e);
             }
 
             @Override
             public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-                getLog().d("onScroll");
+                LOG.d("onScroll");
                 scrolling = true;
                 return presenter.onScroll(e1, e2, distanceX, distanceY);
             }
 
             @Override
             public boolean onDown(MotionEvent e) {
-                getLog().d("onDown");
+                LOG.d("onDown");
                 // Must return true to receive motion events on onScroll.
                 return true;
             }
@@ -194,11 +188,11 @@ public final class ArFragment extends AbstractFragment<ArPresenter.View, ArPrese
         //
         // Undesirable gimmick that focuses on the top view explicitly.
         // onKeyEvent/onBackPressed is never called if the view losts the focus.
-        view.setFocusable(true);
-        view.setFocusableInTouchMode(true);
-        view.requestFocus();
+        viewTop.setFocusable(true);
+        viewTop.setFocusableInTouchMode(true);
+        viewTop.requestFocus();
 
-        ViewBindingFactory factory = new ViewBindingFactory(view);
+        ViewBindingFactory factory = new ViewBindingFactory(viewTop);
         factory.create(R.id.view_group_view_mode_menu, "visibility", presenter.propertyViewModeMenuVisible)
                .converter(BooleanToVisibilityConverter.INSTANCE)
                .bind();
@@ -211,6 +205,43 @@ public final class ArFragment extends AbstractFragment<ArPresenter.View, ArPrese
         factory.create(R.id.image_button_show_settings, "onClick", presenter.commandShowSettings).bind();
         factory.create(R.id.image_button_switch_to_edit_mode, "onClick", presenter.commandSwitchToEditMode).bind();
         factory.create(R.id.image_button_switch_to_view_mode, "onClick", presenter.commandSwitchToViewMode).bind();
+
+        presenter.onCreateView(this);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+//        eventBus.unregister(this);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        presenter.onStart();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        presenter.onStop();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        presenter.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        presenter.onPause();
     }
 
     @Override
@@ -260,9 +291,9 @@ public final class ArFragment extends AbstractFragment<ArPresenter.View, ArPrese
         if (visible) {
             if (fragment == null) {
                 fragment = ImageAssetListFragment.newInstance();
-                getChildFragmentManager().beginTransaction()
-                                         .replace(R.id.asset_list_container, fragment, fragment.getClass().getName())
-                                         .commit();
+                getSupportFragmentManager().beginTransaction()
+                                           .replace(R.id.asset_list_container, fragment, fragment.getClass().getName())
+                                           .commit();
             }
         } else {
             if (fragment != null) {
@@ -435,18 +466,18 @@ public final class ArFragment extends AbstractFragment<ArPresenter.View, ArPrese
     @SuppressWarnings("unchecked")
     @Nullable
     private <T extends Fragment> T findFragment(@NonNull Class<T> clazz) {
-        return (T) getChildFragmentManager().findFragmentByTag(clazz.getName());
+        return (T) getSupportFragmentManager().findFragmentByTag(clazz.getName());
     }
 
     private void replaceWindowFragment(@NonNull Fragment fragment) {
-        getChildFragmentManager().beginTransaction()
-                                 .replace(R.id.window_container, fragment, fragment.getClass().getName())
-                                 .commit();
+        getSupportFragmentManager().beginTransaction()
+                                   .replace(R.id.window_container, fragment, fragment.getClass().getName())
+                                   .commit();
     }
 
     private void removeFragment(@NonNull Fragment fragment) {
-        getChildFragmentManager().beginTransaction()
-                                 .remove(fragment)
-                                 .commit();
+        getSupportFragmentManager().beginTransaction()
+                                   .remove(fragment)
+                                   .commit();
     }
 }
