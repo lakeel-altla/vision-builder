@@ -20,7 +20,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.rajawali3d.renderer.ISurfaceRenderer;
 import org.rajawali3d.view.ISurface;
-import org.rajawali3d.view.TextureView;
+import org.rajawali3d.view.SurfaceView;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -61,8 +61,8 @@ public final class ArActivity extends AppCompatActivity implements ActivityScope
     @BindView(R.id.view_top)
     ViewGroup viewTop;
 
-    @BindView(R.id.texture_view)
-    TextureView textureView;
+    @BindView(R.id.surface_view)
+    SurfaceView surfaceView;
 
     @BindView(R.id.image_button_asset_list)
     ImageButton imageButtonAssetList;
@@ -131,9 +131,10 @@ public final class ArActivity extends AppCompatActivity implements ActivityScope
 
         ButterKnife.bind(this, this);
 
-        textureView.setFrameRate(60d);
-        textureView.setRenderMode(ISurface.RENDERMODE_WHEN_DIRTY);
-        textureView.setOnDragListener((v, event) -> {
+//        surfaceView.setFrameRate(60d);
+//        surfaceView.setRenderMode(ISurface.RENDERMODE_WHEN_DIRTY);
+        surfaceView.setRenderMode(ISurface.RENDERMODE_CONTINUOUSLY);
+        surfaceView.setOnDragListener((v, event) -> {
             switch (event.getAction()) {
                 case DragEvent.ACTION_DRAG_STARTED:
                     // returns true to accept a drag event.
@@ -176,7 +177,7 @@ public final class ArActivity extends AppCompatActivity implements ActivityScope
             }
         });
 
-        textureView.setOnTouchListener((v, event) -> {
+        surfaceView.setOnTouchListener((v, event) -> {
             if (gestureDetector.onTouchEvent(event)) {
                 return true;
             }
@@ -261,17 +262,17 @@ public final class ArActivity extends AppCompatActivity implements ActivityScope
 
     @Override
     public void setSurfaceRenderer(ISurfaceRenderer renderer) {
-        textureView.setSurfaceRenderer(renderer);
+        surfaceView.setSurfaceRenderer(renderer);
     }
 
     @Override
     public void resumeTextureView() {
-        textureView.onResume();
+        surfaceView.onResume();
     }
 
     @Override
     public void pauseTextureView() {
-        textureView.onPause();
+        surfaceView.onPause();
     }
 
     @Override
