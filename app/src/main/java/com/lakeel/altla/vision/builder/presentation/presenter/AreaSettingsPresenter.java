@@ -5,10 +5,8 @@ import com.lakeel.altla.android.property.IntProperty;
 import com.lakeel.altla.android.property.StringProperty;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.event.ActionBarTitleEvent;
-import com.lakeel.altla.vision.builder.presentation.event.ActionBarVisibleEvent;
 import com.lakeel.altla.vision.builder.presentation.event.BackViewEvent;
 import com.lakeel.altla.vision.builder.presentation.event.HomeAsUpIndicatorEvent;
-import com.lakeel.altla.vision.builder.presentation.event.HomeAsUpVisibleEvent;
 import com.lakeel.altla.vision.builder.presentation.event.ShowAreaDescriptionByAreaListViewEvent;
 import com.lakeel.altla.vision.builder.presentation.event.ShowAreaFindViewEvent;
 import com.lakeel.altla.vision.builder.presentation.event.ShowAreaModeViewEvent;
@@ -73,9 +71,7 @@ public final class AreaSettingsPresenter extends BasePresenter<AreaSettingsPrese
     protected void onCreateViewOverride() {
         super.onCreateViewOverride();
 
-        eventBus.post(ActionBarVisibleEvent.VISIBLE);
         eventBus.post(new ActionBarTitleEvent(resources.getString(R.string.title_area_settings_view)));
-        eventBus.post(HomeAsUpVisibleEvent.VISIBLE);
         eventBus.post(new HomeAsUpIndicatorEvent(resources.getDrawable(R.drawable.ic_clear_white_24dp)));
     }
 

@@ -9,9 +9,6 @@ import com.google.firebase.auth.FirebaseUser;
 
 import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
-import com.lakeel.altla.vision.builder.presentation.event.ActionBarTitleEvent;
-import com.lakeel.altla.vision.builder.presentation.event.ActionBarVisibleEvent;
-import com.lakeel.altla.vision.builder.presentation.event.HomeAsUpVisibleEvent;
 import com.lakeel.altla.vision.builder.presentation.event.ShowTangoPermissionViewEvent;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 
@@ -78,15 +75,6 @@ public final class SignInPresenter extends BasePresenter<SignInPresenter.View> {
     }
 
     @Override
-    protected void onCreateViewOverride() {
-        super.onCreateViewOverride();
-
-        eventBus.post(ActionBarVisibleEvent.VISIBLE);
-        eventBus.post(new ActionBarTitleEvent(resources.getString(R.string.title_sign_in_view)));
-        eventBus.post(HomeAsUpVisibleEvent.INVISIBLE);
-    }
-
-    @Override
     protected void onStartOverride() {
         super.onStartOverride();
 
@@ -105,7 +93,6 @@ public final class SignInPresenter extends BasePresenter<SignInPresenter.View> {
         signInButtonClicked = true;
 
         Intent intent = Auth.GoogleSignInApi.getSignInIntent(googleApiClient);
-
         getView().startActivityForResult(intent, REQUEST_CODE_GOOGLE_SIGN_IN);
     }
 

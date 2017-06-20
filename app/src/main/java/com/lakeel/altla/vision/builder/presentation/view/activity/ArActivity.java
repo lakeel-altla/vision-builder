@@ -6,8 +6,10 @@ import com.lakeel.altla.android.log.Log;
 import com.lakeel.altla.android.log.LogFactory;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.app.MyApplication;
+import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.di.component.ActivityComponent;
 import com.lakeel.altla.vision.builder.presentation.di.module.ActivityModule;
+import com.lakeel.altla.vision.builder.presentation.event.ShowAreaSettingsViewEvent;
 import com.lakeel.altla.vision.builder.presentation.event.ShowSettingsViewEvent;
 import com.lakeel.altla.vision.builder.presentation.model.Axis;
 import com.lakeel.altla.vision.builder.presentation.presenter.ArPresenter;
@@ -46,7 +48,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.OnTouch;
 
-public final class ArActivity extends AppCompatActivity implements ArPresenter.View {
+public final class ArActivity extends AppCompatActivity implements ActivityScopeContext, ArPresenter.View {
 
     private static final Log LOG = LogFactory.getLog(ArActivity.class);
 
@@ -253,6 +255,11 @@ public final class ArActivity extends AppCompatActivity implements ArPresenter.V
     }
 
     @Override
+    public ActivityComponent getActivityComponent() {
+        return activityComponent;
+    }
+
+    @Override
     public void setSurfaceRenderer(ISurfaceRenderer renderer) {
         textureView.setSurfaceRenderer(renderer);
     }
@@ -357,6 +364,12 @@ public final class ArActivity extends AppCompatActivity implements ArPresenter.V
     @Override
     public void showSnackbar(@StringRes int resId) {
         Snackbar.make(viewTop, resId, Snackbar.LENGTH_SHORT).show();
+    }
+
+    @Subscribe
+    public void onEvent(@NonNull ShowAreaSettingsViewEvent event) {
+        Intent intent = AreaSettingsActivity.createIntent(this);
+        startActivity(intent);
     }
 
     @Subscribe

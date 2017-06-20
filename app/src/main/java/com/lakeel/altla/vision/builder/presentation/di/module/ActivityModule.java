@@ -1,12 +1,6 @@
 package com.lakeel.altla.vision.builder.presentation.di.module;
 
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.storage.FirebaseStorage;
-
-import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScope;
-import com.lakeel.altla.vision.builder.presentation.model.ArModel;
-import com.lakeel.altla.vision.builder.presentation.model.SelectAreaSettingsModel;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -47,24 +41,24 @@ public final class ActivityModule {
     ContentResolver provideContentResolver() {
         return activity.getContentResolver();
     }
-
-    @ActivityScope
-    @Provides
-    VisionService provideVisionService(FirebaseDatabase firebaseDatabase, FirebaseStorage firebaseStorage) {
-        return new VisionService(activity, firebaseDatabase, firebaseStorage);
-    }
-
-    @ActivityScope
-    @Provides
-    ArModel provideArModel(VisionService visionService) {
-        return new ArModel(visionService);
-    }
-
-    @ActivityScope
-    @Provides
-    SelectAreaSettingsModel provideSelectAreaSettingsModel(VisionService visionService, ArModel arModel) {
-        return new SelectAreaSettingsModel(visionService, arModel);
-    }
+//
+//    @ActivityScope
+//    @Provides
+//    VisionService provideVisionService(FirebaseDatabase firebaseDatabase, FirebaseStorage firebaseStorage) {
+//        return new VisionService(activity, firebaseDatabase, firebaseStorage);
+//    }
+//
+//    @ActivityScope
+//    @Provides
+//    ArModel provideArModel(VisionService visionService) {
+//        return new ArModel(visionService);
+//    }
+//
+//    @ActivityScope
+//    @Provides
+//    SelectAreaSettingsModel provideSelectAreaSettingsModel(VisionService visionService, ArModel arModel) {
+//        return new SelectAreaSettingsModel(visionService, arModel);
+//    }
 
     @ActivityScope
     @Provides

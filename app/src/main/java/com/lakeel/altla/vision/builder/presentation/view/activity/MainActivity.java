@@ -11,29 +11,9 @@ import com.lakeel.altla.vision.builder.presentation.app.MyApplication;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.di.component.ActivityComponent;
 import com.lakeel.altla.vision.builder.presentation.di.module.ActivityModule;
-import com.lakeel.altla.vision.builder.presentation.event.ActionBarTitleEvent;
-import com.lakeel.altla.vision.builder.presentation.event.ActionBarVisibleEvent;
-import com.lakeel.altla.vision.builder.presentation.event.BackViewEvent;
-import com.lakeel.altla.vision.builder.presentation.event.ClearBackStackEvent;
-import com.lakeel.altla.vision.builder.presentation.event.CloseAreaByPlaceListViewEvent;
-import com.lakeel.altla.vision.builder.presentation.event.HomeAsUpIndicatorEvent;
-import com.lakeel.altla.vision.builder.presentation.event.HomeAsUpVisibleEvent;
-import com.lakeel.altla.vision.builder.presentation.event.InvalidateOptionsMenuEvent;
 import com.lakeel.altla.vision.builder.presentation.event.ShowArViewEvent;
-import com.lakeel.altla.vision.builder.presentation.event.ShowAreaByPlaceListViewEvent;
-import com.lakeel.altla.vision.builder.presentation.event.ShowAreaDescriptionByAreaListViewEvent;
-import com.lakeel.altla.vision.builder.presentation.event.ShowAreaFindViewEvent;
-import com.lakeel.altla.vision.builder.presentation.event.ShowAreaModeViewEvent;
-import com.lakeel.altla.vision.builder.presentation.event.ShowAreaSettingsListViewEvent;
-import com.lakeel.altla.vision.builder.presentation.event.ShowAreaSettingsViewEvent;
 import com.lakeel.altla.vision.builder.presentation.event.ShowTangoPermissionViewEvent;
 import com.lakeel.altla.vision.builder.presentation.helper.ObservableHelper;
-import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaByPlaceListFragment;
-import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaDescriptionByAreaListFragment;
-import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaFindFragment;
-import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaModeFragment;
-import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaSettingsFragment;
-import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaSettingsListFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.SignInFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.TangoPermissionFragment;
 
@@ -44,18 +24,13 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.MenuItem;
 
 import javax.inject.Inject;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
 import io.reactivex.Completable;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
@@ -71,9 +46,6 @@ public final class MainActivity extends AppCompatActivity
 
     @Inject
     EventBus eventBus;
-
-    @BindView(R.id.toolbar)
-    Toolbar toolbar;
 
     private final CompositeDisposable compositeDisposable = new CompositeDisposable();
 
@@ -100,9 +72,17 @@ public final class MainActivity extends AppCompatActivity
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        ButterKnife.bind(this);
 
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setTitle(R.string.title_sign_in_view);
+            actionBar.setDisplayHomeAsUpEnabled(false);
+        } else {
+            LOG.w("ActionBar is null.");
+        }
 
         if (savedInstanceState == null) {
             replaceFragment(SignInFragment.newInstance());
@@ -114,17 +94,6 @@ public final class MainActivity extends AppCompatActivity
         super.onDestroy();
 
         eventBus.unregister(this);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                backView();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
     }
 
     @Override
@@ -188,70 +157,6 @@ public final class MainActivity extends AppCompatActivity
     }
 
     @Subscribe
-    public void onEvent(@NonNull ActionBarVisibleEvent event) {
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            if (event.visible) {
-                actionBar.show();
-            } else {
-                actionBar.hide();
-            }
-        } else {
-            LOG.w("ActionBar is null.");
-        }
-    }
-
-    @Subscribe
-    public void onEvent(@NonNull ActionBarTitleEvent event) {
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setTitle(event.title);
-        } else {
-            LOG.w("ActionBar is null.");
-        }
-    }
-
-    @Subscribe
-    public void onEvent(@NonNull InvalidateOptionsMenuEvent event) {
-        invalidateOptionsMenu();
-    }
-
-    @Subscribe
-    public void onEvent(@NonNull HomeAsUpVisibleEvent event) {
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(event.visible);
-        } else {
-            LOG.w("ActionBar is null.");
-        }
-    }
-
-    @Subscribe
-    public void onEvent(@NonNull HomeAsUpIndicatorEvent event) {
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setHomeAsUpIndicator(event.indicator);
-        } else {
-            LOG.w("ActionBar is null.");
-        }
-    }
-
-    @Subscribe
-    public void onEvent(@NonNull BackViewEvent event) {
-        Fragment fragment = (Fragment) event.view;
-        if (getSupportFragmentManager().findFragmentByTag(fragment.getTag()) != null) {
-            backView();
-        } else {
-            LOG.w("No such view exists: tag = %s", fragment.getTag());
-        }
-    }
-
-    @Subscribe
-    public void onEvent(@NonNull ClearBackStackEvent event) {
-        getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-    }
-
-    @Subscribe
     public void onEvent(@NonNull ShowTangoPermissionViewEvent event) {
         replaceFragment(TangoPermissionFragment.newInstance());
     }
@@ -263,64 +168,9 @@ public final class MainActivity extends AppCompatActivity
         finish();
     }
 
-    @Subscribe
-    public void onEvent(@NonNull ShowAreaSettingsViewEvent event) {
-        replaceFragmentAndAddToBackStack(AreaSettingsFragment.newInstance());
-    }
-
-    @Subscribe
-    public void onEvent(@NonNull ShowAreaSettingsListViewEvent event) {
-        replaceFragmentAndAddToBackStack(AreaSettingsListFragment.newInstance());
-    }
-
-    @Subscribe
-    public void onEvent(@NonNull ShowAreaModeViewEvent event) {
-        replaceFragmentAndAddToBackStack(AreaModeFragment.newInstance());
-    }
-
-    @Subscribe
-    public void onEvent(@NonNull ShowAreaFindViewEvent event) {
-        replaceFragmentAndAddToBackStack(AreaFindFragment.newInstance());
-    }
-
-    @Subscribe
-    public void onEvent(@NonNull ShowAreaByPlaceListViewEvent event) {
-        replaceFragmentAndAddToBackStack(AreaByPlaceListFragment.newInstance());
-    }
-
-    @Subscribe
-    public void onEvent(@NonNull ShowAreaDescriptionByAreaListViewEvent event) {
-        replaceFragmentAndAddToBackStack(AreaDescriptionByAreaListFragment.newInstance());
-    }
-
-    @Subscribe
-    public void onEvent(@NonNull CloseAreaByPlaceListViewEvent event) {
-        getSupportFragmentManager().popBackStack(AreaFindFragment.class.getName(),
-                                                 FragmentManager.POP_BACK_STACK_INCLUSIVE);
-    }
-
-    private void backView() {
-        if (0 < getSupportFragmentManager().getBackStackEntryCount()) {
-            getSupportFragmentManager().popBackStack();
-        }
-    }
-
-    private void replaceFragmentAndAddToBackStack(Fragment fragment) {
-        getSupportFragmentManager().beginTransaction()
-                                   .addToBackStack(fragment.getClass().getName())
-                                   .replace(R.id.fragment_container, fragment, fragment.getClass().getName())
-                                   .commit();
-    }
-
     private void replaceFragment(Fragment fragment) {
         getSupportFragmentManager().beginTransaction()
                                    .replace(R.id.fragment_container, fragment, fragment.getClass().getName())
                                    .commit();
-    }
-
-    @SuppressWarnings("unchecked")
-    @Nullable
-    private <T extends Fragment> T findFragment(@NonNull Class<T> clazz) {
-        return (T) getSupportFragmentManager().findFragmentByTag(clazz.getName());
     }
 }

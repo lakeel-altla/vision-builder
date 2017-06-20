@@ -65,6 +65,7 @@
     <string name="label_area_mode_public">Public mode</string>
     <string name="label_area_mode_user">User mode</string>
 
+    <string name="title_sign_in_view">Sign In</string>
     <string name="title_area_settings_view">Area Settings</string>
     <string name="title_area_settings_list_view">History</string>
     <string name="title_area_mode_view">Select Area Mode</string>
@@ -84,6 +85,5 @@
 
     <string name="input_error_required">Required.</string>
     <string name="button_sign_out">Sign Out</string>
-    <string name="title_sign_in_view">Sign In</string>
 
 </resources>
