@@ -8,11 +8,14 @@ import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.app.MyApplication;
 import com.lakeel.altla.vision.builder.presentation.di.component.ActivityComponent;
 import com.lakeel.altla.vision.builder.presentation.di.module.ActivityModule;
+import com.lakeel.altla.vision.builder.presentation.event.ShowSettingsViewEvent;
 import com.lakeel.altla.vision.builder.presentation.model.Axis;
 import com.lakeel.altla.vision.builder.presentation.presenter.ArPresenter;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.ActorFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.ImageAssetListFragment;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 import org.rajawali3d.renderer.ISurfaceRenderer;
 import org.rajawali3d.view.ISurface;
 import org.rajawali3d.view.TextureView;
@@ -50,8 +53,8 @@ public final class ArActivity extends AppCompatActivity implements ArPresenter.V
     @Inject
     ArPresenter presenter;
 
-//    @Inject
-//    EventBus eventBus;
+    @Inject
+    EventBus eventBus;
 
     @BindView(R.id.view_top)
     ViewGroup viewTop;
@@ -107,6 +110,8 @@ public final class ArActivity extends AppCompatActivity implements ArPresenter.V
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        LOG.d("onCreate");
+
         // NOTE:
         //
         // Any injection must be done before super.onCreate()
@@ -115,7 +120,7 @@ public final class ArActivity extends AppCompatActivity implements ArPresenter.V
                                          .activityComponent(new ActivityModule(this));
         activityComponent.inject(this);
 
-//        eventBus.register(this);
+        eventBus.register(this);
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ar);
@@ -211,13 +216,15 @@ public final class ArActivity extends AppCompatActivity implements ArPresenter.V
 
     @Override
     protected void onDestroy() {
+        LOG.d("onDestroy");
         super.onDestroy();
 
-//        eventBus.unregister(this);
+        eventBus.unregister(this);
     }
 
     @Override
     protected void onStart() {
+        LOG.d("onStart");
         super.onStart();
 
         presenter.onStart();
@@ -225,6 +232,7 @@ public final class ArActivity extends AppCompatActivity implements ArPresenter.V
 
     @Override
     protected void onStop() {
+        LOG.d("onStop");
         super.onStop();
 
         presenter.onStop();
@@ -349,6 +357,12 @@ public final class ArActivity extends AppCompatActivity implements ArPresenter.V
     @Override
     public void showSnackbar(@StringRes int resId) {
         Snackbar.make(viewTop, resId, Snackbar.LENGTH_SHORT).show();
+    }
+
+    @Subscribe
+    public void onEvent(@NonNull ShowSettingsViewEvent event) {
+        Intent intent = SettingsActivity.createIntent(this);
+        startActivity(intent);
     }
 
     @OnClick(R.id.image_button_area_settings)

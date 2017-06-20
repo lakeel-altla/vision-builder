@@ -63,7 +63,7 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
 
     private boolean clearAllActors;
 
-    private boolean tangoLocalized;
+    private boolean poseValid;
 
     public MainRenderer(Context context) {
         super(context);
@@ -96,7 +96,7 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
         // Renderer#onRender invoked in OpenGL thread instantiates an actual primitive.
         //
 
-        if (tangoLocalized) {
+        if (poseValid) {
             // Add user actors.
             synchronized (addActorModelQueue) {
                 while (true) {
@@ -209,8 +209,8 @@ public final class MainRenderer extends TangoCameraRenderer implements OnObjectP
                                              forward.x, forward.y, forward.z);
     }
 
-    public void setTangoLocalized(boolean tangoLocalized) {
-        this.tangoLocalized = tangoLocalized;
+    public void setPoseValid(boolean poseValid) {
+        this.poseValid = poseValid;
     }
 
     // This method must be invoke on the main thread.

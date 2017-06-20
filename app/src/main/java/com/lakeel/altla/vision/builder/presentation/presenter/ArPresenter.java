@@ -20,7 +20,6 @@ import com.lakeel.altla.vision.api.CurrentUser;
 import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.module.Names;
-import com.lakeel.altla.vision.builder.presentation.event.ActionBarVisibleEvent;
 import com.lakeel.altla.vision.builder.presentation.event.ShowAreaSettingsViewEvent;
 import com.lakeel.altla.vision.builder.presentation.event.ShowSettingsViewEvent;
 import com.lakeel.altla.vision.builder.presentation.event.SnackbarEvent;
@@ -31,7 +30,7 @@ import com.lakeel.altla.vision.builder.presentation.model.ArModel;
 import com.lakeel.altla.vision.builder.presentation.model.Axis;
 import com.lakeel.altla.vision.builder.presentation.model.EditAxesModel;
 import com.lakeel.altla.vision.builder.presentation.model.ImageActorModel;
-import com.lakeel.altla.vision.builder.presentation.model.TangoLocalizationState;
+import com.lakeel.altla.vision.builder.presentation.model.TangoPoseState;
 import com.lakeel.altla.vision.builder.presentation.view.renderer.MainRenderer;
 import com.lakeel.altla.vision.model.Actor;
 import com.lakeel.altla.vision.model.AreaSettings;
@@ -146,7 +145,7 @@ public final class ArPresenter implements TangoWrapper.OnTangoReadyListener,
 
     private View view;
 
-    private TangoLocalizationState tangoLocalizationState;
+    private TangoPoseState tangoPoseState;
 
     private ActorManager actorManager;
 
@@ -187,12 +186,9 @@ public final class ArPresenter implements TangoWrapper.OnTangoReadyListener,
         view.onUpdateRotateMenuVisible(false);
         view.onUpdateTranslateAxisSelected(Axis.X, true);
         view.onUpdateRotateAxisSelected(Axis.Y, true);
-
-        eventBus.post(ActionBarVisibleEvent.INVISIBLE);
     }
 
     public void onStart() {
-
         // Instantiate ActorManager here to clear the bitmap cache in Picasso.
         actorManager = new ActorManager(context);
 
@@ -206,7 +202,7 @@ public final class ArPresenter implements TangoWrapper.OnTangoReadyListener,
     }
 
     public void onResume() {
-        tangoLocalizationState = TangoLocalizationState.UNKNOWN;
+        tangoPoseState = TangoPoseState.UNKNOWN;
         view.onUpdateImageButtonAssetListVisible(false);
 
         connectTango();
@@ -222,6 +218,8 @@ public final class ArPresenter implements TangoWrapper.OnTangoReadyListener,
 
     @Override
     public void onTangoReady(Tango tango) {
+        LOG.d("onTangoReady");
+
         renderer.connectToTangoCamera(tango);
 
         // Resume the texture view after the tango becomes ready.
@@ -264,20 +262,20 @@ public final class ArPresenter implements TangoWrapper.OnTangoReadyListener,
             pose.targetFrame == TangoPoseData.COORDINATE_FRAME_START_OF_SERVICE) {
 
             if (pose.statusCode == TangoPoseData.POSE_VALID) {
-                if (tangoLocalizationState == TangoLocalizationState.UNKNOWN ||
-                    tangoLocalizationState == TangoLocalizationState.NOT_LOCALIZED) {
+                if (tangoPoseState == TangoPoseState.UNKNOWN ||
+                    tangoPoseState == TangoPoseState.NOT_VALID) {
 
-                    LOG.d("Localized.");
-                    tangoLocalizationState = TangoLocalizationState.LOCALIZED;
-                    renderer.setTangoLocalized(true);
+                    LOG.d("Pose is available.");
+                    tangoPoseState = TangoPoseState.VALID;
+                    renderer.setPoseValid(true);
                 }
             } else {
-                if (tangoLocalizationState == TangoLocalizationState.UNKNOWN ||
-                    tangoLocalizationState == TangoLocalizationState.LOCALIZED) {
+                if (tangoPoseState == TangoPoseState.UNKNOWN ||
+                    tangoPoseState == TangoPoseState.VALID) {
 
-                    LOG.d("Not localized.");
-                    tangoLocalizationState = TangoLocalizationState.NOT_LOCALIZED;
-                    renderer.setTangoLocalized(false);
+                    LOG.d("Pose is not available.");
+                    tangoPoseState = TangoPoseState.NOT_VALID;
+                    renderer.setPoseValid(false);
                 }
             }
         }
@@ -732,7 +730,7 @@ public final class ArPresenter implements TangoWrapper.OnTangoReadyListener,
                     break;
                 default:
                     LOG.e("Unexpected asset type: actorId = %s, assetType = %s",
-                               actor.getId(), actor.getAssetTypeAsEnum());
+                          actor.getId(), actor.getAssetTypeAsEnum());
                     break;
             }
         }
@@ -746,7 +744,7 @@ public final class ArPresenter implements TangoWrapper.OnTangoReadyListener,
                     break;
                 default:
                     LOG.e("Unexpected asset type: actorId = %s, assetType = %s",
-                               actor.getId(), actor.getAssetTypeAsEnum());
+                          actor.getId(), actor.getAssetTypeAsEnum());
                     break;
             }
         }

@@ -1,7 +1,7 @@
 package com.lakeel.altla.vision.builder.presentation.model;
 
-public enum TangoLocalizationState {
+public enum TangoPoseState {
     UNKNOWN,
-    LOCALIZED,
-    NOT_LOCALIZED,
+    VALID,
+    NOT_VALID,
 }

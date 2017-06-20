@@ -26,8 +26,6 @@ import com.lakeel.altla.vision.builder.presentation.event.ShowAreaFindViewEvent;
 import com.lakeel.altla.vision.builder.presentation.event.ShowAreaModeViewEvent;
 import com.lakeel.altla.vision.builder.presentation.event.ShowAreaSettingsListViewEvent;
 import com.lakeel.altla.vision.builder.presentation.event.ShowAreaSettingsViewEvent;
-import com.lakeel.altla.vision.builder.presentation.event.ShowSettingsViewEvent;
-import com.lakeel.altla.vision.builder.presentation.event.ShowSignInViewEvent;
 import com.lakeel.altla.vision.builder.presentation.event.ShowTangoPermissionViewEvent;
 import com.lakeel.altla.vision.builder.presentation.helper.ObservableHelper;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaByPlaceListFragment;
@@ -36,13 +34,13 @@ import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaFindFragme
 import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaModeFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaSettingsFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaSettingsListFragment;
-import com.lakeel.altla.vision.builder.presentation.view.fragment.SettingsFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.SignInFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.TangoPermissionFragment;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -82,6 +80,11 @@ public final class MainActivity extends AppCompatActivity
     private ActivityComponent activityComponent;
 
     private Disposable observeConnectionDisposable;
+
+    @NonNull
+    public static Intent createIntent(@NonNull Activity activity) {
+        return new Intent(activity, MainActivity.class);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -249,11 +252,6 @@ public final class MainActivity extends AppCompatActivity
     }
 
     @Subscribe
-    public void onEvent(@NonNull ShowSignInViewEvent event) {
-        replaceFragment(SignInFragment.newInstance());
-    }
-
-    @Subscribe
     public void onEvent(@NonNull ShowTangoPermissionViewEvent event) {
         replaceFragment(TangoPermissionFragment.newInstance());
     }
@@ -293,11 +291,6 @@ public final class MainActivity extends AppCompatActivity
     @Subscribe
     public void onEvent(@NonNull ShowAreaDescriptionByAreaListViewEvent event) {
         replaceFragmentAndAddToBackStack(AreaDescriptionByAreaListFragment.newInstance());
-    }
-
-    @Subscribe
-    public void onEvent(@NonNull ShowSettingsViewEvent event) {
-        replaceFragmentAndAddToBackStack(SettingsFragment.newInstance());
     }
 
     @Subscribe

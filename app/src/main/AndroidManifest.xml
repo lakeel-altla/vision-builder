@@ -29,6 +29,14 @@
                 android:name=".presentation.view.activity.ArActivity"
                 android:theme="@style/AppTheme.NoActionBar">
         </activity>
+        <activity
+                android:name=".presentation.view.activity.SettingsActivity"
+                android:label="@string/title_settings_view"
+                android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                    android:name="android.support.PARENT_ACTIVITY"
+                    android:value=".presentation.view.activity.ArActivity"/>
+        </activity>
     </application>
 
 </manifest>
