@@ -35,11 +35,11 @@ import io.reactivex.Completable;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 
-public final class MainActivity extends AppCompatActivity
+public final class SignInActivity extends AppCompatActivity
         implements ActivityScopeContext,
                    FirebaseAuth.AuthStateListener {
 
-    private static final Log LOG = LogFactory.getLog(MainActivity.class);
+    private static final Log LOG = LogFactory.getLog(SignInActivity.class);
 
     @Inject
     VisionService visionService;
@@ -55,7 +55,7 @@ public final class MainActivity extends AppCompatActivity
 
     @NonNull
     public static Intent createIntent(@NonNull Activity activity) {
-        return new Intent(activity, MainActivity.class);
+        return new Intent(activity, SignInActivity.class);
     }
 
     @Override
@@ -71,14 +71,13 @@ public final class MainActivity extends AppCompatActivity
         eventBus.register(this);
 
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_sign_in);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
-            actionBar.setTitle(R.string.title_sign_in_view);
             actionBar.setDisplayHomeAsUpEnabled(false);
         } else {
             LOG.w("ActionBar is null.");

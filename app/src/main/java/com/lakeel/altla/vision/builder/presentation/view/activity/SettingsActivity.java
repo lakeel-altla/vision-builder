@@ -103,7 +103,7 @@ public final class SettingsActivity extends AppCompatActivity
     @Subscribe
     public void onEvent(@NonNull ShowSignInViewEvent event) {
         // Clear all activities and then start sign in activity.
-        Intent intent = MainActivity.createIntent(this);
+        Intent intent = SignInActivity.createIntent(this);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
