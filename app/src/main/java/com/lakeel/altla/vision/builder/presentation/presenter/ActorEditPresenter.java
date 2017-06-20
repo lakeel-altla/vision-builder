@@ -6,7 +6,6 @@ import com.lakeel.altla.android.property.StringProperty;
 import com.lakeel.altla.vision.ArgumentNullException;
 import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
-import com.lakeel.altla.vision.builder.presentation.helper.SnackbarEventHelper;
 import com.lakeel.altla.vision.model.Actor;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 
@@ -102,7 +101,8 @@ public final class ActorEditPresenter extends BasePresenter<ActorEditPresenter.V
         actor.setName(propertyName.get());
         visionService.getUserActorApi().saveActor(actor);
         close();
-        SnackbarEventHelper.post(eventBus, R.string.snackbar_done);
+        // TODO
+//        SnackbarEventHelper.post(eventBus, R.string.snackbar_done);
     }
 
     private boolean canSave() {

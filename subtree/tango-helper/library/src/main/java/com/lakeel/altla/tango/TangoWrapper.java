@@ -4,6 +4,8 @@ import com.google.atap.tangoservice.Tango;
 import com.google.atap.tangoservice.TangoConfig;
 import com.google.atap.tangoservice.TangoCoordinateFramePair;
 import com.google.atap.tangoservice.TangoErrorException;
+import com.google.atap.tangoservice.TangoException;
+import com.google.atap.tangoservice.TangoInvalidException;
 import com.google.atap.tangoservice.TangoOutOfDateException;
 
 import com.projecttango.tangosupport.TangoSupport;
@@ -25,6 +27,10 @@ public final class TangoWrapper {
 
     private final TangoUpdateDispatcher tangoUpdateDispatcher = new TangoUpdateDispatcher();
 
+    private final List<OnTangoReadyListener> onTangoReadyListeners = new LinkedList<>();
+
+    private final List<OnTangoConnectErrorListener> onTangoConnectErrorListeners = new LinkedList<>();
+
     private boolean connected;
 
     private Tango tango;
@@ -34,8 +40,6 @@ public final class TangoWrapper {
     private TangoConfigFactory tangoConfigFactory;
 
     private List<TangoCoordinateFramePair> coordinateFramePairs;
-
-    private List<OnTangoReadyListener> onTangoReadyListeners = new LinkedList<>();
 
     public TangoWrapper(@NonNull Context context) {
         this.context = context;
@@ -101,6 +105,14 @@ public final class TangoWrapper {
         onTangoReadyListeners.remove(listener);
     }
 
+    public synchronized void addOnTangoConnectErrorListener(@NonNull OnTangoConnectErrorListener listener) {
+        onTangoConnectErrorListeners.add(listener);
+    }
+
+    public synchronized void removeOnTangoConnectErrorListener(@NonNull OnTangoConnectErrorListener listener) {
+        onTangoConnectErrorListeners.remove(listener);
+    }
+
     public void connect() {
         Log.d(TAG, "Connecting...");
 
@@ -131,8 +143,16 @@ public final class TangoWrapper {
                         Log.d(TAG, "Connected.");
                     } catch (TangoOutOfDateException e) {
                         Log.e(TAG, "Tango service outdated.", e);
+                        raiseOnTangoConnectError(e);
                     } catch (TangoErrorException e) {
                         Log.e(TAG, "Tango error occurred.", e);
+                        raiseOnTangoConnectError(e);
+                    } catch (TangoInvalidException e) {
+                        Log.e(TAG, "Invalid UUID error occurred.", e);
+                        raiseOnTangoConnectError(e);
+                    } catch (TangoException e) {
+                        Log.e(TAG, "Unexpected tango error occurred.", e);
+                        raiseOnTangoConnectError(e);
                     }
 
                     if (!onTangoReadyListeners.isEmpty()) {
@@ -166,9 +186,22 @@ public final class TangoWrapper {
         }
     }
 
+    private void raiseOnTangoConnectError(@NonNull TangoException e) {
+        if (!onTangoConnectErrorListeners.isEmpty()) {
+            for (OnTangoConnectErrorListener listener : onTangoConnectErrorListeners) {
+                listener.onTangoConnectError(e);
+            }
+        }
+    }
+
     public interface OnTangoReadyListener {
 
         void onTangoReady(Tango tango);
+    }
+
+    public interface OnTangoConnectErrorListener {
+
+        void onTangoConnectError(TangoException e);
     }
 
     public interface TangoConfigFactory {

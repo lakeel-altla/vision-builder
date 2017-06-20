@@ -9,7 +9,6 @@ import com.lakeel.altla.vision.builder.presentation.event.ActionBarVisibleEvent;
 import com.lakeel.altla.vision.builder.presentation.event.HomeAsUpIndicatorEvent;
 import com.lakeel.altla.vision.builder.presentation.event.HomeAsUpVisibleEvent;
 import com.lakeel.altla.vision.builder.presentation.event.ShowAreaByPlaceListViewEvent;
-import com.lakeel.altla.vision.builder.presentation.helper.SnackbarEventHelper;
 import com.lakeel.altla.vision.builder.presentation.model.SelectAreaSettingsModel;
 import com.lakeel.altla.vision.presentation.presenter.BasePresenter;
 
@@ -17,6 +16,7 @@ import org.greenrobot.eventbus.EventBus;
 
 import android.content.res.Resources;
 import android.support.annotation.NonNull;
+import android.support.annotation.StringRes;
 
 import javax.inject.Inject;
 
@@ -53,7 +53,7 @@ public final class AreaFindPresenter extends BasePresenter<AreaFindPresenter.Vie
     }
 
     public void onShowPlacePickerFailed(@NonNull Exception e) {
-        SnackbarEventHelper.post(eventBus, R.string.snackbar_done);
+        getView().showSnackbar(R.string.snackbar_failed);
     }
 
     private void showPlacePicker() {
@@ -63,5 +63,7 @@ public final class AreaFindPresenter extends BasePresenter<AreaFindPresenter.Vie
     public interface View {
 
         void onShowPlacePicker();
+
+        void showSnackbar(@StringRes int resId);
     }
 }

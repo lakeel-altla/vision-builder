@@ -18,6 +18,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -111,6 +113,14 @@ public final class AreaFindFragment extends AbstractFragment<AreaFindPresenter.V
             } catch (GooglePlayServicesRepairableException | GooglePlayServicesNotAvailableException e) {
                 presenter.onShowPlacePickerFailed(e);
             }
+        }
+    }
+
+    @Override
+    public void showSnackbar(@StringRes int resId) {
+        View view = getView();
+        if (view != null) {
+            Snackbar.make(view, resId, Snackbar.LENGTH_SHORT).show();
         }
     }
 }

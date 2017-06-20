@@ -8,7 +8,6 @@ import com.lakeel.altla.vision.builder.presentation.event.ActionBarTitleEvent;
 import com.lakeel.altla.vision.builder.presentation.event.BackViewEvent;
 import com.lakeel.altla.vision.builder.presentation.event.HomeAsUpIndicatorEvent;
 import com.lakeel.altla.vision.builder.presentation.event.InvalidateOptionsMenuEvent;
-import com.lakeel.altla.vision.builder.presentation.helper.SnackbarEventHelper;
 import com.lakeel.altla.vision.builder.presentation.helper.StringResourceHelper;
 import com.lakeel.altla.vision.builder.presentation.model.SelectAreaSettingsModel;
 import com.lakeel.altla.vision.model.Scope;
@@ -18,6 +17,7 @@ import org.greenrobot.eventbus.EventBus;
 
 import android.content.res.Resources;
 import android.support.annotation.NonNull;
+import android.support.annotation.StringRes;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,7 +70,7 @@ public final class AreaSettingsListPresenter extends BasePresenter<AreaSettingsL
                     getView().notifyItemInserted(items.size() - 1);
                 }, e -> {
                     getLog().e("Failed.", e);
-                    SnackbarEventHelper.post(eventBus, R.string.snackbar_done);
+                    getView().showSnackbar(R.string.snackbar_failed);
                 });
         compositeDisposable.add(disposable);
     }
@@ -119,6 +119,8 @@ public final class AreaSettingsListPresenter extends BasePresenter<AreaSettingsL
         void notifyDataSetChanged();
 
         void setActionSelectEnabled(boolean enabled);
+
+        void showSnackbar(@StringRes int resId);
     }
 
     public final class ItemPresenter {

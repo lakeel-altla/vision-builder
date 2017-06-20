@@ -4,6 +4,8 @@ import com.google.atap.tangoservice.Tango;
 import com.google.atap.tangoservice.TangoCameraIntrinsics;
 import com.google.atap.tangoservice.TangoConfig;
 import com.google.atap.tangoservice.TangoCoordinateFramePair;
+import com.google.atap.tangoservice.TangoException;
+import com.google.atap.tangoservice.TangoOutOfDateException;
 import com.google.atap.tangoservice.TangoPoseData;
 
 import com.lakeel.altla.android.binding.command.RelayCommand;
@@ -22,7 +24,6 @@ import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.module.Names;
 import com.lakeel.altla.vision.builder.presentation.event.ShowAreaSettingsViewEvent;
 import com.lakeel.altla.vision.builder.presentation.event.ShowSettingsViewEvent;
-import com.lakeel.altla.vision.builder.presentation.event.SnackbarEvent;
 import com.lakeel.altla.vision.builder.presentation.model.ActorDragConstants;
 import com.lakeel.altla.vision.builder.presentation.model.ActorEditMode;
 import com.lakeel.altla.vision.builder.presentation.model.ActorModel;
@@ -78,6 +79,7 @@ import io.reactivex.disposables.Disposable;
  * Defines the presenter for {@link View}.
  */
 public final class ArPresenter implements TangoWrapper.OnTangoReadyListener,
+                                          TangoWrapper.OnTangoConnectErrorListener,
                                           OnFrameAvailableListener,
                                           OnPoseAvailableListener,
                                           MainRenderer.OnCurrentCameraTransformUpdatedListener,
@@ -243,9 +245,18 @@ public final class ArPresenter implements TangoWrapper.OnTangoReadyListener,
                         actorManager.addActor(actor);
                     }, e -> {
                         LOG.e("Failed.", e);
-                        view.showSnackbar(R.string.snackbar_failed);
+                        view.showToast(R.string.toast_failed);
                     });
             compositeDisposable.add(disposable);
+        }
+    }
+
+    @Override
+    public void onTangoConnectError(TangoException e) {
+        if (e instanceof TangoOutOfDateException) {
+            view.showToast(R.string.toast_tango_out_of_date);
+        } else {
+            view.showToast(R.string.toast_tango_error);
         }
     }
 
@@ -487,11 +498,6 @@ public final class ArPresenter implements TangoWrapper.OnTangoReadyListener,
         view.setMainMenuVisible(true);
     }
 
-    @Subscribe
-    public void onEvent(@NonNull SnackbarEvent event) {
-        view.showSnackbar(event.resource);
-    }
-
     @NonNull
     private TangoConfig createTangoConfig(@NonNull Tango tango) {
         TangoConfig config = tango.getConfig(TangoConfig.CONFIG_TYPE_DEFAULT);
@@ -708,7 +714,7 @@ public final class ArPresenter implements TangoWrapper.OnTangoReadyListener,
 
         void onUpdateScaleSelected(boolean selected);
 
-        void showSnackbar(@StringRes int resId);
+        void showToast(@StringRes int resId);
     }
 
     private final class ActorManager {
