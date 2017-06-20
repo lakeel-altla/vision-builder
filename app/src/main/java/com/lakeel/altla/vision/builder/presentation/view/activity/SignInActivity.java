@@ -78,6 +78,7 @@ public final class SignInActivity extends AppCompatActivity
 
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
+            actionBar.setTitle(R.string.title_sign_in_view);
             actionBar.setDisplayHomeAsUpEnabled(false);
         } else {
             LOG.w("ActionBar is null.");
