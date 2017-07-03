@@ -23,6 +23,9 @@ buildscript {
 
 allprojects {
     repositories {
+        maven {
+            url 'https://lakeel-altla.github.io/maven-repository'
+        }
         jcenter()
     }
 }
