@@ -32,9 +32,7 @@ public final class TangoAreaDescriptionApi extends BaseVisionApi {
     }
 
     @Nullable
-    public TangoAreaDescription findTangoAreaDescriptionById(@NonNull String areaDescriptionId) {
-        Tango tango = getVisionService().getTangoWrapper().getTango();
-
+    public TangoAreaDescription findTangoAreaDescriptionById(@NonNull Tango tango, @NonNull String areaDescriptionId) {
         List<String> areaDescriptionIds = tangoAreaDescriptionIdRepository.findAll(tango);
         if (areaDescriptionIds.contains(areaDescriptionId)) {
             TangoAreaDescriptionMetaData metaData = tangoAreaDescriptionMetadataRepository.get(
@@ -46,9 +44,7 @@ public final class TangoAreaDescriptionApi extends BaseVisionApi {
     }
 
     @NonNull
-    public List<TangoAreaDescription> findAllTangoAreaDescriptions() {
-        Tango tango = getVisionService().getTangoWrapper().getTango();
-
+    public List<TangoAreaDescription> findAllTangoAreaDescriptions(@NonNull Tango tango) {
         List<TangoAreaDescriptionMetaData> metaDatas = tangoAreaDescriptionMetadataRepository.findAll(tango);
 
         List<TangoAreaDescription> results = new ArrayList<>(metaDatas.size());
@@ -59,16 +55,12 @@ public final class TangoAreaDescriptionApi extends BaseVisionApi {
         return results;
     }
 
-    public void deleteTangoAreaDescriptionById(@NonNull String areaDescriptionId) {
-        Tango tango = getVisionService().getTangoWrapper().getTango();
-
+    public void deleteTangoAreaDescriptionById(@NonNull Tango tango, @NonNull String areaDescriptionId) {
         tangoAreaDescriptionMetadataRepository.delete(tango, areaDescriptionId);
     }
 
-    public void exportTangoAreaDescriptionById(@NonNull String areaDescriptionId) {
-        Tango tango = getVisionService().getTangoWrapper().getTango();
-
-        TangoAreaDescription tangoAreaDescription = findTangoAreaDescriptionById(areaDescriptionId);
+    public void exportTangoAreaDescriptionById(@NonNull Tango tango, @NonNull String areaDescriptionId) {
+        TangoAreaDescription tangoAreaDescription = findTangoAreaDescriptionById(tango, areaDescriptionId);
         if (tangoAreaDescription == null) {
             throw new IllegalArgumentException(
                     "TangoAreaDescription not found: areaDescriptionId = " + areaDescriptionId);

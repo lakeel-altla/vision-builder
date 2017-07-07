@@ -2,6 +2,7 @@ package com.lakeel.altla.vision.api;
 
 import com.google.firebase.iid.FirebaseInstanceId;
 
+import com.lakeel.altla.vision.data.repository.android.AssetCacheRepository;
 import com.lakeel.altla.vision.data.repository.android.DocumentRepository;
 import com.lakeel.altla.vision.data.repository.firebase.UserImageAssetFileRepository;
 import com.lakeel.altla.vision.data.repository.firebase.UserImageAssetFileUploadTaskRepository;
@@ -19,6 +20,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -32,6 +34,8 @@ public final class UserAssetApi extends BaseVisionApi {
 
     private final DocumentRepository documentRepository;
 
+    private final AssetCacheRepository assetCacheRepository;
+
     public UserAssetApi(@NonNull VisionService visionService) {
         super(visionService);
 
@@ -40,6 +44,7 @@ public final class UserAssetApi extends BaseVisionApi {
         userImageAssetFileUploadTaskRepository = new UserImageAssetFileUploadTaskRepository(
                 visionService.getFirebaseDatabase());
         documentRepository = new DocumentRepository(visionService.getContext().getContentResolver());
+        assetCacheRepository = new AssetCacheRepository(visionService.getContext());
     }
 
     public void findUserImageAssetById(@NonNull String assetId,
@@ -144,5 +149,22 @@ public final class UserAssetApi extends BaseVisionApi {
                 if (onFailureListener != null) onFailureListener.onFailure(ex);
             }
         }, onFailureListener);
+    }
+
+    public void downloadImageAssetFile(@NonNull String assetId,
+                                       @Nullable OnSuccessListener<File> onSuccessListener,
+                                       @Nullable OnFailureListener onFailureListener,
+                                       @Nullable OnProgressListener onProgressListener)
+            throws IOException {
+
+        final File destination = assetCacheRepository.findOrCreate(assetId);
+
+        userImageAssetFileRepository.download(
+                CurrentUser.getInstance().getUserId(), assetId, destination,
+                aVoid -> {
+                    if (onSuccessListener != null) onSuccessListener.onSuccess(destination);
+                },
+                onFailureListener,
+                onProgressListener);
     }
 }

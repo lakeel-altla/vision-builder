@@ -16,6 +16,7 @@
     <string name="button_start">Start</string>
     <string name="button_select">Select</string>
     <string name="button_save">Save</string>
+    <string name="button_sign_out">Sign Out</string>
 
     <string name="radio_button_public">Public</string>
     <string name="radio_button_group">Group</string>
@@ -26,14 +27,13 @@
 
     <string name="snackbar_failed">Failed.</string>
     <string name="snackbar_done">Done.</string>
-    <string name="snackbar_google_sign_in_failed">Google Sign-In failed.</string>
-    <string name="snackbar_google_sign_in_reqiured">Sign-in required.</string>
-    <string name="snackbar_area_learning_permission_required">Area Learning permission required.</string>
     <string name="snackbar_image_file_not_found">Image file not found.</string>
     <string name="snackbar_action_request_permission">Request permission</string>
 
     <string name="toast_failed">Failed.</string>
     <string name="toast_google_api_client_connection_failed">Google Play Services error.</string>
+    <string name="toast_google_sign_in_failed">Google Sign-In failed.</string>
+    <string name="toast_adf_save_load_permissions_required">Area Learning permission required.</string>
 
     <string name="progress_dialog_signin_in">Signing in...</string>
     <string name="progress_dialog_upload">Uploading...</string>
@@ -88,6 +88,5 @@
     <string name="action_select">Select</string>
 
     <string name="input_error_required">Required.</string>
-    <string name="button_sign_out">Sign Out</string>
 
 </resources>

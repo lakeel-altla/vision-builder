@@ -17,6 +17,7 @@ android {
         targetSdkVersion 25
         versionCode 1
         versionName "1.0"
+        multiDexEnabled true
 
         try {
             manifestPlaceholders = [GOOGLE_API_KEY: googleApiProperties.getProperty("GOOGLE_API_KEY")]
@@ -36,7 +37,10 @@ android {
     }
 }
 
+configurations { natives }
+
 dependencies {
+    compile 'com.android.support:multidex:1.0.1'
     compile 'com.android.support:appcompat-v7:25.3.1'
     compile 'com.android.support:design:25.3.1'
     compile 'com.android.support:percent:25.3.1'
@@ -45,6 +49,14 @@ dependencies {
     compile "io.reactivex.rxjava2:rxjava:2.0.4"
     compile 'io.reactivex.rxjava2:rxandroid:2.0.1'
     compile 'org.greenrobot:eventbus:3.0.0'
+
+    compile "com.badlogicgames.gdx:gdx-backend-android:$gdxVersion"
+    natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-armeabi"
+    natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-armeabi-v7a"
+    natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-arm64-v8a"
+    natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-x86"
+    natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-x86_64"
+    compile "com.badlogicgames.gdx:gdx:$gdxVersion"
 
     compile 'com.google.dagger:dagger:2.10'
     annotationProcessor 'com.google.dagger:dagger-compiler:2.10'
@@ -58,15 +70,38 @@ dependencies {
     compile project(path: ':android-binding')
 
     debugCompile project(path: ':vision-core', configuration: 'debug')
-    debugCompile project(path: ':tango-rajawali', configuration: 'debug')
-    debugCompile project(path: ':rajawali-pool', configuration: 'debug')
     debugCompile 'com.squareup.leakcanary:leakcanary-android:1.4'
 
     releaseCompile project(path: ':vision-core', configuration: 'debug')
-    releaseCompile project(path: ':tango-rajawali', configuration: 'release')
-    releaseCompile project(path: ':rajawali-pool', configuration: 'release')
     releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.4'
 }
 
 // google-services plugin to use firebase.
 apply plugin: 'com.google.gms.google-services'
+
+// called every time gradle gets executed, takes the native dependencies of
+// the natives configuration, and extracts them to the proper libs/ folders
+// so they get packed with the APK.
+task copyAndroidNatives() {
+    file("src/main/jniLibs/armeabi/").mkdirs();
+    file("src/main/jniLibs/armeabi-v7a/").mkdirs();
+    file("src/main/jniLibs/arm64-v8a/").mkdirs();
+    file("src/main/jniLibs/x86_64/").mkdirs();
+    file("src/main/jniLibs/x86/").mkdirs();
+
+    configurations.natives.files.each { jar ->
+        def outputDir = null
+        if (jar.name.endsWith("natives-arm64-v8a.jar")) outputDir = file("src/main/jniLibs/arm64-v8a")
+        if (jar.name.endsWith("natives-armeabi-v7a.jar")) outputDir = file("src/main/jniLibs/armeabi-v7a")
+        if (jar.name.endsWith("natives-armeabi.jar")) outputDir = file("src/main/jniLibs/armeabi")
+        if (jar.name.endsWith("natives-x86_64.jar")) outputDir = file("src/main/jniLibs/x86_64")
+        if (jar.name.endsWith("natives-x86.jar")) outputDir = file("src/main/jniLibs/x86")
+        if (outputDir != null) {
+            copy {
+                from zipTree(jar)
+                into outputDir
+                include "*.so"
+            }
+        }
+    }
+}

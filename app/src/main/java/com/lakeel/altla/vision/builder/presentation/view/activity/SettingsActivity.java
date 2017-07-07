@@ -96,7 +96,6 @@ public final class SettingsActivity extends AppCompatActivity
         NavUtils.navigateUpFromSameTask(this);
     }
 
-    @Override
     public ActivityComponent getActivityComponent() {
         return activityComponent;
     }

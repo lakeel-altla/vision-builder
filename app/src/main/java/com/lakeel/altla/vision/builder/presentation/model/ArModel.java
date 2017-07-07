@@ -17,23 +17,21 @@ public final class ArModel {
 
     private AreaSettings areaSettings;
 
-    private Actor selectedActor;
-
     public ArModel(@NonNull VisionService visionService) {
         this.visionService = visionService;
     }
 
     @Nullable
-    public AreaSettings getAreaSettings() {
+    public synchronized AreaSettings getAreaSettings() {
         return areaSettings;
     }
 
-    public void selectAreaSettings(@NonNull AreaSettings areaSettings) {
+    public synchronized void selectAreaSettings(@NonNull AreaSettings areaSettings) {
         this.areaSettings = areaSettings;
     }
 
     @NonNull
-    public Observable<Actor> loadActors() {
+    public synchronized Observable<Actor> loadActors() {
         if (areaSettings == null) throw new IllegalStateException("'areaSettings' is null.");
 
         final String areaId = areaSettings.getAreaId();
@@ -74,27 +72,6 @@ public final class ArModel {
                                                  },
                                                  e::onError);
             });
-        }
-    }
-
-    @Nullable
-    public Actor getSelectedActor() {
-        return selectedActor;
-    }
-
-    public void setSelectedActor(@Nullable Actor selectedActor) {
-        this.selectedActor = selectedActor;
-    }
-
-    public static final class PickedActor {
-
-        public final Scope scope;
-
-        public final String actorId;
-
-        public PickedActor(Scope scope, String actorId) {
-            this.scope = scope;
-            this.actorId = actorId;
         }
     }
 }

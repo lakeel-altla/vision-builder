@@ -4,10 +4,10 @@ import com.lakeel.altla.vision.builder.presentation.di.ActivityScope;
 
 import org.greenrobot.eventbus.EventBus;
 
+import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
 
 import javax.inject.Named;
 
@@ -17,15 +17,15 @@ import dagger.Provides;
 @Module
 public final class ActivityModule {
 
-    private final AppCompatActivity activity;
+    private final Activity activity;
 
-    public ActivityModule(@NonNull AppCompatActivity activity) {
+    public ActivityModule(@NonNull Activity activity) {
         this.activity = activity;
     }
 
     @ActivityScope
     @Provides
-    AppCompatActivity provideActivity() {
+    Activity provideActivity() {
         return activity;
     }
 
@@ -41,24 +41,6 @@ public final class ActivityModule {
     ContentResolver provideContentResolver() {
         return activity.getContentResolver();
     }
-//
-//    @ActivityScope
-//    @Provides
-//    VisionService provideVisionService(FirebaseDatabase firebaseDatabase, FirebaseStorage firebaseStorage) {
-//        return new VisionService(activity, firebaseDatabase, firebaseStorage);
-//    }
-//
-//    @ActivityScope
-//    @Provides
-//    ArModel provideArModel(VisionService visionService) {
-//        return new ArModel(visionService);
-//    }
-//
-//    @ActivityScope
-//    @Provides
-//    SelectAreaSettingsModel provideSelectAreaSettingsModel(VisionService visionService, ArModel arModel) {
-//        return new SelectAreaSettingsModel(visionService, arModel);
-//    }
 
     @ActivityScope
     @Provides

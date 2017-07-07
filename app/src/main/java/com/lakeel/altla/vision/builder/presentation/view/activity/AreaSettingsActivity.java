@@ -109,7 +109,6 @@ public final class AreaSettingsActivity extends AppCompatActivity
         backView();
     }
 
-    @Override
     public ActivityComponent getActivityComponent() {
         return activityComponent;
     }

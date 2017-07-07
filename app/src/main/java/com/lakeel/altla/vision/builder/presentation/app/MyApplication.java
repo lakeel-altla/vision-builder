@@ -7,16 +7,15 @@ import com.lakeel.altla.vision.builder.BuildConfig;
 import com.lakeel.altla.vision.builder.presentation.di.component.ApplicationComponent;
 import com.lakeel.altla.vision.builder.presentation.di.component.DaggerApplicationComponent;
 import com.lakeel.altla.vision.builder.presentation.di.module.ApplicationModule;
-import com.squareup.leakcanary.LeakCanary;
 
 import android.app.Activity;
-import android.app.Application;
 import android.support.annotation.NonNull;
+import android.support.multidex.MultiDexApplication;
 
 /**
  * Defines our application class.
  */
-public final class MyApplication extends Application {
+public final class MyApplication extends MultiDexApplication {
 
     private ApplicationComponent applicationComponent;
 
@@ -25,7 +24,7 @@ public final class MyApplication extends Application {
         super.onCreate();
 
         // LeakCanary
-        LeakCanary.install(this);
+//        LeakCanary.install(this);
 
         // Dagger 2
         applicationComponent = DaggerApplicationComponent

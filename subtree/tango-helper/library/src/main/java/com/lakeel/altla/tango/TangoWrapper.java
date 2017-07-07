@@ -4,17 +4,23 @@ import com.google.atap.tangoservice.Tango;
 import com.google.atap.tangoservice.TangoConfig;
 import com.google.atap.tangoservice.TangoCoordinateFramePair;
 import com.google.atap.tangoservice.TangoErrorException;
+import com.google.atap.tangoservice.TangoEvent;
 import com.google.atap.tangoservice.TangoException;
 import com.google.atap.tangoservice.TangoInvalidException;
 import com.google.atap.tangoservice.TangoOutOfDateException;
+import com.google.atap.tangoservice.TangoPointCloudData;
+import com.google.atap.tangoservice.TangoPoseData;
+import com.google.atap.tangoservice.TangoXyzIjData;
 
 import com.projecttango.tangosupport.TangoSupport;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public final class TangoWrapper {
@@ -23,13 +29,59 @@ public final class TangoWrapper {
 
     private static final DefaultTangoConfigFactory DEFAULT_TANGO_CONFIG_FACTORY = new DefaultTangoConfigFactory();
 
+    private static final List<TangoCoordinateFramePair> DEFAULT_COORDINATE_FRAME_PAIR = Collections.emptyList();
+
     private final Context context;
 
-    private final TangoUpdateDispatcher tangoUpdateDispatcher = new TangoUpdateDispatcher();
+    private final List<OnTangoReadyListener> onTangoReadyListeners = new ArrayList<>();
 
-    private final List<OnTangoReadyListener> onTangoReadyListeners = new LinkedList<>();
+    private final List<OnTangoConnectErrorListener> onTangoConnectErrorListeners = new ArrayList<>();
 
-    private final List<OnTangoConnectErrorListener> onTangoConnectErrorListeners = new LinkedList<>();
+    private final List<OnTangoDisconnectingListener> onTangoDisconnectingListeners = new ArrayList<>();
+
+    private final List<OnTangoDisconnectedListener> onTangoDisconnectedListeners = new ArrayList<>();
+
+    private final List<OnPoseAvailableListener> onPoseAvailableListeners = new ArrayList<>();
+
+    private final List<OnPointCloudAvailableListener> onPointCloudAvailableListeners = new ArrayList<>();
+
+    private final List<OnFrameAvailableListener> onFrameAvailableListeners = new ArrayList<>();
+
+    private final List<OnTangoEventListener> onTangoEventListeners = new ArrayList<>();
+
+    private final Tango.TangoUpdateCallback tangoUpdateCallback = new Tango.TangoUpdateCallback() {
+        @Override
+        public void onPoseAvailable(TangoPoseData pose) {
+            for (OnPoseAvailableListener listener : onPoseAvailableListeners) {
+                listener.onPoseAvailable(pose);
+            }
+        }
+
+        @Override
+        public void onXyzIjAvailable(TangoXyzIjData xyzIj) {
+        }
+
+        @Override
+        public void onFrameAvailable(int cameraId) {
+            for (OnFrameAvailableListener listener : onFrameAvailableListeners) {
+                listener.onFrameAvailable(cameraId);
+            }
+        }
+
+        @Override
+        public void onTangoEvent(TangoEvent event) {
+            for (OnTangoEventListener listener : onTangoEventListeners) {
+                listener.onTangoEvent(event);
+            }
+        }
+
+        @Override
+        public void onPointCloudAvailable(TangoPointCloudData pointCloud) {
+            for (OnPointCloudAvailableListener listener : onPointCloudAvailableListeners) {
+                listener.onPointCloudAvailable(pointCloud);
+            }
+        }
+    };
 
     private boolean connected;
 
@@ -45,12 +97,52 @@ public final class TangoWrapper {
         this.context = context;
     }
 
-    public void setTangoConfigFactory(TangoConfigFactory tangoConfigFactory) {
+    public void setTangoConfigFactory(@Nullable TangoConfigFactory tangoConfigFactory) {
         this.tangoConfigFactory = tangoConfigFactory;
     }
 
-    public void setCoordinateFramePairs(List<TangoCoordinateFramePair> coordinateFramePairs) {
+    public void setCoordinateFramePairs(@Nullable List<TangoCoordinateFramePair> coordinateFramePairs) {
         this.coordinateFramePairs = coordinateFramePairs;
+    }
+
+    @NonNull
+    public List<OnTangoReadyListener> getOnTangoReadyListeners() {
+        return onTangoReadyListeners;
+    }
+
+    @NonNull
+    public List<OnTangoConnectErrorListener> getOnTangoConnectErrorListeners() {
+        return onTangoConnectErrorListeners;
+    }
+
+    @NonNull
+    public List<OnTangoDisconnectingListener> getOnTangoDisconnectingListeners() {
+        return onTangoDisconnectingListeners;
+    }
+
+    @NonNull
+    public List<OnTangoDisconnectedListener> getOnTangoDisconnectedListeners() {
+        return onTangoDisconnectedListeners;
+    }
+
+    @NonNull
+    public List<OnPoseAvailableListener> getOnPoseAvailableListeners() {
+        return onPoseAvailableListeners;
+    }
+
+    @NonNull
+    public List<OnPointCloudAvailableListener> getOnPointCloudAvailableListeners() {
+        return onPointCloudAvailableListeners;
+    }
+
+    @NonNull
+    public List<OnFrameAvailableListener> getOnFrameAvailableListeners() {
+        return onFrameAvailableListeners;
+    }
+
+    @NonNull
+    public List<OnTangoEventListener> getOnTangoEventListeners() {
+        return onTangoEventListeners;
     }
 
     public boolean isConnected() {
@@ -59,58 +151,6 @@ public final class TangoWrapper {
 
     public Tango getTango() {
         return tango;
-    }
-
-    public synchronized void addOnPoseAvailableListener(@NonNull OnPoseAvailableListener listener) {
-        tangoUpdateDispatcher.getOnPoseAvailableListeners().add(listener);
-    }
-
-    public synchronized void removeOnPoseAvailableListener(@NonNull OnPoseAvailableListener listener) {
-        tangoUpdateDispatcher.getOnPoseAvailableListeners().remove(listener);
-    }
-
-    public synchronized void addOnPointCloudAvailableListener(@NonNull OnPointCloudAvailableListener listener) {
-        tangoUpdateDispatcher.getOnPointCloudAvailableListeners().add(listener);
-    }
-
-    public synchronized void removeOnPointCloudAvailableListener(@NonNull OnPointCloudAvailableListener listener) {
-        tangoUpdateDispatcher.getOnPointCloudAvailableListeners().remove(listener);
-    }
-
-    public synchronized void addOnFrameAvailableListener(@NonNull OnFrameAvailableListener listener) {
-        tangoUpdateDispatcher.getOnFrameAvailableListeners().add(listener);
-    }
-
-    public synchronized void removeOnFrameAvailableListener(@NonNull OnFrameAvailableListener listener) {
-        tangoUpdateDispatcher.getOnFrameAvailableListeners().remove(listener);
-    }
-
-    public synchronized void addOnTangoEventListener(@NonNull OnTangoEventListener listener) {
-        tangoUpdateDispatcher.getOnTangoEventListeners().add(listener);
-    }
-
-    public synchronized void removeOnTangoEventListener(@NonNull OnTangoEventListener listener) {
-        tangoUpdateDispatcher.getOnTangoEventListeners().remove(listener);
-    }
-
-    public synchronized void addOnTangoReadyListener(@NonNull OnTangoReadyListener listener) {
-        onTangoReadyListeners.add(listener);
-
-        if (connected) {
-            listener.onTangoReady(tango);
-        }
-    }
-
-    public synchronized void removeOnTangoReadyListener(@NonNull OnTangoReadyListener listener) {
-        onTangoReadyListeners.remove(listener);
-    }
-
-    public synchronized void addOnTangoConnectErrorListener(@NonNull OnTangoConnectErrorListener listener) {
-        onTangoConnectErrorListeners.add(listener);
-    }
-
-    public synchronized void removeOnTangoConnectErrorListener(@NonNull OnTangoConnectErrorListener listener) {
-        onTangoConnectErrorListeners.remove(listener);
     }
 
     public void connect() {
@@ -129,14 +169,21 @@ public final class TangoWrapper {
                             tangoSupportInitialized = true;
                         }
 
-                        TangoConfig tangoConfig;
+                        final TangoConfig tangoConfig;
                         if (tangoConfigFactory == null) {
                             tangoConfig = DEFAULT_TANGO_CONFIG_FACTORY.create(tango);
                         } else {
                             tangoConfig = tangoConfigFactory.create(tango);
                         }
                         tango.connect(tangoConfig);
-                        tango.connectListener(coordinateFramePairs, tangoUpdateDispatcher);
+
+                        final List<TangoCoordinateFramePair> framePairs;
+                        if (coordinateFramePairs == null) {
+                            framePairs = DEFAULT_COORDINATE_FRAME_PAIR;
+                        } else {
+                            framePairs = coordinateFramePairs;
+                        }
+                        tango.connectListener(framePairs, tangoUpdateCallback);
 
                         connected = true;
 
@@ -168,21 +215,28 @@ public final class TangoWrapper {
     public synchronized void disconnect() {
         Log.d(TAG, "Disconnecting...");
 
+        if (!onTangoDisconnectingListeners.isEmpty()) {
+            for (OnTangoDisconnectingListener listener : onTangoDisconnectingListeners) {
+                listener.onTangoDisconnecting();
+            }
+        }
+
         try {
             if (tango != null) {
                 tango.disconnect();
             }
-
-            tangoUpdateDispatcher.getOnPoseAvailableListeners().clear();
-            tangoUpdateDispatcher.getOnPointCloudAvailableListeners().clear();
-            tangoUpdateDispatcher.getOnFrameAvailableListeners().clear();
-            tangoUpdateDispatcher.getOnTangoEventListeners().clear();
-
-            connected = false;
-
-            Log.d(TAG, "Disconnected.");
         } catch (TangoErrorException e) {
             Log.e(TAG, "Tango error occurred.", e);
+        }
+
+        connected = false;
+
+        Log.d(TAG, "Disconnected.");
+
+        if (!onTangoDisconnectedListeners.isEmpty()) {
+            for (OnTangoDisconnectedListener listener : onTangoDisconnectedListeners) {
+                listener.onTangoDisconnected();
+            }
         }
     }
 
@@ -192,6 +246,11 @@ public final class TangoWrapper {
                 listener.onTangoConnectError(e);
             }
         }
+    }
+
+    public interface TangoConfigFactory {
+
+        TangoConfig create(Tango tango);
     }
 
     public interface OnTangoReadyListener {
@@ -204,9 +263,34 @@ public final class TangoWrapper {
         void onTangoConnectError(TangoException e);
     }
 
-    public interface TangoConfigFactory {
+    public interface OnTangoDisconnectingListener {
 
-        TangoConfig create(Tango tango);
+        void onTangoDisconnecting();
+    }
+
+    public interface OnTangoDisconnectedListener {
+
+        void onTangoDisconnected();
+    }
+
+    public interface OnFrameAvailableListener {
+
+        void onFrameAvailable(int cameraId);
+    }
+
+    public interface OnPointCloudAvailableListener {
+
+        void onPointCloudAvailable(TangoPointCloudData pointCloud);
+    }
+
+    public interface OnPoseAvailableListener {
+
+        void onPoseAvailable(TangoPoseData pose);
+    }
+
+    public interface OnTangoEventListener {
+
+        void onTangoEvent(TangoEvent event);
     }
 
     private static final class DefaultTangoConfigFactory implements TangoConfigFactory {

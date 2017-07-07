@@ -3,8 +3,6 @@ package com.lakeel.altla.vision.api;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 
-import com.lakeel.altla.tango.TangoWrapper;
-
 import android.content.Context;
 import android.support.annotation.NonNull;
 
@@ -15,8 +13,6 @@ public final class VisionService {
     private final FirebaseDatabase firebaseDatabase;
 
     private final FirebaseStorage firebaseStorage;
-
-    private final TangoWrapper tangoWrapper;
 
     private final GooglePlaceApi googlePlaceApi;
 
@@ -54,8 +50,6 @@ public final class VisionService {
         this.firebaseDatabase = firebaseDatabase;
         this.firebaseStorage = firebaseStorage;
 
-        tangoWrapper = new TangoWrapper(context);
-
         googlePlaceApi = new GooglePlaceApi(this);
 
         tangoAreaDescriptionApi = new TangoAreaDescriptionApi(this);
@@ -88,11 +82,6 @@ public final class VisionService {
     @NonNull
     FirebaseStorage getFirebaseStorage() {
         return firebaseStorage;
-    }
-
-    @NonNull
-    public TangoWrapper getTangoWrapper() {
-        return tangoWrapper;
     }
 
     @NonNull

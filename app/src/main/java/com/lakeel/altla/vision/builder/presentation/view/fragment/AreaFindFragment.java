@@ -4,6 +4,7 @@ import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.Places;
 import com.google.android.gms.location.places.ui.PlacePicker;
 
 import com.lakeel.altla.android.binding.ViewBindingFactory;
@@ -20,10 +21,10 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import javax.inject.Inject;
 
@@ -35,11 +36,7 @@ public final class AreaFindFragment extends AbstractFragment<AreaFindPresenter.V
     @Inject
     AreaFindPresenter presenter;
 
-    @Inject
-    AppCompatActivity activity;
-
-    @Inject
-    GoogleApiClient googleApiClient;
+    private GoogleApiClient googleApiClient;
 
     private Place pickedPlace;
 
@@ -65,6 +62,20 @@ public final class AreaFindFragment extends AbstractFragment<AreaFindPresenter.V
         ActivityScopeContext.class.cast(context).getActivityComponent().inject(this);
     }
 
+    @Override
+    protected void onCreateOverride(@Nullable Bundle savedInstanceState) {
+        super.onCreateOverride(savedInstanceState);
+
+        googleApiClient = new GoogleApiClient.Builder(getActivity())
+                .enableAutoManage(getActivity(), connectionResult -> {
+                    getLog().e("Google API connection error occured: %s", connectionResult);
+                    Toast.makeText(getActivity(), R.string.toast_google_api_client_connection_failed, Toast.LENGTH_LONG)
+                         .show();
+                })
+                .addApi(Places.GEO_DATA_API)
+                .build();
+    }
+
     @Nullable
     @Override
     protected View onCreateViewCore(LayoutInflater inflater, @Nullable ViewGroup container,
@@ -76,7 +87,7 @@ public final class AreaFindFragment extends AbstractFragment<AreaFindPresenter.V
     protected void onBindView(@NonNull View view) {
         super.onBindView(view);
 
-        ViewBindingFactory factory = new ViewBindingFactory(view);
+        final ViewBindingFactory factory = new ViewBindingFactory(view);
         factory.create(R.id.button_place_picker, "onClick", presenter.commandShowPlacePicker).bind();
     }
 
@@ -108,7 +119,7 @@ public final class AreaFindFragment extends AbstractFragment<AreaFindPresenter.V
         if (googleApiClient.isConnected()) {
             // TODO: disable the action to pick a place.
             try {
-                Intent intent = new PlacePicker.IntentBuilder().build(activity);
+                final Intent intent = new PlacePicker.IntentBuilder().build(getActivity());
                 startActivityForResult(intent, REQUEST_CODE_PLACE_PICKER);
             } catch (GooglePlayServicesRepairableException | GooglePlayServicesNotAvailableException e) {
                 presenter.onShowPlacePickerFailed(e);
