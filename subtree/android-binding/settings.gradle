@@ -1,2 +1,0 @@
-include ':app', ':library', ':android-property'
-project(':android-property').projectDir = new File(settingsDir, './subtree/android-property/library')
