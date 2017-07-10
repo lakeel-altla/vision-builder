@@ -6,7 +6,6 @@ import com.lakeel.altla.vision.builder.presentation.view.activity.ArActivity;
 import com.lakeel.altla.vision.builder.presentation.view.activity.AreaSettingsActivity;
 import com.lakeel.altla.vision.builder.presentation.view.activity.SettingsActivity;
 import com.lakeel.altla.vision.builder.presentation.view.activity.SignInActivity;
-import com.lakeel.altla.vision.builder.presentation.view.fragment.ActorEditFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaByPlaceListFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaDescriptionByAreaListFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaFindFragment;
@@ -46,8 +45,6 @@ public interface ActivityComponent {
     void inject(AreaFindFragment fragment);
 
     void inject(SettingsFragment fragment);
-
-    void inject(ActorEditFragment fragment);
 
     void inject(ImageAssetListFragment fragment);
 }

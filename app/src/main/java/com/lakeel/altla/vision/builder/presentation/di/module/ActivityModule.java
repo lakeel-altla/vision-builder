@@ -2,8 +2,6 @@ package com.lakeel.altla.vision.builder.presentation.di.module;
 
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScope;
 
-import org.greenrobot.eventbus.EventBus;
-
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -40,11 +38,5 @@ public final class ActivityModule {
     @Provides
     ContentResolver provideContentResolver() {
         return activity.getContentResolver();
-    }
-
-    @ActivityScope
-    @Provides
-    EventBus provideEventBus() {
-        return new EventBus();
     }
 }

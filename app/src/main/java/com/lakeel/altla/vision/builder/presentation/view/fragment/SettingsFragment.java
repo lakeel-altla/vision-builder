@@ -1,26 +1,40 @@
 package com.lakeel.altla.vision.builder.presentation.view.fragment;
 
-import com.lakeel.altla.android.binding.ViewBindingFactory;
+import com.google.firebase.auth.FirebaseAuth;
+
+import com.lakeel.altla.android.log.Log;
+import com.lakeel.altla.android.log.LogFactory;
+import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
-import com.lakeel.altla.vision.builder.presentation.presenter.SettingsPresenter;
-import com.lakeel.altla.vision.presentation.view.fragment.AbstractFragment;
 
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 import javax.inject.Inject;
 
-public final class SettingsFragment extends AbstractFragment<SettingsPresenter.View, SettingsPresenter>
-        implements SettingsPresenter.View {
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+
+public final class SettingsFragment extends Fragment {
+
+    private static final Log LOG = LogFactory.getLog(SettingsFragment.class);
 
     @Inject
-    SettingsPresenter presenter;
+    VisionService visionService;
+
+    @BindView(R.id.button_sign_out)
+    Button buttonSignOut;
+
+    private FragmentContext fragmentContext;
 
     @NonNull
     public static SettingsFragment newInstance() {
@@ -28,34 +42,45 @@ public final class SettingsFragment extends AbstractFragment<SettingsPresenter.V
     }
 
     @Override
-    protected SettingsPresenter getPresenter() {
-        return presenter;
-    }
-
-    @Override
-    protected SettingsPresenter.View getViewInterface() {
-        return this;
-    }
-
-    @Override
-    protected void onAttachOverride(@NonNull Context context) {
-        super.onAttachOverride(context);
-
+    public void onAttach(Context context) {
+        super.onAttach(context);
         ((ActivityScopeContext) context).getActivityComponent().inject(this);
+        fragmentContext = (FragmentContext) context;
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        fragmentContext = null;
     }
 
     @Nullable
     @Override
-    protected View onCreateViewCore(LayoutInflater inflater, @Nullable ViewGroup container,
-                                    @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_settings, container, false);
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+        final View view = inflater.inflate(R.layout.fragment_settings, container, false);
+        ButterKnife.bind(this, view);
+        return view;
     }
 
-    @Override
-    protected void onBindView(@NonNull View view) {
-        super.onBindView(view);
+    @OnClick(R.id.button_sign_out)
+    void onClickSignOut() {
+        visionService.getUserDeviceConnectionApi()
+                     .markUserDeviceConnectionAsOffline(aVoid -> {
+                         showSignInView();
+                     }, e -> {
+                         LOG.e("Failed.", e);
+                         showSignInView();
+                     });
+    }
 
-        ViewBindingFactory factory = new ViewBindingFactory(view);
-        factory.create(R.id.button_sign_out, "onClick", presenter.commandSignOut).bind();
+    private void showSignInView() {
+        FirebaseAuth.getInstance().signOut();
+        fragmentContext.showSignInView();
+    }
+
+    public interface FragmentContext {
+
+        void showSignInView();
     }
 }

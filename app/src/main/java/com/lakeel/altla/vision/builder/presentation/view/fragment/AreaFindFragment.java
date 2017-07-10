@@ -2,41 +2,49 @@ package com.lakeel.altla.vision.builder.presentation.view.fragment;
 
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.places.Place;
-import com.google.android.gms.location.places.Places;
 import com.google.android.gms.location.places.ui.PlacePicker;
 
-import com.lakeel.altla.android.binding.ViewBindingFactory;
+import com.lakeel.altla.android.log.Log;
+import com.lakeel.altla.android.log.LogFactory;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
-import com.lakeel.altla.vision.builder.presentation.presenter.AreaFindPresenter;
-import com.lakeel.altla.vision.presentation.view.fragment.AbstractFragment;
+import com.lakeel.altla.vision.builder.presentation.model.SelectAreaSettingsModel;
 
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
-import android.support.design.widget.Snackbar;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.Toast;
 
 import javax.inject.Inject;
 
-public final class AreaFindFragment extends AbstractFragment<AreaFindPresenter.View, AreaFindPresenter>
-        implements AreaFindPresenter.View {
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+
+public final class AreaFindFragment extends Fragment {
+
+    private static final Log LOG = LogFactory.getLog(AreaFindFragment.class);
 
     private static final int REQUEST_CODE_PLACE_PICKER = 1;
 
     @Inject
-    AreaFindPresenter presenter;
+    SelectAreaSettingsModel selectAreaSettingsModel;
 
-    private GoogleApiClient googleApiClient;
+    @BindView(R.id.button_show_place_picker)
+    Button buttonShowPlacePicker;
+
+    private FragmentContext fragmentContext;
 
     private Place pickedPlace;
 
@@ -46,57 +54,42 @@ public final class AreaFindFragment extends AbstractFragment<AreaFindPresenter.V
     }
 
     @Override
-    protected AreaFindPresenter getPresenter() {
-        return presenter;
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        ((ActivityScopeContext) context).getActivityComponent().inject(this);
+        fragmentContext = (FragmentContext) context;
     }
 
     @Override
-    protected AreaFindPresenter.View getViewInterface() {
-        return this;
-    }
-
-    @Override
-    protected void onAttachOverride(@NonNull Context context) {
-        super.onAttachOverride(context);
-
-        ActivityScopeContext.class.cast(context).getActivityComponent().inject(this);
-    }
-
-    @Override
-    protected void onCreateOverride(@Nullable Bundle savedInstanceState) {
-        super.onCreateOverride(savedInstanceState);
-
-        googleApiClient = new GoogleApiClient.Builder(getActivity())
-                .enableAutoManage(getActivity(), connectionResult -> {
-                    getLog().e("Google API connection error occured: %s", connectionResult);
-                    Toast.makeText(getActivity(), R.string.toast_google_api_client_connection_failed, Toast.LENGTH_LONG)
-                         .show();
-                })
-                .addApi(Places.GEO_DATA_API)
-                .build();
+    public void onDetach() {
+        super.onDetach();
+        fragmentContext = null;
     }
 
     @Nullable
     @Override
-    protected View onCreateViewCore(LayoutInflater inflater, @Nullable ViewGroup container,
-                                    @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_area_find, container, false);
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+        final View view = inflater.inflate(R.layout.fragment_area_find, container, false);
+        ButterKnife.bind(this, view);
+        return view;
     }
 
     @Override
-    protected void onBindView(@NonNull View view) {
-        super.onBindView(view);
+    public void onStart() {
+        super.onStart();
 
-        final ViewBindingFactory factory = new ViewBindingFactory(view);
-        factory.create(R.id.button_place_picker, "onClick", presenter.commandShowPlacePicker).bind();
+        fragmentContext.setTitle(R.string.title_area_find_view);
+        fragmentContext.setHomeAsUpIndicator(R.drawable.ic_arrow_back_white_24dp);
     }
 
     @Override
-    protected void onResumeOverride() {
-        super.onResumeOverride();
+    public void onResume() {
+        super.onResume();
 
         if (pickedPlace != null) {
-            presenter.onPlacePicked(pickedPlace);
+            selectAreaSettingsModel.selectPlace(pickedPlace);
+            fragmentContext.showAreaByPlaceListView();
             pickedPlace = null;
         }
     }
@@ -104,8 +97,7 @@ public final class AreaFindFragment extends AbstractFragment<AreaFindPresenter.V
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_CODE_PLACE_PICKER) {
-            // TODO: renable the action to pick a place.
-
+            buttonShowPlacePicker.setEnabled(true);
             if (resultCode == Activity.RESULT_OK) {
                 pickedPlace = PlacePicker.getPlace(getContext(), data);
             }
@@ -114,24 +106,24 @@ public final class AreaFindFragment extends AbstractFragment<AreaFindPresenter.V
         }
     }
 
-    @Override
-    public void onShowPlacePicker() {
-        if (googleApiClient.isConnected()) {
-            // TODO: disable the action to pick a place.
-            try {
-                final Intent intent = new PlacePicker.IntentBuilder().build(getActivity());
-                startActivityForResult(intent, REQUEST_CODE_PLACE_PICKER);
-            } catch (GooglePlayServicesRepairableException | GooglePlayServicesNotAvailableException e) {
-                presenter.onShowPlacePickerFailed(e);
-            }
+    @OnClick(R.id.button_show_place_picker)
+    void onClickShowPlacePicker() {
+        buttonShowPlacePicker.setEnabled(false);
+        try {
+            final Intent intent = new PlacePicker.IntentBuilder().build(getActivity());
+            startActivityForResult(intent, REQUEST_CODE_PLACE_PICKER);
+        } catch (GooglePlayServicesRepairableException | GooglePlayServicesNotAvailableException e) {
+            LOG.e("Failed.", e);
+            Toast.makeText(getContext(), R.string.toast_failed, Toast.LENGTH_SHORT).show();
         }
     }
 
-    @Override
-    public void showSnackbar(@StringRes int resId) {
-        View view = getView();
-        if (view != null) {
-            Snackbar.make(view, resId, Snackbar.LENGTH_SHORT).show();
-        }
+    public interface FragmentContext {
+
+        void setTitle(@StringRes int resId);
+
+        void setHomeAsUpIndicator(@DrawableRes int resId);
+
+        void showAreaByPlaceListView();
     }
 }

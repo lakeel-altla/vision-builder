@@ -7,11 +7,7 @@ import com.lakeel.altla.vision.builder.presentation.app.MyApplication;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.di.component.ActivityComponent;
 import com.lakeel.altla.vision.builder.presentation.di.module.ActivityModule;
-import com.lakeel.altla.vision.builder.presentation.event.ShowSignInViewEvent;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.SettingsFragment;
-
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -24,15 +20,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
-import javax.inject.Inject;
-
 public final class SettingsActivity extends AppCompatActivity
-        implements ActivityScopeContext {
+        implements ActivityScopeContext,
+                   SettingsFragment.FragmentContext {
 
     private static final Log LOG = LogFactory.getLog(SettingsActivity.class);
-
-    @Inject
-    EventBus eventBus;
 
     private ActivityComponent activityComponent;
 
@@ -50,8 +42,6 @@ public final class SettingsActivity extends AppCompatActivity
         activityComponent = MyApplication.getApplicationComponent(this)
                                          .activityComponent(new ActivityModule(this));
         activityComponent.inject(this);
-
-        eventBus.register(this);
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
@@ -74,13 +64,6 @@ public final class SettingsActivity extends AppCompatActivity
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
-        eventBus.unregister(this);
-    }
-
-    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
@@ -96,18 +79,18 @@ public final class SettingsActivity extends AppCompatActivity
         NavUtils.navigateUpFromSameTask(this);
     }
 
-    public ActivityComponent getActivityComponent() {
-        return activityComponent;
-    }
-
-    @Subscribe
-    public void onEvent(@NonNull ShowSignInViewEvent event) {
+    @Override
+    public void showSignInView() {
         // Clear all activities and then start sign in activity.
         Intent intent = SignInActivity.createIntent(this);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();
+    }
+
+    public ActivityComponent getActivityComponent() {
+        return activityComponent;
     }
 
     private void replaceFragment(Fragment fragment) {

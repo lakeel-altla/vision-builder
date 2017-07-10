@@ -35,9 +35,6 @@ public final class MyApplication extends MultiDexApplication {
         // Enable the offline feature of Firebase Database.
         FirebaseDatabase.getInstance().setPersistenceEnabled(true);
 
-        // Rajawali
-//        RajLog.setDebugEnabled(true);
-
         // Altla Log
         LogFactory.setDebug(BuildConfig.DEBUG);
 

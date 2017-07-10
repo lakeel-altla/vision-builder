@@ -1,5 +1,3 @@
-include ':app', ':android-property', ':android-binding', ':vision-core', ':tango-helper'
-project(':android-property').projectDir = new File(settingsDir, './subtree/android-binding/subtree/android-property/library')
-project(':android-binding').projectDir = new File(settingsDir, './subtree/android-binding/library')
+include ':app', ':vision-core', ':tango-helper'
 project(':vision-core').projectDir = new File(settingsDir, './subtree/vision-core/library')
 project(':tango-helper').projectDir = new File(settingsDir, './subtree/tango-helper/library')

@@ -103,8 +103,7 @@ public final class SignInActivity extends AppCompatActivity implements FirebaseA
         googleApiClient = new GoogleApiClient.Builder(this)
                 .enableAutoManage(this, connectionResult -> {
                     LOG.e("Google API connection error occured: %s", connectionResult);
-                    Toast.makeText(this, R.string.toast_google_api_client_connection_failed, Toast.LENGTH_LONG)
-                         .show();
+                    Toast.makeText(this, R.string.toast_google_api_client_connection_failed, Toast.LENGTH_LONG).show();
                 })
                 .addApi(Auth.GOOGLE_SIGN_IN_API, googleSignInOptions)
                 .build();

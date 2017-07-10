@@ -6,8 +6,6 @@ public final class Names {
 
     public static final String ACTIVITY_CONTEXT = "activityContext";
 
-    static final String GOOGLE_API_WEB_CLIENT_ID = "google.api.webClientId";
-
     private Names() {
     }
 }
