@@ -23,6 +23,7 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 public final class UserAssetApi extends BaseVisionApi {
 
@@ -52,6 +53,11 @@ public final class UserAssetApi extends BaseVisionApi {
                                        @Nullable OnFailureListener onFailureListener) {
         userImageAssetRepository.find(CurrentUser.getInstance().getUserId(), assetId,
                                       onSuccessListener, onFailureListener);
+    }
+
+    public void findAllUserImageAssets(@Nullable OnSuccessListener<List<ImageAsset>> onSuccessListener,
+                                       @Nullable OnFailureListener onFailureListener) {
+        userImageAssetRepository.findAll(CurrentUser.getInstance().getUserId(), onSuccessListener, onFailureListener);
     }
 
     @NonNull
@@ -151,10 +157,15 @@ public final class UserAssetApi extends BaseVisionApi {
         }, onFailureListener);
     }
 
-    public void downloadImageAssetFile(@NonNull String assetId,
-                                       @Nullable OnSuccessListener<File> onSuccessListener,
-                                       @Nullable OnFailureListener onFailureListener,
-                                       @Nullable OnProgressListener onProgressListener)
+    @Nullable
+    public File findUserImageAssetCacheFile(@NonNull String assetId) {
+        return assetCacheRepository.find(assetId);
+    }
+
+    public void downloadUserImageAssetFile(@NonNull String assetId,
+                                           @Nullable OnSuccessListener<File> onSuccessListener,
+                                           @Nullable OnFailureListener onFailureListener,
+                                           @Nullable OnProgressListener onProgressListener)
             throws IOException {
 
         final File destination = assetCacheRepository.findOrCreate(assetId);

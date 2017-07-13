@@ -10,6 +10,8 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.widget.ImageView;
 
+import java.io.File;
+
 public final class ThumbnailLoader {
 
     private final Context context;
@@ -19,15 +21,30 @@ public final class ThumbnailLoader {
     }
 
     public void load(@NonNull Uri uri, @NonNull ImageView imageView) {
-        Drawable placeholderDrawable = context.getResources().getDrawable(R.drawable.progress_animation);
-        int placeholderTint = context.getResources().getColor(R.color.tint_progress);
+        final Drawable placeholderDrawable = context.getResources().getDrawable(R.drawable.progress_animation);
+        final int placeholderTint = context.getResources().getColor(R.color.tint_progress);
         placeholderDrawable.setColorFilter(placeholderTint, PorterDuff.Mode.SRC_ATOP);
 
-        Picasso picasso = Picasso.with(context);
+        final Picasso picasso = Picasso.with(context);
         picasso.setIndicatorsEnabled(true);
         picasso.setLoggingEnabled(true);
 
         picasso.load(uri)
+               .placeholder(placeholderDrawable)
+               .error(R.drawable.ic_clear_black_24dp)
+               .into(imageView);
+    }
+
+    public void load(@NonNull File file, @NonNull ImageView imageView) {
+        final Drawable placeholderDrawable = context.getResources().getDrawable(R.drawable.progress_animation);
+        final int placeholderTint = context.getResources().getColor(R.color.tint_progress);
+        placeholderDrawable.setColorFilter(placeholderTint, PorterDuff.Mode.SRC_ATOP);
+
+        final Picasso picasso = Picasso.with(context);
+        picasso.setIndicatorsEnabled(true);
+        picasso.setLoggingEnabled(true);
+
+        picasso.load(file)
                .placeholder(placeholderDrawable)
                .error(R.drawable.ic_clear_black_24dp)
                .into(imageView);

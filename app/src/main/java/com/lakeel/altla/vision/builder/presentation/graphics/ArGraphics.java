@@ -27,6 +27,7 @@ import com.badlogic.gdx.utils.Queue;
 import com.lakeel.altla.android.log.Log;
 import com.lakeel.altla.android.log.LogFactory;
 import com.lakeel.altla.vision.model.Actor;
+import com.lakeel.altla.vision.model.AssetType;
 import com.projecttango.tangosupport.TangoSupport;
 
 import android.support.annotation.NonNull;
@@ -90,13 +91,21 @@ public final class ArGraphics extends ApplicationAdapter {
 
     private final Map<String, Actor> actorMap = new HashMap<>();
 
-    private final Queue<ActorModelBuilder> actorModelBuilderQueue = new Queue<>();
+    private final Queue<ActorBuildRequest> actorBuildRequestQueue = new Queue<>();
 
     private final Map<String, Model> modelMap = new HashMap<>();
 
     private final Array<ArObject> arObjects = new Array<>();
 
     private final Map<String, ArObject> arObjectMap = new HashMap<>();
+
+    private CursorBuildRequest cursorBuildRequest;
+
+    private Model cursorModel;
+
+    private CursorObject cursorObject;
+
+    private boolean removeCursorRequested;
 
     public ArGraphics(@NonNull Display display, @NonNull Listener listener) {
         this.display = display;
@@ -175,9 +184,26 @@ public final class ArGraphics extends ApplicationAdapter {
         frameAvailable.set(true);
     }
 
+    public void setImageAssetCursor(@NonNull String assetId, @NonNull File imageCache) {
+        final ImageAssetModelBuilder builder = new ImageAssetModelBuilder(imageCache);
+        cursorBuildRequest = new CursorBuildRequest(assetId, AssetType.IMAGE, builder);
+
+        if (cursorObject != null) {
+            // Remove a previous cursor if it exists.
+            removeCursor();
+        }
+    }
+
+    public void removeCursor() {
+        removeCursorRequested = true;
+    }
+
     public void addImageActor(@NonNull Actor actor, @NonNull File imageCache) {
         actorMap.put(actor.getId(), actor);
-        actorModelBuilderQueue.addLast(new ImageActorModelBuilder(actor, imageCache));
+
+        final AssetModelBuilder builder = new ImageAssetModelBuilder(imageCache);
+        final ActorBuildRequest request = new ActorBuildRequest(actor, builder);
+        actorBuildRequestQueue.addLast(request);
     }
 
     private void update() {
@@ -263,10 +289,10 @@ public final class ArGraphics extends ApplicationAdapter {
             LOG.e("Tango API call error within the OpenGL render thread.", e);
         }
 
-        while (0 < actorModelBuilderQueue.size) {
-            final ActorModelBuilder actorModelBuilder = actorModelBuilderQueue.removeFirst();
-            final Actor actor = actorModelBuilder.actor;
-            final Model model = actorModelBuilder.build();
+        while (0 < actorBuildRequestQueue.size) {
+            final ActorBuildRequest request = actorBuildRequestQueue.removeFirst();
+            final Actor actor = request.actor;
+            final Model model = request.builder.build();
 
             modelMap.put(actor.getId(), model);
 
@@ -293,6 +319,27 @@ public final class ArGraphics extends ApplicationAdapter {
 
             LOG.d("Created an AR object: actorId = %s", actor.getId());
         }
+
+        if (removeCursorRequested) {
+            cursorModel.dispose();
+            cursorModel = null;
+            cursorObject = null;
+            removeCursorRequested = false;
+        }
+
+        if (cursorBuildRequest != null) {
+            cursorModel = cursorBuildRequest.builder.build();
+            cursorObject = new CursorObject(cursorModel, cursorBuildRequest.assetId, cursorBuildRequest.assetType);
+            cursorBuildRequest = null;
+        }
+
+        if (cursorObject != null) {
+            // TODO
+            final float distance = 20;
+            cursorObject.transform.setTranslation(camera.position.x,
+                                                  camera.position.y,
+                                                  camera.position.z - distance);
+        }
     }
 
     private void draw() {
@@ -311,6 +358,7 @@ public final class ArGraphics extends ApplicationAdapter {
         // Draw models.
         modelBatch.begin(camera);
         modelBatch.render(instances, environment);
+        if (cursorObject != null) modelBatch.render(cursorObject, environment);
         modelBatch.end();
 
         // Begin the picking section.

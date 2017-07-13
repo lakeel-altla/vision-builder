@@ -8,18 +8,16 @@ import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
-import com.lakeel.altla.vision.model.Actor;
 
 import android.support.annotation.NonNull;
 
 import java.io.File;
 
-public final class ImageActorModelBuilder extends ActorModelBuilder {
+public final class ImageAssetModelBuilder implements AssetModelBuilder {
 
     public final File imageCache;
 
-    public ImageActorModelBuilder(@NonNull Actor actor, @NonNull File imageCache) {
-        super(actor);
+    public ImageAssetModelBuilder(@NonNull File imageCache) {
         this.imageCache = imageCache;
     }
 

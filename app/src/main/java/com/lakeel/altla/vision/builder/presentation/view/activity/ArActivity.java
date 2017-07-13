@@ -16,12 +16,22 @@ import com.lakeel.altla.android.log.LogFactory;
 import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.app.MyApplication;
+import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.di.component.ActivityComponent;
 import com.lakeel.altla.vision.builder.presentation.di.module.ActivityModule;
 import com.lakeel.altla.vision.builder.presentation.graphics.ArGraphics;
 import com.lakeel.altla.vision.builder.presentation.model.ArModel;
+import com.lakeel.altla.vision.builder.presentation.view.pane.ActorPane;
+import com.lakeel.altla.vision.builder.presentation.view.pane.EditModelMenuPane;
+import com.lakeel.altla.vision.builder.presentation.view.pane.ImageAssetListPane;
+import com.lakeel.altla.vision.builder.presentation.view.pane.PaneGroup;
+import com.lakeel.altla.vision.builder.presentation.view.pane.PaneLifecycle;
+import com.lakeel.altla.vision.builder.presentation.view.pane.ViewModeMenuPane;
+import com.lakeel.altla.vision.helper.OnFailureListener;
+import com.lakeel.altla.vision.helper.OnSuccessListener;
 import com.lakeel.altla.vision.model.Actor;
 import com.lakeel.altla.vision.model.AreaSettings;
+import com.lakeel.altla.vision.model.ImageAsset;
 import com.projecttango.tangosupport.TangoSupport;
 
 import android.app.Activity;
@@ -33,10 +43,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,12 +54,16 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 import io.reactivex.Single;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 
-public final class ArActivity extends AndroidApplication implements ArGraphics.Listener {
+public final class ArActivity extends AndroidApplication
+        implements ActivityScopeContext,
+                   ArGraphics.Listener,
+                   ViewModeMenuPane.PaneContext,
+                   EditModelMenuPane.PageContext,
+                   ImageAssetListPane.PageContext {
 
     private static final Log LOG = LogFactory.getLog(ArActivity.class);
 
@@ -77,18 +91,19 @@ public final class ArActivity extends AndroidApplication implements ArGraphics.L
     @BindView(R.id.view_top)
     ViewGroup viewTop;
 
-    @BindView(R.id.view_group_view_mode_menu)
-    ViewGroup viewGroupViewModeMenu;
-
-    @BindView(R.id.view_group_edit_mode_menu)
-    ViewGroup viewGroupEditModeMenu;
-
-    @BindView(R.id.view_actor)
-    View viewActor;
-
     private final CompositeDisposable compositeDisposable = new CompositeDisposable();
 
-    private final ActorView actorView = new ActorView();
+    private final PaneLifecycle paneLifecycle = new PaneLifecycle();
+
+    private final PaneGroup paneGroup = new PaneGroup();
+
+    private ViewModeMenuPane viewModeMenuPane;
+
+    private EditModelMenuPane editModelMenuPane;
+
+    private ImageAssetListPane imageAssetListPane;
+
+    private ActorPane actorPane;
 
     private ActivityComponent activityComponent;
 
@@ -140,18 +155,42 @@ public final class ArActivity extends AndroidApplication implements ArGraphics.L
         viewTop.addView(view, 0);
 
         // Initialize sub views
-        actorView.onCreateView(viewActor);
+        viewModeMenuPane = new ViewModeMenuPane(this);
+        editModelMenuPane = new EditModelMenuPane(this);
+        imageAssetListPane = new ImageAssetListPane(this);
+        actorPane = new ActorPane(this);
+        paneGroup.add(viewModeMenuPane);
+        paneGroup.add(editModelMenuPane);
+        paneGroup.add(imageAssetListPane);
+        paneLifecycle.add(viewModeMenuPane);
+        paneLifecycle.add(editModelMenuPane);
+        paneLifecycle.add(imageAssetListPane);
+        paneLifecycle.add(actorPane);
 
         //
         // Set the initial state of views.
         //
-        viewGroupEditModeMenu.setVisibility(View.GONE);
-        viewActor.setVisibility(View.GONE);
+        paneGroup.show(R.id.pane_view_mode_menu);
+        actorPane.hide();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        paneLifecycle.onStart();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        paneLifecycle.onStop();
+        compositeDisposable.clear();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        paneLifecycle.onResume();
 
         // Connect tango service.
         tango = new Tango(this, () -> {
@@ -231,6 +270,7 @@ public final class ArActivity extends AndroidApplication implements ArGraphics.L
     @Override
     protected void onPause() {
         super.onPause();
+        paneLifecycle.onPause();
 
         // Disconnect the tango service.
         synchronized (this) {
@@ -250,30 +290,53 @@ public final class ArActivity extends AndroidApplication implements ArGraphics.L
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
-
-        compositeDisposable.clear();
+    public ActivityComponent getActivityComponent() {
+        return activityComponent;
     }
 
     @Override
     public void onActorSelected(@Nullable Actor actor) {
         runOnUiThread(() -> {
             selectedActor = actor;
-            actorView.setActor(selectedActor);
+            actorPane.setActor(selectedActor);
         });
     }
 
-    @OnClick(R.id.image_button_show_area_settings)
-    void onClickShowAreaSettings() {
-        final Intent intent = AreaSettingsActivity.createIntent(this);
-        startActivity(intent);
+    @Override
+    public void showViewModeMenuPane() {
+        paneGroup.show(R.id.pane_view_mode_menu);
     }
 
-    @OnClick(R.id.image_button_show_settings)
-    void onClickShowSettings() {
-        final Intent intent = SettingsActivity.createIntent(this);
-        startActivity(intent);
+    @Override
+    public void showEditModeMenuPane() {
+        paneGroup.show(R.id.pane_edit_mode_menu);
+    }
+
+    @Override
+    public void showImageAssetListPane() {
+        paneGroup.show(R.id.pane_image_asset_list);
+    }
+
+    @Override
+    public void onImageAssetSelected(@Nullable ImageAsset imageAsset) {
+        LOG.d("onImageAssetSelected");
+
+        if (imageAsset == null) {
+            Gdx.app.postRunnable(() -> {
+                arGraphics.removeCursor();
+            });
+        } else {
+            final Disposable disposable = Single.<File>create(e -> {
+                ensureUserImageAssetCacheFile(imageAsset.getId(), e::onSuccess, e::onError);
+            }).subscribe(file -> {
+                Gdx.app.postRunnable(() -> {
+                    arGraphics.setImageAssetCursor(imageAsset.getId(), file);
+                });
+            }, e -> {
+                LOG.e("Failed.", e);
+            });
+            compositeDisposable.add(disposable);
+        }
     }
 
     //
@@ -310,8 +373,7 @@ public final class ArActivity extends AndroidApplication implements ArGraphics.L
         if (actor.getAssetId() == null) throw new IllegalArgumentException("actor.getAssetId() must be not null.");
 
         final Disposable disposable = Single.<File>create(e -> {
-            visionService.getUserAssetApi()
-                         .downloadImageAssetFile(actor.getAssetId(), e::onSuccess, e::onError, null);
+            ensureUserImageAssetCacheFile(actor.getAssetId(), e::onSuccess, e::onError);
         }).subscribe(file -> {
             Gdx.app.postRunnable(() -> {
                 arGraphics.addImageActor(actor, file);
@@ -322,30 +384,18 @@ public final class ArActivity extends AndroidApplication implements ArGraphics.L
         compositeDisposable.add(disposable);
     }
 
-    class ActorView {
-
-        View view;
-
-        @BindView(R.id.text_view_name)
-        TextView name;
-
-        ActorView() {
-        }
-
-        void onCreateView(@NonNull View view) {
-            this.view = view;
-
-            ButterKnife.bind(this, view);
-        }
-
-        void setActor(@Nullable Actor actor) {
-            name.setText(actor == null ? null : actor.getName());
-            view.setVisibility(actor == null ? View.GONE : View.VISIBLE);
-        }
-
-        @OnClick(R.id.image_button_close)
-        void onClickClose() {
-            view.setVisibility(View.GONE);
+    private void ensureUserImageAssetCacheFile(@NonNull String assetId,
+                                               @NonNull OnSuccessListener<File> onSuccessListener,
+                                               @NonNull OnFailureListener onFailureListener)
+            throws IOException {
+        final File file = visionService.getUserAssetApi().findUserImageAssetCacheFile(assetId);
+        if (file == null) {
+            // Download anc cache the file if it is not cached.
+            visionService.getUserAssetApi()
+                         .downloadUserImageAssetFile(assetId, onSuccessListener, onFailureListener, null);
+        } else {
+            // Stream the cache file if it exists.
+            onSuccessListener.onSuccess(file);
         }
     }
 }

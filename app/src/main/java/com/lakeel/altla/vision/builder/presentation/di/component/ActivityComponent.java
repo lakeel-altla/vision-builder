@@ -14,6 +14,8 @@ import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaSettingsFr
 import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaSettingsListFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.ImageAssetListFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.SettingsFragment;
+import com.lakeel.altla.vision.builder.presentation.view.pane.ImageAssetListPane;
+import com.lakeel.altla.vision.builder.presentation.view.pane.ViewModeMenuPane;
 
 import dagger.Subcomponent;
 
@@ -47,4 +49,8 @@ public interface ActivityComponent {
     void inject(SettingsFragment fragment);
 
     void inject(ImageAssetListFragment fragment);
+
+    void inject(ViewModeMenuPane pane);
+
+    void inject(ImageAssetListPane pane);
 }

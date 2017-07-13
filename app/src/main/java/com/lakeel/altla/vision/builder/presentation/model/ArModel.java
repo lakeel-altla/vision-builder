@@ -30,6 +30,10 @@ public final class ArModel {
         this.areaSettings = areaSettings;
     }
 
+    public synchronized boolean canEdit() {
+        return areaSettings != null;
+    }
+
     @NonNull
     public synchronized Observable<Actor> loadActors() {
         if (areaSettings == null) throw new IllegalStateException("'areaSettings' is null.");

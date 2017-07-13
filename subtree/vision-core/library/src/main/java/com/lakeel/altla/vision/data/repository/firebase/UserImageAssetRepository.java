@@ -17,11 +17,16 @@ import com.lakeel.altla.vision.model.ImageAsset;
 
 import android.support.annotation.NonNull;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public final class UserImageAssetRepository extends BaseDatabaseRepository {
 
     private static final String BASE_PATH = "userImageAssets";
 
     private static final String FIELD_NAME = "name";
+
+    private static final String FIELD_UPDATED_AT = "updatedAt";
 
     public UserImageAssetRepository(@NonNull FirebaseDatabase database) {
         super(database);
@@ -57,6 +62,29 @@ public final class UserImageAssetRepository extends BaseDatabaseRepository {
                          public void onDataChange(DataSnapshot snapshot) {
                              ImageAsset userImageAsset = snapshot.getValue(ImageAsset.class);
                              if (onSuccessListener != null) onSuccessListener.onSuccess(userImageAsset);
+                         }
+
+                         @Override
+                         public void onCancelled(DatabaseError error) {
+                             if (onFailureListener != null) onFailureListener.onFailure(error.toException());
+                         }
+                     });
+    }
+
+    public void findAll(@NonNull String userId,
+                        OnSuccessListener<List<ImageAsset>> onSuccessListener, OnFailureListener onFailureListener) {
+        getDatabase().getReference()
+                     .child(BASE_PATH)
+                     .child(userId)
+                     .orderByChild(FIELD_UPDATED_AT)
+                     .addListenerForSingleValueEvent(new ValueEventListener() {
+                         @Override
+                         public void onDataChange(DataSnapshot snapshot) {
+                             final List<ImageAsset> list = new ArrayList<>((int) snapshot.getChildrenCount());
+                             for (DataSnapshot child : snapshot.getChildren()) {
+                                 list.add(child.getValue(ImageAsset.class));
+                             }
+                             if (onSuccessListener != null) onSuccessListener.onSuccess(list);
                          }
 
                          @Override
