@@ -25,10 +25,10 @@
                      android:layout_height="match_parent">
 
             <include android:id="@+id/pane_actor"
-                     layout="@layout/pane_actor"/>
+                     layout="@layout/pane_actor_metadata"/>
 
             <include android:id="@+id/pane_actor_edit"
-                     layout="@layout/pane_actor_edit"/>
+                     layout="@layout/pane_actor_metadata_edit"/>
 
         </FrameLayout>
 

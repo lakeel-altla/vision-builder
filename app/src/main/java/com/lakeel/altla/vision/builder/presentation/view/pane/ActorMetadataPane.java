@@ -14,12 +14,12 @@ import butterknife.OnClick;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
-public final class ActorPane extends Pane {
+public final class ActorMetadataPane extends Pane {
 
     @BindView(R.id.text_view_name)
     TextView textViewName;
 
-    public ActorPane(@NonNull Activity activity) {
+    public ActorMetadataPane(@NonNull Activity activity) {
         super(activity, R.id.pane_actor);
     }
 
