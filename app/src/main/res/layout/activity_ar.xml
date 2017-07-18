@@ -24,10 +24,10 @@
                      android:layout_gravity="right"
                      android:layout_height="match_parent">
 
-            <include android:id="@+id/pane_actor"
+            <include android:id="@+id/pane_actor_metadata"
                      layout="@layout/pane_actor_metadata"/>
 
-            <include android:id="@+id/pane_actor_edit"
+            <include android:id="@+id/pane_actor_metadata_edit"
                      layout="@layout/pane_actor_metadata_edit"/>
 
         </FrameLayout>

@@ -20,7 +20,7 @@ public final class ActorMetadataPane extends Pane {
     TextView textViewName;
 
     public ActorMetadataPane(@NonNull Activity activity) {
-        super(activity, R.id.pane_actor);
+        super(activity, R.id.pane_actor_metadata);
     }
 
     public void setActor(@Nullable Actor actor) {

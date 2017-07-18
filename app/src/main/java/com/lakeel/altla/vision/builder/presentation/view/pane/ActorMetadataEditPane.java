@@ -20,7 +20,7 @@ public final class ActorMetadataEditPane extends Pane {
     TextInputEditText textInputEditTextName;
 
     public ActorMetadataEditPane(@NonNull Activity activity) {
-        super(activity, R.id.pane_actor_edit);
+        super(activity, R.id.pane_actor_metadata_edit);
     }
 
     public void setActor(@Nullable Actor actor) {
