@@ -11,8 +11,11 @@ import com.google.atap.tangoservice.TangoPoseData;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.android.AndroidApplication;
 import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
+import com.badlogic.gdx.math.Quaternion;
+import com.badlogic.gdx.math.Vector3;
 import com.lakeel.altla.android.log.Log;
 import com.lakeel.altla.android.log.LogFactory;
+import com.lakeel.altla.vision.api.CurrentUser;
 import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.app.MyApplication;
@@ -27,11 +30,16 @@ import com.lakeel.altla.vision.builder.presentation.view.pane.ImageAssetListPane
 import com.lakeel.altla.vision.builder.presentation.view.pane.PaneGroup;
 import com.lakeel.altla.vision.builder.presentation.view.pane.PaneLifecycle;
 import com.lakeel.altla.vision.builder.presentation.view.pane.ViewModeMenuPane;
+import com.lakeel.altla.vision.helper.FirebaseQuery;
 import com.lakeel.altla.vision.helper.OnFailureListener;
 import com.lakeel.altla.vision.helper.OnSuccessListener;
 import com.lakeel.altla.vision.model.Actor;
 import com.lakeel.altla.vision.model.AreaSettings;
+import com.lakeel.altla.vision.model.Asset;
+import com.lakeel.altla.vision.model.AssetType;
 import com.lakeel.altla.vision.model.ImageAsset;
+import com.lakeel.altla.vision.model.Layer;
+import com.lakeel.altla.vision.model.Scope;
 import com.projecttango.tangosupport.TangoSupport;
 
 import android.app.Activity;
@@ -114,6 +122,8 @@ public final class ArActivity extends AndroidApplication
     private boolean tangoSupportInitialized;
 
     private Actor selectedActor;
+
+    private FirebaseQuery<Actor> queryUserActors;
 
     @NonNull
     public static Intent createIntent(@NonNull Activity activity) {
@@ -240,21 +250,24 @@ public final class ArActivity extends AndroidApplication
                             throw new IllegalStateException("Unknown areaId: null");
                         }
 
-                        runOnUiThread(() -> {
-                            // TODO
-//                    propertySwitchToEditModeVisible.set(true);
-                        });
+                        // TODO: for public scope
+                        queryUserActors = arModel.loadUserActors();
+                        queryUserActors.addListener(new FirebaseQuery.BaseChildListener<Actor>() {
+                            @Override
+                            public void onChildAdded(@NonNull Actor actor, @Nullable String previousChildName) {
+                                addActor(actor);
+                            }
 
-                        Disposable disposable = arModel
-                                .loadActors()
-                                .subscribe(actor -> {
-                                    LOG.d("Loaded an actor: id = %s", actor.getId());
-                                    addActor(actor);
-                                }, e -> {
-                                    LOG.e("Failed.", e);
-                                    Toast.makeText(this, R.string.toast_failed, Toast.LENGTH_SHORT).show();
-                                });
-                        compositeDisposable.add(disposable);
+                            @Override
+                            public void onChildRemoved(@NonNull Actor actor) {
+                                Gdx.app.postRunnable(() -> arGraphics.removeActor(actor));
+                            }
+
+                            @Override
+                            public void onError(@NonNull Exception e) {
+                                LOG.e("Failed.", e);
+                            }
+                        });
                     }
                 } catch (TangoOutOfDateException e) {
                     LOG.e("Tango service outdated.", e);
@@ -303,6 +316,38 @@ public final class ArActivity extends AndroidApplication
     }
 
     @Override
+    public void onCursorSelected(@NonNull Asset asset, @NonNull AssetType assetType, @NonNull Vector3 position,
+                                 @NonNull Quaternion rotation, @NonNull Vector3 scale) {
+        runOnUiThread(() -> {
+            final Actor actor = new Actor();
+            actor.setUserId(CurrentUser.getInstance().getUserId());
+            actor.setScopeAsEnum(Scope.USER);
+            actor.setAreaId(arModel.getAreaSettings().getAreaId());
+            actor.setAssetId(asset.getId());
+            actor.setAssetTypeAsEnum(assetType);
+            actor.setLayerAsEnum(Layer.NONCOMMERCIAL);
+            actor.setName(asset.getName());
+            actor.setPositionX(position.x);
+            actor.setPositionY(position.y);
+            actor.setPositionZ(position.z);
+            actor.setOrientationX(rotation.x);
+            actor.setOrientationY(rotation.y);
+            actor.setOrientationZ(rotation.z);
+            actor.setOrientationW(rotation.w);
+            actor.setScaleX(scale.x);
+            actor.setScaleY(scale.y);
+            actor.setScaleZ(scale.z);
+
+            // Save the actor.
+            visionService.getUserActorApi()
+                         .save(actor);
+
+            // Add the actor into the scene.
+            addActor(actor);
+        });
+    }
+
+    @Override
     public void showViewModeMenuPane() {
         paneGroup.show(R.id.pane_view_mode_menu);
     }
@@ -318,19 +363,19 @@ public final class ArActivity extends AndroidApplication
     }
 
     @Override
-    public void onImageAssetSelected(@Nullable ImageAsset imageAsset) {
+    public void onImageAssetSelected(@Nullable ImageAsset asset) {
         LOG.d("onImageAssetSelected");
 
-        if (imageAsset == null) {
+        if (asset == null) {
             Gdx.app.postRunnable(() -> {
                 arGraphics.removeCursor();
             });
         } else {
             final Disposable disposable = Single.<File>create(e -> {
-                ensureUserImageAssetCacheFile(imageAsset.getId(), e::onSuccess, e::onError);
+                ensureUserImageAssetCacheFile(asset.getId(), e::onSuccess, e::onError);
             }).subscribe(file -> {
                 Gdx.app.postRunnable(() -> {
-                    arGraphics.setImageAssetCursor(imageAsset.getId(), file);
+                    arGraphics.setImageAssetCursor(asset, file);
                 });
             }, e -> {
                 LOG.e("Failed.", e);

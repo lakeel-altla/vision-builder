@@ -154,6 +154,7 @@ public final class SignInActivity extends AppCompatActivity implements FirebaseA
             if (!signedInDetected) {
                 LOG.i("Signed in to firebase: %s", user.getUid());
                 signInButton.setVisibility(View.GONE);
+                hideProgressDialog();
                 Intent intent = TangoIntents.createAdfLoadSaveRequestPermissionIntent();
                 startActivityForResult(intent, REQUEST_CODE_ADF_LOAD_SAVE_REQUEST_PERMISSIONS);
                 signedInDetected = true;
@@ -217,7 +218,7 @@ public final class SignInActivity extends AppCompatActivity implements FirebaseA
                     }, e::onError);
                 })
                 .subscribe(() -> {
-                    hideProgressDialog();
+//                    hideProgressDialog();
                 }, e -> {
                     signInButton.setEnabled(true);
                     hideProgressDialog();

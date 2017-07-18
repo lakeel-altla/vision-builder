@@ -27,7 +27,9 @@ import com.badlogic.gdx.utils.Queue;
 import com.lakeel.altla.android.log.Log;
 import com.lakeel.altla.android.log.LogFactory;
 import com.lakeel.altla.vision.model.Actor;
+import com.lakeel.altla.vision.model.Asset;
 import com.lakeel.altla.vision.model.AssetType;
+import com.lakeel.altla.vision.model.ImageAsset;
 import com.projecttango.tangosupport.TangoSupport;
 
 import android.support.annotation.NonNull;
@@ -46,6 +48,10 @@ public final class ArGraphics extends ApplicationAdapter {
     private static final Log LOG = LogFactory.getLog(ArGraphics.class);
 
     private static final int INVALID_TEXTURE_ID = 0;
+
+    private static final float NEAR_PLANE_DISTANCE = 0.1f;
+
+    private static final float FAR_PLANE_DISTANCE = 10f;
 
     private final FPSLogger fpsLogger = new FPSLogger();
 
@@ -71,13 +77,9 @@ public final class ArGraphics extends ApplicationAdapter {
 
     private int displayRotation;
 
-    private PerspectiveCamera camera;
+    private PerspectiveCamera camera = new PerspectiveCamera();
 
     private final Quaternion tangoPoseRotation = new Quaternion();
-
-    private final Vector3 cameraInitialDirection = new Vector3();
-
-    private final Vector3 cameraInitialUp = new Vector3();
 
     private RenderContext renderContext;
 
@@ -95,9 +97,13 @@ public final class ArGraphics extends ApplicationAdapter {
 
     private final Map<String, Model> modelMap = new HashMap<>();
 
-    private final Array<ArObject> arObjects = new Array<>();
+    private final Array<ActorObject> actorObjects = new Array<>();
 
-    private final Map<String, ArObject> arObjectMap = new HashMap<>();
+    private final Map<String, ActorObject> actorObjectMap = new HashMap<>();
+
+    private final Array<ModelInstance> visibleInstances = new Array<>();
+
+    private final Array<ModelInstance> pickableInstances = new Array<>();
 
     private CursorBuildRequest cursorBuildRequest;
 
@@ -115,6 +121,9 @@ public final class ArGraphics extends ApplicationAdapter {
     @Override
     public void create() {
         cameraPreview = new CameraPreview();
+
+        camera.near = NEAR_PLANE_DISTANCE;
+        camera.far = FAR_PLANE_DISTANCE;
 
         environment = new Environment();
         environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1f));
@@ -184,9 +193,9 @@ public final class ArGraphics extends ApplicationAdapter {
         frameAvailable.set(true);
     }
 
-    public void setImageAssetCursor(@NonNull String assetId, @NonNull File imageCache) {
+    public void setImageAssetCursor(@NonNull ImageAsset asset, @NonNull File imageCache) {
         final ImageAssetModelBuilder builder = new ImageAssetModelBuilder(imageCache);
-        cursorBuildRequest = new CursorBuildRequest(assetId, AssetType.IMAGE, builder);
+        cursorBuildRequest = new CursorBuildRequest(asset, AssetType.IMAGE, builder);
 
         if (cursorObject != null) {
             // Remove a previous cursor if it exists.
@@ -206,6 +215,14 @@ public final class ArGraphics extends ApplicationAdapter {
         actorBuildRequestQueue.addLast(request);
     }
 
+    public void removeActor(@NonNull Actor actor) {
+        final ActorObject actorObject = actorObjectMap.remove(actor.getId());
+
+        if (actorObject == null) throw new IllegalArgumentException("Invalid actor id: " + actor.getId());
+
+        actorObjects.removeValue(actorObject, true);
+    }
+
     private void update() {
         //
         // Update the camera state and the texture for the camera preview.
@@ -219,32 +236,33 @@ public final class ArGraphics extends ApplicationAdapter {
                 if (!cameraConfigured) {
                     displayRotation = display.getRotation();
 
-                    // Create/recreate the scene camera.
+                    // Update settings of the scene camera.
                     final TangoCameraIntrinsics intrinsics = TangoSupport.getCameraIntrinsicsBasedOnDisplayRotation(
                             TangoCameraIntrinsics.TANGO_CAMERA_COLOR, displayRotation);
+                    camera.fieldOfView = MathHelper.verticalFieldOfView(intrinsics);
+                    camera.viewportWidth = Gdx.graphics.getWidth();
+                    camera.viewportHeight = Gdx.graphics.getHeight();
 
-                    final int viewportWidth = Gdx.graphics.getWidth();
-                    final int viewportHeight = Gdx.graphics.getHeight();
-                    final float fovy = (float) Math.toDegrees(2f * Math.atan(0.5 * intrinsics.height / intrinsics.fy));
+                    LOG.d("Camera parameters: fieldOfView = %f, viewportWidth = %f, viewportHeight = %f",
+                          camera.fieldOfView, camera.viewportWidth, camera.viewportHeight);
 
-                    camera = new PerspectiveCamera(fovy, viewportWidth, viewportHeight);
-                    camera.near = 1f;
-                    camera.far = 300f;
+                    // Initialize the pose of the scene camera.
+                    camera.direction.set(0, 0, -1);
+                    camera.up.set(0, 1, 0);
                     camera.update();
 
-                    cameraInitialDirection.set(camera.direction);
-                    cameraInitialUp.set(camera.up);
-
+                    // Connect a new texture id for the camera preview to the tango.
                     if (connectedTextureId != cameraPreview.getTextureId()) {
                         tango.connectTextureId(TangoCameraIntrinsics.TANGO_CAMERA_COLOR, cameraPreview.getTextureId());
                         connectedTextureId = cameraPreview.getTextureId();
                         LOG.d("Texture connected: id = %d", connectedTextureId);
                     }
 
+                    // Update the texture coordinate with the display rotation.
                     cameraPreview.updateTextureUv(displayRotation);
 
-                    // Recreate the SpriteBatch instance because it decides the projection matrix with the current
-                    // viewport in its constructor.
+                    // Recreate the SpriteBatch instance
+                    // because it decides the projection matrix with the viewport in its constructor.
                     if (spriteBatch != null) {
                         spriteBatch.dispose();
                     }
@@ -273,8 +291,8 @@ public final class ArGraphics extends ApplicationAdapter {
                                               (float) poseData.rotation[1],
                                               (float) poseData.rotation[2],
                                               (float) poseData.rotation[3]);
-                        camera.direction.set(cameraInitialDirection);
-                        camera.up.set(cameraInitialUp);
+                        camera.direction.set(0, 0, -1);
+                        camera.up.set(0, 1, 0);
                         camera.rotate(tangoPoseRotation);
                         camera.update();
                     } else if (poseData.statusCode == TangoPoseData.POSE_INVALID) {
@@ -296,26 +314,9 @@ public final class ArGraphics extends ApplicationAdapter {
 
             modelMap.put(actor.getId(), model);
 
-            final ArObject arObject = new ArObject(model, actor);
-
-            // TODO: Adjust Z for tests.
-            arObject.transform.translate((float) actor.getPositionX(),
-                                         (float) actor.getPositionY(),
-                                         (float) actor.getPositionZ() - 100);
-
-            // TODO: use a tmp field.
-            Quaternion rotation = new Quaternion((float) actor.getOrientationX(),
-                                                 (float) actor.getOrientationY(),
-                                                 (float) actor.getOrientationZ(),
-                                                 (float) actor.getOrientationW());
-            arObject.transform.rotate(rotation);
-
-            arObject.transform.scale((float) actor.getScaleX() * arObject.transform.getScaleX(),
-                                     (float) actor.getScaleY() * arObject.transform.getScaleY(),
-                                     (float) actor.getScaleZ() * arObject.transform.getScaleZ());
-
-            arObjects.add(arObject);
-            arObjectMap.put(actor.getId(), arObject);
+            final ActorObject actorObject = new ActorObject(model, actor);
+            actorObjects.add(actorObject);
+            actorObjectMap.put(actor.getId(), actorObject);
 
             LOG.d("Created an AR object: actorId = %s", actor.getId());
         }
@@ -329,16 +330,12 @@ public final class ArGraphics extends ApplicationAdapter {
 
         if (cursorBuildRequest != null) {
             cursorModel = cursorBuildRequest.builder.build();
-            cursorObject = new CursorObject(cursorModel, cursorBuildRequest.assetId, cursorBuildRequest.assetType);
+            cursorObject = new CursorObject(cursorModel, cursorBuildRequest.asset, cursorBuildRequest.assetType);
             cursorBuildRequest = null;
         }
 
         if (cursorObject != null) {
-            // TODO
-            final float distance = 20;
-            cursorObject.transform.setTranslation(camera.position.x,
-                                                  camera.position.y,
-                                                  camera.position.z - distance);
+            cursorObject.update(camera.position, tangoPoseRotation);
         }
     }
 
@@ -353,31 +350,49 @@ public final class ArGraphics extends ApplicationAdapter {
         cameraPreview.draw();
 
         // TODO: Do frustum culling.
-        final Array<ModelInstance> instances = new Array<>(arObjects);
+        visibleInstances.clear();
+        visibleInstances.addAll(actorObjects);
+        if (cursorObject != null) visibleInstances.add(cursorObject);
+
+        pickableInstances.clear();
+        if (cursorObject == null) {
+            pickableInstances.addAll(actorObjects);
+        } else {
+            pickableInstances.add(cursorObject);
+        }
 
         // Draw models.
         modelBatch.begin(camera);
-        modelBatch.render(instances, environment);
-        if (cursorObject != null) modelBatch.render(cursorObject, environment);
+        modelBatch.render(visibleInstances, environment);
         modelBatch.end();
 
         // Begin the picking section.
         picker.begin(camera, renderContext);
-        picker.render(instances);
+        picker.render(pickableInstances);
 
         // Check a picked object.
         if (Gdx.input.justTouched()) {
-            final ModelInstance instance = picker.pick(instances, Gdx.input.getX(), Gdx.input.getY());
+            final ModelInstance instance = picker.pick(pickableInstances, Gdx.input.getX(), Gdx.input.getY());
 
-            final Actor actor;
             if (instance == null) {
-                actor = null;
+                if (cursorObject == null) {
+                    listener.onActorSelected(null);
+                }
+            } else if (instance instanceof ActorObject) {
+                final ActorObject actorObject = (ActorObject) instance;
+                listener.onActorSelected(actorObject.actor);
+            } else if (instance instanceof CursorObject) {
+                final CursorObject cursorObject = (CursorObject) instance;
+                listener.onCursorSelected(cursorObject.asset,
+                                          cursorObject.assetType,
+                                          new Vector3(cursorObject.position),
+                                          new Quaternion(cursorObject.rotation),
+                                          new Vector3(1, 1, 1));
+                // Remove the cursor.
+                removeCursor();
             } else {
-                final ArObject arObject = (ArObject) instance;
-                actor = arObject.actor;
+                LOG.e("Detected an unexpected model instance.");
             }
-
-            listener.onActorSelected(actor);
         }
 
         picker.end();
@@ -385,7 +400,6 @@ public final class ArGraphics extends ApplicationAdapter {
         renderContext.end();
 
         // Draw frame buffers.
-
         spriteBatch.begin();
         spriteBatch.disableBlending();
         // Flip the texture because its origin in OpenGL is the buttom left.
@@ -401,5 +415,8 @@ public final class ArGraphics extends ApplicationAdapter {
     public interface Listener {
 
         void onActorSelected(@Nullable Actor actor);
+
+        void onCursorSelected(@NonNull Asset asset, @NonNull AssetType assetType,
+                              @NonNull Vector3 position, @NonNull Quaternion rotation, @NonNull Vector3 scale);
     }
 }

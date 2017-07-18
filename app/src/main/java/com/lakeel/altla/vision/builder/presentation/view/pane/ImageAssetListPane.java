@@ -111,7 +111,7 @@ public final class ImageAssetListPane extends Pane {
 
     public interface PageContext {
 
-        void onImageAssetSelected(@Nullable ImageAsset imageAsset);
+        void onImageAssetSelected(@Nullable ImageAsset asset);
 
         void showEditModeMenuPane();
     }

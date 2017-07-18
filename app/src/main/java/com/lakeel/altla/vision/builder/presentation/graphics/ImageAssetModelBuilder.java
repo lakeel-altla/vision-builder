@@ -2,18 +2,28 @@ package com.lakeel.altla.vision.builder.presentation.graphics;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
+import com.lakeel.altla.android.log.Log;
+import com.lakeel.altla.android.log.LogFactory;
 
 import android.support.annotation.NonNull;
 
 import java.io.File;
 
+import static com.badlogic.gdx.graphics.VertexAttributes.Usage.Normal;
+import static com.badlogic.gdx.graphics.VertexAttributes.Usage.Position;
+import static com.badlogic.gdx.graphics.VertexAttributes.Usage.TextureCoordinates;
+
 public final class ImageAssetModelBuilder implements AssetModelBuilder {
+
+    private static final Log LOG = LogFactory.getLog(ImageAssetModelBuilder.class);
+
+    // The texture scalling factor: 512 pixels = 1 meter.
+    private static final float SCALING_FACTOR = 1f / 512f;
 
     public final File imageCache;
 
@@ -23,6 +33,8 @@ public final class ImageAssetModelBuilder implements AssetModelBuilder {
 
     @Override
     public Model build() {
+        LOG.d("Loading the texture: path = %s", imageCache.getPath());
+
         final Texture texture = new Texture(Gdx.files.absolute(imageCache.getPath()));
         final Material material = new Material(TextureAttribute.createDiffuse(texture), new BlendingAttribute());
 
@@ -39,13 +51,10 @@ public final class ImageAssetModelBuilder implements AssetModelBuilder {
                 // normal
                 0, 1, 0,
                 material,
-                VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal |
-                VertexAttributes.Usage.TextureCoordinates);
+                Position | Normal | TextureCoordinates);
 
-        // TODO: make the value constant.
-        final float coeff = 0.1f;
-        final float width = texture.getWidth() * coeff;
-        final float height = texture.getHeight() * coeff;
+        final float width = texture.getWidth() * SCALING_FACTOR;
+        final float height = texture.getHeight() * SCALING_FACTOR;
         model.meshes.get(0).scale(width, height, 1);
 
         return model;
