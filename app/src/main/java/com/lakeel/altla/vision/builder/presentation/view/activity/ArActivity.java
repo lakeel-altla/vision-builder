@@ -24,6 +24,7 @@ import com.lakeel.altla.vision.builder.presentation.di.component.ActivityCompone
 import com.lakeel.altla.vision.builder.presentation.di.module.ActivityModule;
 import com.lakeel.altla.vision.builder.presentation.graphics.ArGraphics;
 import com.lakeel.altla.vision.builder.presentation.model.ArModel;
+import com.lakeel.altla.vision.builder.presentation.view.pane.ActorEditMenuPane;
 import com.lakeel.altla.vision.builder.presentation.view.pane.ActorMetadataEditPane;
 import com.lakeel.altla.vision.builder.presentation.view.pane.ActorMetadataPane;
 import com.lakeel.altla.vision.builder.presentation.view.pane.EditModelMenuPane;
@@ -72,7 +73,8 @@ public final class ArActivity extends AndroidApplication
                    ArGraphics.Listener,
                    ViewModeMenuPane.PaneContext,
                    EditModelMenuPane.PageContext,
-                   ImageAssetListPane.PageContext {
+                   ImageAssetListPane.PageContext,
+                   ActorEditMenuPane.PageContext {
 
     private static final Log LOG = LogFactory.getLog(ArActivity.class);
 
@@ -111,6 +113,8 @@ public final class ArActivity extends AndroidApplication
     private EditModelMenuPane editModelMenuPane;
 
     private ImageAssetListPane imageAssetListPane;
+
+    private ActorEditMenuPane actorEditMenuPane;
 
     private ActorMetadataPane actorMetadataPane;
 
@@ -173,9 +177,11 @@ public final class ArActivity extends AndroidApplication
         viewModeMenuPane = new ViewModeMenuPane(this);
         editModelMenuPane = new EditModelMenuPane(this);
         imageAssetListPane = new ImageAssetListPane(this);
+        actorEditMenuPane = new ActorEditMenuPane(this);
         paneGroup.add(viewModeMenuPane);
         paneGroup.add(editModelMenuPane);
         paneGroup.add(imageAssetListPane);
+        paneGroup.add(actorEditMenuPane);
 
         actorMetadataPane = new ActorMetadataPane(this);
         actorMetadataEditPane = new ActorMetadataEditPane(this);
@@ -322,7 +328,12 @@ public final class ArActivity extends AndroidApplication
         runOnUiThread(() -> {
             selectedActor = actor;
             if (editMode) {
-                actorMetadataEditPane.setActor(selectedActor);
+                if (selectedActor == null) {
+                    paneGroup.show(R.id.pane_edit_mode_menu);
+                } else {
+                    paneGroup.show(R.id.pane_actor_edit_menu);
+                    actorEditMenuPane.setActor(selectedActor);
+                }
             } else {
                 actorMetadataPane.setActor(selectedActor);
             }
@@ -398,6 +409,17 @@ public final class ArActivity extends AndroidApplication
             });
             compositeDisposable.add(disposable);
         }
+    }
+
+    @Override
+    public void closeActorEditMenu() {
+        paneGroup.show(R.id.pane_edit_mode_menu);
+        selectedActor = null;
+    }
+
+    @Override
+    public void showActorMetadataEditPane() {
+        actorMetadataEditPane.setActor(selectedActor);
     }
 
     //

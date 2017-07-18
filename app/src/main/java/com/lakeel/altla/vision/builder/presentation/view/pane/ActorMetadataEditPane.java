@@ -32,9 +32,4 @@ public final class ActorMetadataEditPane extends Pane {
     void onClickClose() {
         view.setVisibility(GONE);
     }
-
-    @OnClick(R.id.image_button_delete)
-    void onClickDelete() {
-        // TODO
-    }
 }

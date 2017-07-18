@@ -88,5 +88,8 @@
     <string name="action_select">Select</string>
 
     <string name="input_error_required">Required.</string>
+    <string name="dialog_message_confirm_delete">Delete the actor?</string>
+    <string name="dialog_button_cancel">Cancel</string>
+    <string name="dialog_button_delete">Delete</string>
 
 </resources>

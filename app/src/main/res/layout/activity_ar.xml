@@ -16,6 +16,9 @@
     <include android:id="@+id/pane_image_asset_list"
              layout="@layout/pane_image_asset_list"/>
 
+    <include android:id="@+id/pane_actor_edit_menu"
+             layout="@layout/pane_actor_edit_menu"/>
+
     <android.support.percent.PercentFrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">

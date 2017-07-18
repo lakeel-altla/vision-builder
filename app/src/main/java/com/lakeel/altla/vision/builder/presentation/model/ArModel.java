@@ -43,4 +43,18 @@ public final class ArModel {
         return visionService.getUserActorApi()
                             .findByAreaId(areaId);
     }
+
+    public void deleteActor(@NonNull Actor actor) {
+        switch (actor.getScopeAsEnum()) {
+            case PUBLIC:
+                // TODO
+                break;
+            case USER:
+                visionService.getUserActorApi().delete(actor.getId());
+                break;
+            default:
+                // TODO
+                break;
+        }
+    }
 }

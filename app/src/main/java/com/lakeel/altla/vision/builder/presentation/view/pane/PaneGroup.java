@@ -27,4 +27,11 @@ public final class PaneGroup {
         activePane = pane;
         activePane.show();
     }
+
+    public void hide() {
+        if (activePane != null) {
+            activePane.hide();
+            activePane = null;
+        }
+    }
 }

@@ -14,6 +14,7 @@ import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaSettingsFr
 import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaSettingsListFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.ImageAssetListFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.SettingsFragment;
+import com.lakeel.altla.vision.builder.presentation.view.pane.ActorEditMenuPane;
 import com.lakeel.altla.vision.builder.presentation.view.pane.ImageAssetListPane;
 import com.lakeel.altla.vision.builder.presentation.view.pane.ViewModeMenuPane;
 
@@ -53,4 +54,6 @@ public interface ActivityComponent {
     void inject(ViewModeMenuPane pane);
 
     void inject(ImageAssetListPane pane);
+
+    void inject(ActorEditMenuPane actorEditMenuPane);
 }
