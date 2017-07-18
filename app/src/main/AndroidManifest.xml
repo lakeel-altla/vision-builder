@@ -15,8 +15,7 @@
                    android:value="${GOOGLE_API_KEY}"/>
 
         <activity android:name=".presentation.view.activity.SignInActivity"
-                  android:configChanges="orientation|screenSize"
-                  android:theme="@style/AppTheme.NoActionBar">
+                  android:configChanges="orientation|screenSize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
@@ -24,17 +23,15 @@
         </activity>
 
         <activity android:name=".presentation.view.activity.ArActivity"
-                  android:theme="@style/AppTheme.NoActionBar">
+                  android:theme="@style/ArTheme">
         </activity>
 
-        <activity android:name=".presentation.view.activity.SettingsActivity"
-                  android:theme="@style/AppTheme.NoActionBar">
+        <activity android:name=".presentation.view.activity.SettingsActivity">
             <meta-data android:name="android.support.PARENT_ACTIVITY"
                        android:value=".presentation.view.activity.ArActivity"/>
         </activity>
 
-        <activity android:name=".presentation.view.activity.AreaSettingsActivity"
-                  android:theme="@style/AppTheme.NoActionBar">
+        <activity android:name=".presentation.view.activity.AreaSettingsActivity">
             <meta-data android:name="android.support.PARENT_ACTIVITY"
                        android:value=".presentation.view.activity.ArActivity"/>
         </activity>

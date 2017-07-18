@@ -27,6 +27,9 @@
             <include android:id="@+id/pane_actor"
                      layout="@layout/pane_actor"/>
 
+            <include android:id="@+id/pane_actor_edit"
+                     layout="@layout/pane_actor_edit"/>
+
         </FrameLayout>
 
     </android.support.percent.PercentFrameLayout>

@@ -24,6 +24,7 @@ import com.lakeel.altla.vision.builder.presentation.di.component.ActivityCompone
 import com.lakeel.altla.vision.builder.presentation.di.module.ActivityModule;
 import com.lakeel.altla.vision.builder.presentation.graphics.ArGraphics;
 import com.lakeel.altla.vision.builder.presentation.model.ArModel;
+import com.lakeel.altla.vision.builder.presentation.view.pane.ActorEditPane;
 import com.lakeel.altla.vision.builder.presentation.view.pane.ActorPane;
 import com.lakeel.altla.vision.builder.presentation.view.pane.EditModelMenuPane;
 import com.lakeel.altla.vision.builder.presentation.view.pane.ImageAssetListPane;
@@ -113,6 +114,8 @@ public final class ArActivity extends AndroidApplication
 
     private ActorPane actorPane;
 
+    private ActorEditPane actorEditPane;
+
     private ActivityComponent activityComponent;
 
     private ArGraphics arGraphics;
@@ -124,6 +127,8 @@ public final class ArActivity extends AndroidApplication
     private Actor selectedActor;
 
     private FirebaseQuery<Actor> queryUserActors;
+
+    private boolean editMode;
 
     @NonNull
     public static Intent createIntent(@NonNull Activity activity) {
@@ -168,20 +173,25 @@ public final class ArActivity extends AndroidApplication
         viewModeMenuPane = new ViewModeMenuPane(this);
         editModelMenuPane = new EditModelMenuPane(this);
         imageAssetListPane = new ImageAssetListPane(this);
-        actorPane = new ActorPane(this);
         paneGroup.add(viewModeMenuPane);
         paneGroup.add(editModelMenuPane);
         paneGroup.add(imageAssetListPane);
+
+        actorPane = new ActorPane(this);
+        actorEditPane = new ActorEditPane(this);
+
         paneLifecycle.add(viewModeMenuPane);
         paneLifecycle.add(editModelMenuPane);
         paneLifecycle.add(imageAssetListPane);
         paneLifecycle.add(actorPane);
+        paneLifecycle.add(actorEditPane);
 
         //
         // Set the initial state of views.
         //
         paneGroup.show(R.id.pane_view_mode_menu);
         actorPane.hide();
+        actorEditPane.hide();
     }
 
     @Override
@@ -311,7 +321,11 @@ public final class ArActivity extends AndroidApplication
     public void onActorSelected(@Nullable Actor actor) {
         runOnUiThread(() -> {
             selectedActor = actor;
-            actorPane.setActor(selectedActor);
+            if (editMode) {
+                actorEditPane.setActor(selectedActor);
+            } else {
+                actorPane.setActor(selectedActor);
+            }
         });
     }
 
@@ -350,11 +364,13 @@ public final class ArActivity extends AndroidApplication
     @Override
     public void showViewModeMenuPane() {
         paneGroup.show(R.id.pane_view_mode_menu);
+        editMode = false;
     }
 
     @Override
     public void showEditModeMenuPane() {
         paneGroup.show(R.id.pane_edit_mode_menu);
+        editMode = true;
     }
 
     @Override
