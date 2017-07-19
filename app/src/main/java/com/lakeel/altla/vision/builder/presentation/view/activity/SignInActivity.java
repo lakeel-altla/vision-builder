@@ -34,9 +34,6 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import io.reactivex.Completable;
-import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.disposables.Disposable;
 
 public final class SignInActivity extends AppCompatActivity implements FirebaseAuth.AuthStateListener {
 
@@ -51,8 +48,6 @@ public final class SignInActivity extends AppCompatActivity implements FirebaseA
 
     @BindView(R.id.sign_in_button)
     SignInButton signInButton;
-
-    private final CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     private ActivityComponent activityComponent;
 
@@ -120,16 +115,13 @@ public final class SignInActivity extends AppCompatActivity implements FirebaseA
     @Override
     protected void onStart() {
         super.onStart();
-
         FirebaseAuth.getInstance().addAuthStateListener(this);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-
         FirebaseAuth.getInstance().removeAuthStateListener(this);
-        compositeDisposable.clear();
     }
 
     @Override
@@ -186,7 +178,7 @@ public final class SignInActivity extends AppCompatActivity implements FirebaseA
             return;
         }
 
-        GoogleSignInResult googleSignInResult = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+        final GoogleSignInResult googleSignInResult = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
         if (googleSignInResult == null) {
             LOG.e("GoogleSignInResult is null.");
             Toast.makeText(this, R.string.toast_google_sign_in_failed, Toast.LENGTH_SHORT).show();
@@ -201,7 +193,7 @@ public final class SignInActivity extends AppCompatActivity implements FirebaseA
             return;
         }
 
-        GoogleSignInAccount googleSignInAccount = googleSignInResult.getSignInAccount();
+        final GoogleSignInAccount googleSignInAccount = googleSignInResult.getSignInAccount();
         if (googleSignInAccount == null) {
             LOG.e("GoogleSignInAccount is null.");
             Toast.makeText(this, R.string.toast_google_sign_in_failed, Toast.LENGTH_SHORT).show();
@@ -211,26 +203,17 @@ public final class SignInActivity extends AppCompatActivity implements FirebaseA
 
         showProgressDialog();
 
-        Disposable disposable = Completable
-                .create(e -> {
-                    visionService.getAuthApi().signInWithGoogle(googleSignInAccount, aVoid -> {
-                        e.onComplete();
-                    }, e::onError);
-                })
-                .subscribe(() -> {
-//                    hideProgressDialog();
-                }, e -> {
-                    signInButton.setEnabled(true);
-                    hideProgressDialog();
-                    LOG.e("Failed to sign in to Firebase.", e);
-                });
-        compositeDisposable.add(disposable);
+        visionService.getAuthApi().signInWithGoogle(googleSignInAccount, null, e -> {
+            signInButton.setEnabled(true);
+            hideProgressDialog();
+            LOG.e("Failed to sign in to Firebase.", e);
+        });
     }
 
     private void handleAdfLoadSaveRequestPermissions(int resultCode, Intent data) {
         if (resultCode == Activity.RESULT_OK) {
             // TODO: Request the camera permission too for Android 6.0 or later.
-            Intent intent = ArActivity.createIntent(this);
+            final Intent intent = ArActivity.createIntent(this);
             startActivity(intent);
         } else {
             Toast.makeText(this, R.string.toast_adf_save_load_permissions_required, Toast.LENGTH_SHORT).show();
