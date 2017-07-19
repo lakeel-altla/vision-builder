@@ -178,19 +178,20 @@ public final class ArActivity extends AndroidApplication
         editModelMenuPane = new EditModelMenuPane(this);
         imageAssetListPane = new ImageAssetListPane(this);
         actorEditMenuPane = new ActorEditMenuPane(this);
-        paneGroup.add(viewModeMenuPane);
-        paneGroup.add(editModelMenuPane);
-        paneGroup.add(imageAssetListPane);
-        paneGroup.add(actorEditMenuPane);
-
         actorMetadataPane = new ActorMetadataPane(this);
         actorMetadataEditPane = new ActorMetadataEditPane(this);
 
         paneLifecycle.add(viewModeMenuPane);
         paneLifecycle.add(editModelMenuPane);
         paneLifecycle.add(imageAssetListPane);
+        paneLifecycle.add(actorEditMenuPane);
         paneLifecycle.add(actorMetadataPane);
         paneLifecycle.add(actorMetadataEditPane);
+
+        paneGroup.add(viewModeMenuPane);
+        paneGroup.add(editModelMenuPane);
+        paneGroup.add(imageAssetListPane);
+        paneGroup.add(actorEditMenuPane);
 
         //
         // Set the initial state of views.
