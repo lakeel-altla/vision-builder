@@ -46,10 +46,10 @@ public final class SettingsActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        ActionBar actionBar = getSupportActionBar();
+        final ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setTitle(R.string.title_settings_view);
             actionBar.setDisplayHomeAsUpEnabled(true);
@@ -82,7 +82,7 @@ public final class SettingsActivity extends AppCompatActivity
     @Override
     public void showSignInView() {
         // Clear all activities and then start sign in activity.
-        Intent intent = SignInActivity.createIntent(this);
+        final Intent intent = SignInActivity.createIntent(this);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
