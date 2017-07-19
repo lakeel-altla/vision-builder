@@ -153,6 +153,7 @@ public final class AreaSettingsActivity extends AppCompatActivity
         replaceFragmentAndAddToBackStack(AreaByPlaceListFragment.newInstance());
     }
 
+    @Override
     public ActivityComponent getActivityComponent() {
         return activityComponent;
     }
