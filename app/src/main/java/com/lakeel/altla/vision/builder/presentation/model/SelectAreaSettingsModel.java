@@ -2,6 +2,8 @@ package com.lakeel.altla.vision.builder.presentation.model;
 
 import com.google.android.gms.location.places.Place;
 
+import com.lakeel.altla.android.log.Log;
+import com.lakeel.altla.android.log.LogFactory;
 import com.lakeel.altla.vision.api.CurrentUser;
 import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.helper.AreaDescriptionNameComparater;
@@ -18,10 +20,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-import io.reactivex.Observable;
 import io.reactivex.Single;
 
 public final class SelectAreaSettingsModel {
+
+    private static final Log LOG = LogFactory.getLog(SelectAreaSettingsModel.class);
 
     private final VisionService visionService;
 
@@ -82,16 +85,6 @@ public final class SelectAreaSettingsModel {
     @Nullable
     public AreaSettings getAreaSettings() {
         return areaSettings;
-    }
-
-    @NonNull
-    public Observable<AreaSettings> loadAreaSettings() {
-        return Single
-                .<List<AreaSettings>>create(e -> {
-                    visionService.getUserAreaSettingsApi()
-                                 .findAllUserAreaSettings(e::onSuccess, e::onError);
-                })
-                .flatMapObservable(Observable::fromIterable);
     }
 
     @NonNull
@@ -204,7 +197,7 @@ public final class SelectAreaSettingsModel {
         }
 
         visionService.getUserAreaSettingsApi()
-                     .saveUserAreaSettings(areaSettings);
+                     .save(areaSettings);
 
         arModel.selectAreaSettings(areaSettings);
     }

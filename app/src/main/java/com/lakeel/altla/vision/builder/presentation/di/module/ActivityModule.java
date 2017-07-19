@@ -3,6 +3,7 @@ package com.lakeel.altla.vision.builder.presentation.di.module;
 import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScope;
 import com.lakeel.altla.vision.builder.presentation.model.ArModel;
+import com.lakeel.altla.vision.builder.presentation.model.AreaSettingsListModel;
 import com.lakeel.altla.vision.builder.presentation.model.SelectAreaSettingsModel;
 
 import android.app.Activity;
@@ -47,5 +48,11 @@ public final class ActivityModule {
     @Provides
     SelectAreaSettingsModel provideSelectAreaSettingsModel(VisionService visionService, ArModel arModel) {
         return new SelectAreaSettingsModel(visionService, arModel);
+    }
+
+    @ActivityScope
+    @Provides
+    AreaSettingsListModel provideAreaSettingsListModel(VisionService visionService) {
+        return new AreaSettingsListModel(visionService);
     }
 }

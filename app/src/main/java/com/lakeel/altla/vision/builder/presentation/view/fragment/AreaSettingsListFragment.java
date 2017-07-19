@@ -1,10 +1,9 @@
 package com.lakeel.altla.vision.builder.presentation.view.fragment;
 
-import com.lakeel.altla.android.log.Log;
-import com.lakeel.altla.android.log.LogFactory;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.helper.StringResourceHelper;
+import com.lakeel.altla.vision.builder.presentation.model.AreaSettingsListModel;
 import com.lakeel.altla.vision.builder.presentation.model.SelectAreaSettingsModel;
 import com.lakeel.altla.vision.model.AreaSettings;
 
@@ -24,37 +23,26 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.disposables.Disposable;
 
 public final class AreaSettingsListFragment extends Fragment {
-
-    private static final Log LOG = LogFactory.getLog(AreaSettingsListFragment.class);
 
     @Inject
     SelectAreaSettingsModel selectAreaSettingsModel;
 
+    @Inject
+    AreaSettingsListModel areaSettingsListModel;
+
     @BindView(R.id.recycler_view)
     RecyclerView recyclerView;
 
-    private final List<AreaSettings> items = new ArrayList<>();
-
     private final Adapter adapter = new Adapter();
 
-    private final CompositeDisposable compositeDisposable = new CompositeDisposable();
-
     private FragmentContext fragmentContext;
-
-    private AreaSettings selectedItem;
 
     @NonNull
     public static AreaSettingsListFragment newInstance() {
@@ -93,25 +81,39 @@ public final class AreaSettingsListFragment extends Fragment {
         fragmentContext.setHomeAsUpIndicator(R.drawable.ic_arrow_back_white_24dp);
         setHasOptionsMenu(true);
 
-        items.clear();
-        adapter.notifyDataSetChanged();
+        areaSettingsListModel.setOnItemEventListener(new AreaSettingsListModel.OnItemEventListener() {
+            @Override
+            public void onDataSetChanged() {
+                adapter.notifyDataSetChanged();
+            }
 
-        final Disposable disposable = selectAreaSettingsModel
-                .loadAreaSettings()
-                .subscribe(areaSettings -> {
-                    items.add(areaSettings);
-                    adapter.notifyItemInserted(items.size() - 1);
-                }, e -> {
-                    LOG.e("Failed.", e);
-                    Toast.makeText(getContext(), R.string.toast_failed, Toast.LENGTH_SHORT).show();
-                });
-        compositeDisposable.add(disposable);
+            @Override
+            public void onItemInserted(int position) {
+                adapter.notifyItemInserted(position);
+            }
+
+            @Override
+            public void onItemChanged(int position) {
+                adapter.notifyItemChanged(position);
+            }
+
+            @Override
+            public void onItemRemoved(int position) {
+                adapter.notifyItemRemoved(position);
+            }
+
+            @Override
+            public void onItemMoved(int fromPosition, int toPosition) {
+                adapter.notifyItemMoved(fromPosition, toPosition);
+            }
+        });
+        areaSettingsListModel.loadAllItems();
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        compositeDisposable.clear();
+        areaSettingsListModel.setOnItemEventListener(null);
     }
 
     @Override
@@ -122,29 +124,24 @@ public final class AreaSettingsListFragment extends Fragment {
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
-        menu.findItem(R.id.action_select).setEnabled(selectedItem != null);
+        menu.findItem(R.id.action_select).setEnabled(areaSettingsListModel.canSelect());
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_select:
-                selectAreaSettingsModel.selectAreaSettings(selectedItem);
-                fragmentContext.backView();
+                final AreaSettings areaSettings = areaSettingsListModel.getSelectedItem();
+                if (areaSettings == null) {
+                    throw new IllegalStateException("No item is selected.");
+                } else {
+                    selectAreaSettingsModel.selectAreaSettings(areaSettings);
+                    fragmentContext.backView();
+                }
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
-    }
-
-    private void onItemSelected(int position) {
-        if (0 <= position) {
-            selectedItem = items.get(position);
-        } else {
-            selectedItem = null;
-        }
-
-        fragmentContext.invalidateOptionsMenu();
     }
 
     public interface FragmentContext {
@@ -184,7 +181,8 @@ public final class AreaSettingsListFragment extends Fragment {
                     selectedPosition = recyclerView.getChildAdapterPosition(selectedItemView);
                 }
 
-                onItemSelected(selectedPosition);
+                areaSettingsListModel.setSelectedPosition(selectedPosition);
+                fragmentContext.invalidateOptionsMenu();
             });
 
             return new ViewHolder(itemView);
@@ -192,7 +190,7 @@ public final class AreaSettingsListFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
-            final AreaSettings item = items.get(position);
+            final AreaSettings item = areaSettingsListModel.getItem(position);
 
             holder.textViewUpdatedAt.setText(String.valueOf(item.getUpdatedAtAsLong()));
             holder.textViewAreaMode.setText(StringResourceHelper.resolveScopeStringResource(item.getAreaScopeAsEnum()));
@@ -202,7 +200,7 @@ public final class AreaSettingsListFragment extends Fragment {
 
         @Override
         public int getItemCount() {
-            return items.size();
+            return areaSettingsListModel.getItemCount();
         }
 
         class ViewHolder extends RecyclerView.ViewHolder {
