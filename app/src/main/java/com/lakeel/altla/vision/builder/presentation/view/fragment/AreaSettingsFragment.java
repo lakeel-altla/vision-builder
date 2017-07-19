@@ -4,9 +4,6 @@ import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.helper.StringResourceHelper;
 import com.lakeel.altla.vision.builder.presentation.model.SelectAreaSettingsModel;
-import com.lakeel.altla.vision.model.Area;
-import com.lakeel.altla.vision.model.AreaDescription;
-import com.lakeel.altla.vision.model.Scope;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -88,15 +85,12 @@ public final class AreaSettingsFragment extends Fragment {
         fragmentContext.setHomeAsUpIndicator(R.drawable.ic_clear_white_24dp);
         setHasOptionsMenu(true);
 
-        final Scope areaScope = selectAreaSettingsModel.getAreaScope();
-        final Area area = selectAreaSettingsModel.getArea();
-        final AreaDescription areaDescription = selectAreaSettingsModel.getAreaDescription();
+        textViewAreaMode.setText(StringResourceHelper.resolveScopeStringResource(
+                selectAreaSettingsModel.getAreaScope()));
+        textViewAreaName.setText(selectAreaSettingsModel.getAreaName());
+        textViewAreaDescriptionName.setText(selectAreaSettingsModel.getAreaDescriptionName());
 
-        textViewAreaMode.setText(StringResourceHelper.resolveScopeStringResource(areaScope));
-        textViewAreaName.setText(area == null ? null : area.getName());
-        textViewAreaDescriptionName.setText(areaDescription == null ? null : areaDescription.getName());
-
-        boolean canShowAreaDescriptionList = selectAreaSettingsModel.getArea() != null;
+        boolean canShowAreaDescriptionList = (selectAreaSettingsModel.getAreaId() != null);
         int id = canShowAreaDescriptionList ?
                 R.color.background_image_button :
                 R.color.background_image_button_disabled;

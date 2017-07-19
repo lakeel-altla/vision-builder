@@ -15,7 +15,11 @@ public final class AreaSettings extends BaseEntity {
 
     private String areaId;
 
+    private String areaName;
+
     private String areaDescriptionId;
+
+    private String areaDescriptionName;
 
     @NonNull
     public String getAreaScope() {
@@ -47,11 +51,29 @@ public final class AreaSettings extends BaseEntity {
     }
 
     @Nullable
+    public String getAreaName() {
+        return areaName;
+    }
+
+    public void setAreaName(@Nullable String areaName) {
+        this.areaName = areaName;
+    }
+
+    @Nullable
     public String getAreaDescriptionId() {
         return areaDescriptionId;
     }
 
     public void setAreaDescriptionId(@Nullable String areaDescriptionId) {
         this.areaDescriptionId = areaDescriptionId;
+    }
+
+    @Nullable
+    public String getAreaDescriptionName() {
+        return areaDescriptionName;
+    }
+
+    public void setAreaDescriptionName(@Nullable String areaDescriptionName) {
+        this.areaDescriptionName = areaDescriptionName;
     }
 }

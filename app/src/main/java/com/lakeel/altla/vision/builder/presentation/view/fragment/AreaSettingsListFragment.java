@@ -6,6 +6,7 @@ import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.helper.StringResourceHelper;
 import com.lakeel.altla.vision.builder.presentation.model.SelectAreaSettingsModel;
+import com.lakeel.altla.vision.model.AreaSettings;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -45,7 +46,7 @@ public final class AreaSettingsListFragment extends Fragment {
     @BindView(R.id.recycler_view)
     RecyclerView recyclerView;
 
-    private final List<SelectAreaSettingsModel.AreaSettingsDetail> items = new ArrayList<>();
+    private final List<AreaSettings> items = new ArrayList<>();
 
     private final Adapter adapter = new Adapter();
 
@@ -53,7 +54,7 @@ public final class AreaSettingsListFragment extends Fragment {
 
     private FragmentContext fragmentContext;
 
-    private SelectAreaSettingsModel.AreaSettingsDetail selectedItem;
+    private AreaSettings selectedItem;
 
     @NonNull
     public static AreaSettingsListFragment newInstance() {
@@ -96,9 +97,9 @@ public final class AreaSettingsListFragment extends Fragment {
         adapter.notifyDataSetChanged();
 
         final Disposable disposable = selectAreaSettingsModel
-                .loadAreaSettingsDetails()
-                .subscribe(detail -> {
-                    items.add(detail);
+                .loadAreaSettings()
+                .subscribe(areaSettings -> {
+                    items.add(areaSettings);
                     adapter.notifyItemInserted(items.size() - 1);
                 }, e -> {
                     LOG.e("Failed.", e);
@@ -128,9 +129,7 @@ public final class AreaSettingsListFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_select:
-                selectAreaSettingsModel.selectAreaSettings(selectedItem.areaSettings,
-                                                           selectedItem.area,
-                                                           selectedItem.areaDescription);
+                selectAreaSettingsModel.selectAreaSettings(selectedItem);
                 fragmentContext.backView();
                 return true;
             default:
@@ -193,13 +192,12 @@ public final class AreaSettingsListFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
-            final SelectAreaSettingsModel.AreaSettingsDetail item = items.get(position);
+            final AreaSettings item = items.get(position);
 
-            holder.textViewUpdatedAt.setText(String.valueOf(item.areaSettings.getUpdatedAtAsLong()));
-            holder.textViewAreaMode.setText(
-                    StringResourceHelper.resolveScopeStringResource(item.areaSettings.getAreaScopeAsEnum()));
-            holder.textViewAreaName.setText(item.area.getName());
-            holder.textViewAreaDescriptionName.setText(item.areaDescription.getName());
+            holder.textViewUpdatedAt.setText(String.valueOf(item.getUpdatedAtAsLong()));
+            holder.textViewAreaMode.setText(StringResourceHelper.resolveScopeStringResource(item.getAreaScopeAsEnum()));
+            holder.textViewAreaName.setText(item.getAreaName());
+            holder.textViewAreaDescriptionName.setText(item.getAreaDescriptionName());
         }
 
         @Override

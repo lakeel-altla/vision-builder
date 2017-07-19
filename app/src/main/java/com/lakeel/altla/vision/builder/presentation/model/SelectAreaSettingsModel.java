@@ -34,10 +34,16 @@ public final class SelectAreaSettingsModel {
     private Place place;
 
     @Nullable
-    private Area area;
+    private String areaId;
 
     @Nullable
-    private AreaDescription areaDescription;
+    private String areaName;
+
+    @Nullable
+    private String areaDescriptionId;
+
+    @Nullable
+    private String areaDescriptionName;
 
     @Nullable
     private AreaSettings areaSettings;
@@ -53,13 +59,23 @@ public final class SelectAreaSettingsModel {
     }
 
     @Nullable
-    public Area getArea() {
-        return area;
+    public String getAreaId() {
+        return areaId;
     }
 
     @Nullable
-    public AreaDescription getAreaDescription() {
-        return areaDescription;
+    public String getAreaName() {
+        return areaName;
+    }
+
+    @Nullable
+    public String getAreaDescriptionId() {
+        return areaDescriptionId;
+    }
+
+    @Nullable
+    public String getAreaDescriptionName() {
+        return areaDescriptionName;
     }
 
     @Nullable
@@ -68,76 +84,13 @@ public final class SelectAreaSettingsModel {
     }
 
     @NonNull
-    public Observable<AreaSettingsDetail> loadAreaSettingsDetails() {
+    public Observable<AreaSettings> loadAreaSettings() {
         return Single
                 .<List<AreaSettings>>create(e -> {
                     visionService.getUserAreaSettingsApi()
                                  .findAllUserAreaSettings(e::onSuccess, e::onError);
                 })
-                .flatMapObservable(Observable::fromIterable)
-                .map(AreaSettingsDetail::new)
-                .concatMap(detail -> Observable.<AreaSettingsDetail>create(e -> {
-                    String areaId = detail.areaSettings.getAreaId();
-                    if (areaId == null) {
-                        throw new IllegalStateException("Field 'areaId' is null.");
-                    }
-
-                    switch (detail.areaSettings.getAreaScopeAsEnum()) {
-                        case PUBLIC:
-                            visionService.getPublicAreaApi()
-                                         .findAreaById(areaId, area -> {
-                                             if (area != null) {
-                                                 detail.area = area;
-                                                 e.onNext(detail);
-                                             }
-                                             e.onComplete();
-                                         }, e::onError);
-                            break;
-                        case USER:
-                            visionService.getUserAreaApi()
-                                         .findAreaById(areaId, area -> {
-                                             if (area != null) {
-                                                 detail.area = area;
-                                                 e.onNext(detail);
-                                             }
-                                             e.onComplete();
-                                         }, e::onError);
-                            break;
-                        default:
-                            throw new IllegalStateException("Unknown area scope.");
-                    }
-                }))
-                .concatMap(detail -> Observable.<AreaSettingsDetail>create(e -> {
-                    String areaDescriptionId = detail.areaSettings.getAreaDescriptionId();
-                    if (areaDescriptionId == null) {
-                        throw new IllegalStateException("Field 'areaId' is null.");
-                    }
-
-                    switch (detail.areaSettings.getAreaScopeAsEnum()) {
-                        case PUBLIC:
-                            visionService.getPublicAreaDescriptionApi()
-                                         .findAreaDescriptionById(areaDescriptionId, areaDescription -> {
-                                             if (areaDescription != null) {
-                                                 detail.areaDescription = areaDescription;
-                                                 e.onNext(detail);
-                                             }
-                                             e.onComplete();
-                                         }, e::onError);
-                            break;
-                        case USER:
-                            visionService.getUserAreaDescriptionApi()
-                                         .findAreaDescriptionById(areaDescriptionId, areaDescription -> {
-                                             if (areaDescription != null) {
-                                                 detail.areaDescription = areaDescription;
-                                                 e.onNext(detail);
-                                             }
-                                             e.onComplete();
-                                         }, e::onError);
-                            break;
-                        default:
-                            throw new IllegalStateException("Unknown area scope.");
-                    }
-                }));
+                .flatMapObservable(Observable::fromIterable);
     }
 
     @NonNull
@@ -170,13 +123,13 @@ public final class SelectAreaSettingsModel {
 
     @NonNull
     public Single<List<AreaDescription>> loadAreaDescriptionsByArea() {
-        if (area == null) throw new IllegalStateException("'area' is null.");
+        if (areaId == null) throw new IllegalStateException("'areaId' is null.");
 
         return Single.create(e -> {
             switch (areaScope) {
                 case PUBLIC: {
                     visionService.getPublicAreaDescriptionApi()
-                                 .findAreaDescriptionsByAreaId(area.getId(), areaDescriptions -> {
+                                 .findAreaDescriptionsByAreaId(areaId, areaDescriptions -> {
                                      Collections.sort(areaDescriptions, AreaDescriptionNameComparater.INSTANCE);
                                      e.onSuccess(areaDescriptions);
                                  }, e::onError);
@@ -184,7 +137,7 @@ public final class SelectAreaSettingsModel {
                 }
                 case USER: {
                     visionService.getUserAreaDescriptionApi()
-                                 .findAreaDescriptionsByAreaId(area.getId(), areaDescriptions -> {
+                                 .findAreaDescriptionsByAreaId(areaId, areaDescriptions -> {
                                      Collections.sort(areaDescriptions, AreaDescriptionNameComparater.INSTANCE);
                                      e.onSuccess(areaDescriptions);
                                  }, e::onError);
@@ -194,20 +147,18 @@ public final class SelectAreaSettingsModel {
         });
     }
 
-    public void selectAreaSettings(@NonNull AreaSettings areaSettings, @NonNull Area area,
-                                   @NonNull AreaDescription areaDescription) {
+    public void selectAreaSettings(@NonNull AreaSettings areaSettings) {
         this.areaSettings = areaSettings;
-        areaScope = areaSettings.getAreaScopeAsEnum();
-        this.area = area;
-        this.areaDescription = areaDescription;
     }
 
     public void selectAreaScope(@NonNull Scope areaScope) {
         if (this.areaScope != areaScope) {
             this.areaScope = areaScope;
             areaSettings = null;
-            area = null;
-            areaDescription = null;
+            areaId = null;
+            areaName = null;
+            areaDescriptionId = null;
+            areaDescriptionName = null;
         }
     }
 
@@ -216,16 +167,19 @@ public final class SelectAreaSettingsModel {
     }
 
     public void selectArea(@NonNull Area area) {
-        if (!Objects.equals(this.area, area)) {
-            this.area = area;
+        if (!Objects.equals(areaId, area.getId())) {
+            areaId = area.getId();
+            areaName = area.getName();
             areaSettings = null;
-            areaDescription = null;
+            areaDescriptionId = null;
+            areaDescriptionName = null;
         }
     }
 
-    public void selectAreaDescriptiob(@NonNull AreaDescription areaDescription) {
-        if (!Objects.equals(this.areaDescription, areaDescription)) {
-            this.areaDescription = areaDescription;
+    public void selectAreaDescription(@NonNull AreaDescription areaDescription) {
+        if (!Objects.equals(areaDescriptionId, areaDescription.getId())) {
+            areaDescriptionId = areaDescription.getId();
+            areaDescriptionName = areaDescription.getName();
             areaSettings = null;
         }
     }
@@ -233,15 +187,15 @@ public final class SelectAreaSettingsModel {
     public void start() {
         if (!canStart()) throw new IllegalStateException("Can not start.");
 
-        AreaSettings areaSettings = this.areaSettings;
         if (areaSettings == null) {
             areaSettings = new AreaSettings();
             areaSettings.setUserId(CurrentUser.getInstance().getUserId());
+            areaSettings.setAreaScopeAsEnum(areaScope);
+            areaSettings.setAreaId(areaId);
+            areaSettings.setAreaName(areaName);
+            areaSettings.setAreaDescriptionId(areaDescriptionId);
+            areaSettings.setAreaDescriptionName(areaDescriptionName);
         }
-
-        areaSettings.setAreaScopeAsEnum(areaScope);
-        areaSettings.setAreaId(area.getId());
-        areaSettings.setAreaDescriptionId(areaDescription.getId());
 
         visionService.getUserAreaSettingsApi()
                      .saveUserAreaSettings(areaSettings);
@@ -250,20 +204,6 @@ public final class SelectAreaSettingsModel {
     }
 
     public boolean canStart() {
-        return area != null && areaDescription != null;
-    }
-
-    public final class AreaSettingsDetail {
-
-        @NonNull
-        public final AreaSettings areaSettings;
-
-        public Area area;
-
-        public AreaDescription areaDescription;
-
-        private AreaSettingsDetail(@NonNull AreaSettings areaSettings) {
-            this.areaSettings = areaSettings;
-        }
+        return areaId != null && areaDescriptionId != null;
     }
 }

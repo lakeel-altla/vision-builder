@@ -128,7 +128,7 @@ public final class AreaDescriptionByAreaListFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_select:
-                selectAreaSettingsModel.selectAreaDescriptiob(selectedItem);
+                selectAreaSettingsModel.selectAreaDescription(selectedItem);
                 fragmentContext.backView();
                 return true;
             default:
