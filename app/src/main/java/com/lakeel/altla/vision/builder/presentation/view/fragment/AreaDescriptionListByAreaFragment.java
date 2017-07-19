@@ -29,7 +29,7 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public final class AreaDescriptionByAreaListFragment extends Fragment {
+public final class AreaDescriptionListByAreaFragment extends Fragment {
 
     @BindView(R.id.recycler_view)
     RecyclerView recyclerView;
@@ -47,8 +47,8 @@ public final class AreaDescriptionByAreaListFragment extends Fragment {
     private FragmentContext fragmentContext;
 
     @NonNull
-    public static AreaDescriptionByAreaListFragment newInstance() {
-        return new AreaDescriptionByAreaListFragment();
+    public static AreaDescriptionListByAreaFragment newInstance() {
+        return new AreaDescriptionListByAreaFragment();
     }
 
     @Override
@@ -68,7 +68,7 @@ public final class AreaDescriptionByAreaListFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        final View view = inflater.inflate(R.layout.fragment_area_description_by_area_list, container, false);
+        final View view = inflater.inflate(R.layout.fragment_area_description_list_by_area, container, false);
         ButterKnife.bind(this, view);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));

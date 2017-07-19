@@ -10,8 +10,8 @@ import com.lakeel.altla.vision.builder.presentation.app.MyApplication;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.di.component.ActivityComponent;
 import com.lakeel.altla.vision.builder.presentation.di.module.ActivityModule;
-import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaByPlaceListFragment;
-import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaDescriptionByAreaListFragment;
+import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaListByPlaceFragment;
+import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaDescriptionListByAreaFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaFindFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaModeFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaSettingsFragment;
@@ -36,8 +36,8 @@ public final class AreaSettingsActivity extends AppCompatActivity
                    AreaSettingsFragment.FragmentContext,
                    AreaModeFragment.FragmentContext,
                    AreaFindFragment.FragmentContext,
-                   AreaByPlaceListFragment.FragmentContext,
-                   AreaDescriptionByAreaListFragment.FragmentContext,
+                   AreaListByPlaceFragment.FragmentContext,
+                   AreaDescriptionListByAreaFragment.FragmentContext,
                    AreaSettingsListFragment.FragmentContext {
 
     private static final Log LOG = LogFactory.getLog(AreaSettingsActivity.class);
@@ -140,7 +140,7 @@ public final class AreaSettingsActivity extends AppCompatActivity
 
     @Override
     public void showAreaDescriptionByAreaListView() {
-        replaceFragmentAndAddToBackStack(AreaDescriptionByAreaListFragment.newInstance());
+        replaceFragmentAndAddToBackStack(AreaDescriptionListByAreaFragment.newInstance());
     }
 
     @Override
@@ -150,7 +150,7 @@ public final class AreaSettingsActivity extends AppCompatActivity
 
     @Override
     public void showAreaByPlaceListView() {
-        replaceFragmentAndAddToBackStack(AreaByPlaceListFragment.newInstance());
+        replaceFragmentAndAddToBackStack(AreaListByPlaceFragment.newInstance());
     }
 
     @Override

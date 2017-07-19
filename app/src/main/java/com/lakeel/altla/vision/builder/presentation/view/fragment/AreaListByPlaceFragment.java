@@ -31,7 +31,7 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public final class AreaByPlaceListFragment extends Fragment {
+public final class AreaListByPlaceFragment extends Fragment {
 
     @Inject
     AreaSettingsModel areaSettingsModel;
@@ -49,8 +49,8 @@ public final class AreaByPlaceListFragment extends Fragment {
     private FragmentContext fragmentContext;
 
     @NonNull
-    public static AreaByPlaceListFragment newInstance() {
-        return new AreaByPlaceListFragment();
+    public static AreaListByPlaceFragment newInstance() {
+        return new AreaListByPlaceFragment();
     }
 
     @Override
@@ -70,7 +70,7 @@ public final class AreaByPlaceListFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        final View view = inflater.inflate(R.layout.fragment_area_by_place_list, container, false);
+        final View view = inflater.inflate(R.layout.fragment_area_list_by_place, container, false);
         ButterKnife.bind(this, view);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
