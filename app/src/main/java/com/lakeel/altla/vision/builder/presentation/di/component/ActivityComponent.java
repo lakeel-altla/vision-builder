@@ -6,13 +6,12 @@ import com.lakeel.altla.vision.builder.presentation.view.activity.ArActivity;
 import com.lakeel.altla.vision.builder.presentation.view.activity.AreaSettingsActivity;
 import com.lakeel.altla.vision.builder.presentation.view.activity.SettingsActivity;
 import com.lakeel.altla.vision.builder.presentation.view.activity.SignInActivity;
-import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaListByPlaceFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaDescriptionListByAreaFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaFindFragment;
+import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaListByPlaceFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaModeFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaSettingsFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.AreaSettingsListFragment;
-import com.lakeel.altla.vision.builder.presentation.view.fragment.ImageAssetListFragment;
 import com.lakeel.altla.vision.builder.presentation.view.fragment.SettingsFragment;
 import com.lakeel.altla.vision.builder.presentation.view.pane.ActorEditMenuPane;
 import com.lakeel.altla.vision.builder.presentation.view.pane.ActorMetadataEditPane;
@@ -50,8 +49,6 @@ public interface ActivityComponent {
     void inject(AreaFindFragment fragment);
 
     void inject(SettingsFragment fragment);
-
-    void inject(ImageAssetListFragment fragment);
 
     void inject(ViewModeMenuPane pane);
 
