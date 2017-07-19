@@ -51,6 +51,7 @@ public final class SelectAreaSettingsModel {
     public SelectAreaSettingsModel(@NonNull VisionService visionService, @NonNull ArModel arModel) {
         this.visionService = visionService;
         this.arModel = arModel;
+        if (arModel.getAreaSettings() != null) selectAreaSettings(arModel.getAreaSettings());
     }
 
     @NonNull
@@ -149,6 +150,11 @@ public final class SelectAreaSettingsModel {
 
     public void selectAreaSettings(@NonNull AreaSettings areaSettings) {
         this.areaSettings = areaSettings;
+        areaScope = areaSettings.getAreaScopeAsEnum();
+        areaId = areaSettings.getAreaId();
+        areaName = areaSettings.getAreaName();
+        areaDescriptionId = areaSettings.getAreaDescriptionId();
+        areaDescriptionName = areaSettings.getAreaDescriptionName();
     }
 
     public void selectAreaScope(@NonNull Scope areaScope) {

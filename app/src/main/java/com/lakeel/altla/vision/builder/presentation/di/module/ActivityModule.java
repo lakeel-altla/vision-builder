@@ -1,6 +1,9 @@
 package com.lakeel.altla.vision.builder.presentation.di.module;
 
+import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScope;
+import com.lakeel.altla.vision.builder.presentation.model.ArModel;
+import com.lakeel.altla.vision.builder.presentation.model.SelectAreaSettingsModel;
 
 import android.app.Activity;
 import android.content.ContentResolver;
@@ -38,5 +41,11 @@ public final class ActivityModule {
     @Provides
     ContentResolver provideContentResolver() {
         return activity.getContentResolver();
+    }
+
+    @ActivityScope
+    @Provides
+    SelectAreaSettingsModel provideSelectAreaSettingsModel(VisionService visionService, ArModel arModel) {
+        return new SelectAreaSettingsModel(visionService, arModel);
     }
 }

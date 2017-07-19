@@ -6,7 +6,6 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.presentation.app.MyApplication;
 import com.lakeel.altla.vision.builder.presentation.model.ArModel;
-import com.lakeel.altla.vision.builder.presentation.model.SelectAreaSettingsModel;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -50,11 +49,5 @@ public class ApplicationModule {
     @Provides
     ArModel provideArModel(VisionService visionService) {
         return new ArModel(visionService);
-    }
-
-    @Singleton
-    @Provides
-    SelectAreaSettingsModel provideSelectAreaSettingsModel(VisionService visionService, ArModel arModel) {
-        return new SelectAreaSettingsModel(visionService, arModel);
     }
 }
