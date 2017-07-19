@@ -3,6 +3,7 @@ package com.lakeel.altla.vision.builder.presentation.di.module;
 import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScope;
 import com.lakeel.altla.vision.builder.presentation.model.ArModel;
+import com.lakeel.altla.vision.builder.presentation.model.AreaDescriptionListByAreaModel;
 import com.lakeel.altla.vision.builder.presentation.model.AreaListByPlaceModel;
 import com.lakeel.altla.vision.builder.presentation.model.AreaSettingsListModel;
 import com.lakeel.altla.vision.builder.presentation.model.AreaSettingsModel;
@@ -61,5 +62,11 @@ public final class ActivityModule {
     @Provides
     AreaListByPlaceModel provideAreaListByPlaceModel(VisionService visionService) {
         return new AreaListByPlaceModel(visionService);
+    }
+
+    @ActivityScope
+    @Provides
+    AreaDescriptionListByAreaModel provideAreaDescriptionListByAreaModel(VisionService visionService) {
+        return new AreaDescriptionListByAreaModel(visionService);
     }
 }

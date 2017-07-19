@@ -3,8 +3,7 @@ package com.lakeel.altla.vision.api;
 import com.lakeel.altla.vision.data.repository.android.AreaDescriptionCacheRepository;
 import com.lakeel.altla.vision.data.repository.firebase.UserAreaDescriptionFileRepository;
 import com.lakeel.altla.vision.data.repository.firebase.UserAreaDescriptionRepository;
-import com.lakeel.altla.vision.helper.ObservableData;
-import com.lakeel.altla.vision.helper.ObservableList;
+import com.lakeel.altla.vision.helper.FirebaseQuery;
 import com.lakeel.altla.vision.helper.OnFailureListener;
 import com.lakeel.altla.vision.helper.OnProgressListener;
 import com.lakeel.altla.vision.helper.OnSuccessListener;
@@ -17,7 +16,6 @@ import android.support.annotation.Nullable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.List;
 
 public final class UserAreaDescriptionApi extends BaseVisionApi {
 
@@ -35,36 +33,7 @@ public final class UserAreaDescriptionApi extends BaseVisionApi {
         userAreaDescriptionFileRepository = new UserAreaDescriptionFileRepository(visionService.getFirebaseStorage());
     }
 
-    public void findAreaDescriptionById(@NonNull String areaDescriptionId,
-                                        @Nullable OnSuccessListener<AreaDescription> onSuccessListener,
-                                        @Nullable OnFailureListener onFailureListener) {
-        userAreaDescriptionRepository.find(CurrentUser.getInstance().getUserId(), areaDescriptionId,
-                                           onSuccessListener, onFailureListener);
-    }
-
-    public void findAreaDescriptionsByAreaId(@NonNull String areaId,
-                                             @Nullable OnSuccessListener<List<AreaDescription>> onSuccessListener,
-                                             @Nullable OnFailureListener onFailureListener) {
-        userAreaDescriptionRepository.findByAreaId(CurrentUser.getInstance().getUserId(), areaId,
-                                                   onSuccessListener, onFailureListener);
-    }
-
-    @NonNull
-    public ObservableData<AreaDescription> observeAreaDescriptionById(@NonNull String areaDescriptionId) {
-        return userAreaDescriptionRepository.observe(CurrentUser.getInstance().getUserId(), areaDescriptionId);
-    }
-
-    @NonNull
-    public ObservableList<AreaDescription> observeAreaDescriptionsByAreaId(@NonNull String areaId) {
-        return userAreaDescriptionRepository.observeByAreaId(CurrentUser.getInstance().getUserId(), areaId);
-    }
-
-    @NonNull
-    public ObservableList<AreaDescription> observeAllAreaDescriptions() {
-        return userAreaDescriptionRepository.observeAll(CurrentUser.getInstance().getUserId());
-    }
-
-    public void saveAreaDescriptionById(@NonNull AreaDescription areaDescription) {
+    public void save(@NonNull AreaDescription areaDescription) {
         if (!CurrentUser.getInstance().getUserId().equals(areaDescription.getUserId())) {
             throw new IllegalArgumentException("Invalid user id.");
         }
@@ -72,7 +41,12 @@ public final class UserAreaDescriptionApi extends BaseVisionApi {
         userAreaDescriptionRepository.save(areaDescription);
     }
 
-    public void deleteAreaDescriptionById(@NonNull String areaDescriptionId) {
+    @NonNull
+    public FirebaseQuery<AreaDescription> findByAreaId(@NonNull String areaId) {
+        return userAreaDescriptionRepository.findByAreaId(CurrentUser.getInstance().getUserId(), areaId);
+    }
+
+    public void delete(@NonNull String areaDescriptionId) {
         userAreaDescriptionRepository.delete(CurrentUser.getInstance().getUserId(), areaDescriptionId);
     }
 

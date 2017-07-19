@@ -4,7 +4,6 @@ import com.google.android.gms.location.places.Place;
 
 import com.lakeel.altla.vision.api.CurrentUser;
 import com.lakeel.altla.vision.api.VisionService;
-import com.lakeel.altla.vision.helper.AreaDescriptionNameComparater;
 import com.lakeel.altla.vision.model.Area;
 import com.lakeel.altla.vision.model.AreaDescription;
 import com.lakeel.altla.vision.model.AreaSettings;
@@ -13,11 +12,7 @@ import com.lakeel.altla.vision.model.Scope;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
-
-import io.reactivex.Single;
 
 public final class AreaSettingsModel {
 
@@ -85,32 +80,6 @@ public final class AreaSettingsModel {
     @Nullable
     public AreaSettings getAreaSettings() {
         return areaSettings;
-    }
-
-    @NonNull
-    public Single<List<AreaDescription>> loadAreaDescriptionsByArea() {
-        if (areaId == null) throw new IllegalStateException("'areaId' is null.");
-
-        return Single.create(e -> {
-            switch (areaScope) {
-                case PUBLIC: {
-                    visionService.getPublicAreaDescriptionApi()
-                                 .findAreaDescriptionsByAreaId(areaId, areaDescriptions -> {
-                                     Collections.sort(areaDescriptions, AreaDescriptionNameComparater.INSTANCE);
-                                     e.onSuccess(areaDescriptions);
-                                 }, e::onError);
-                    break;
-                }
-                case USER: {
-                    visionService.getUserAreaDescriptionApi()
-                                 .findAreaDescriptionsByAreaId(areaId, areaDescriptions -> {
-                                     Collections.sort(areaDescriptions, AreaDescriptionNameComparater.INSTANCE);
-                                     e.onSuccess(areaDescriptions);
-                                 }, e::onError);
-                    break;
-                }
-            }
-        });
     }
 
     public void selectAreaSettings(@NonNull AreaSettings areaSettings) {

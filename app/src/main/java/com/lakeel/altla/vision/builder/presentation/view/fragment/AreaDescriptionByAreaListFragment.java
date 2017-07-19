@@ -1,10 +1,10 @@
 package com.lakeel.altla.vision.builder.presentation.view.fragment;
 
-import com.lakeel.altla.android.log.Log;
-import com.lakeel.altla.android.log.LogFactory;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
+import com.lakeel.altla.vision.builder.presentation.model.AreaDescriptionListByAreaModel;
 import com.lakeel.altla.vision.builder.presentation.model.AreaSettingsModel;
+import com.lakeel.altla.vision.builder.presentation.model.OnItemEventAdapter;
 import com.lakeel.altla.vision.model.AreaDescription;
 
 import android.content.Context;
@@ -23,21 +23,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.disposables.Disposable;
 
 public final class AreaDescriptionByAreaListFragment extends Fragment {
-
-    private static final Log LOG = LogFactory.getLog(AreaDescriptionByAreaListFragment.class);
 
     @BindView(R.id.recycler_view)
     RecyclerView recyclerView;
@@ -45,15 +37,14 @@ public final class AreaDescriptionByAreaListFragment extends Fragment {
     @Inject
     AreaSettingsModel areaSettingsModel;
 
-    private final List<AreaDescription> items = new ArrayList<>();
+    @Inject
+    AreaDescriptionListByAreaModel areaDescriptionListByAreaModel;
 
     private final Adapter adapter = new Adapter();
 
-    private final CompositeDisposable compositeDisposable = new CompositeDisposable();
+    private final OnItemEventAdapter onItemEventAdapter = new OnItemEventAdapter(adapter);
 
     private FragmentContext fragmentContext;
-
-    private AreaDescription selectedItem;
 
     @NonNull
     public static AreaDescriptionByAreaListFragment newInstance() {
@@ -92,25 +83,17 @@ public final class AreaDescriptionByAreaListFragment extends Fragment {
         fragmentContext.setHomeAsUpIndicator(R.drawable.ic_arrow_back_white_24dp);
         setHasOptionsMenu(true);
 
-        items.clear();
-        adapter.notifyDataSetChanged();
+        final String areaId = areaSettingsModel.getAreaId();
+        if (areaId == null) throw new IllegalStateException("No area is selected.");
 
-        final Disposable disposable = areaSettingsModel
-                .loadAreaDescriptionsByArea()
-                .subscribe(areaDescriptions -> {
-                    items.addAll(areaDescriptions);
-                    adapter.notifyDataSetChanged();
-                }, e -> {
-                    LOG.e("Failed.", e);
-                    Toast.makeText(getContext(), R.string.toast_failed, Toast.LENGTH_SHORT).show();
-                });
-        compositeDisposable.add(disposable);
+        areaDescriptionListByAreaModel.getQueryAdapter().setOnItemEventListener(onItemEventAdapter);
+        areaDescriptionListByAreaModel.queryItems(areaSettingsModel.getAreaScope(), areaId);
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        compositeDisposable.clear();
+        areaDescriptionListByAreaModel.getQueryAdapter().setOnItemEventListener(null);
     }
 
     @Override
@@ -121,29 +104,21 @@ public final class AreaDescriptionByAreaListFragment extends Fragment {
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
-        menu.findItem(R.id.action_select).setEnabled(selectedItem != null);
+        menu.findItem(R.id.action_select).setEnabled(areaDescriptionListByAreaModel.canSelect());
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_select:
-                areaSettingsModel.selectAreaDescription(selectedItem);
+                final AreaDescription areaDescription = areaDescriptionListByAreaModel.getSelectedItem();
+                if (areaDescription == null) throw new IllegalStateException("No area description is selected.");
+                areaSettingsModel.selectAreaDescription(areaDescription);
                 fragmentContext.backView();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
-    }
-
-    private void onItemSelected(int position) {
-        if (0 <= position) {
-            selectedItem = items.get(position);
-        } else {
-            selectedItem = null;
-        }
-
-        fragmentContext.invalidateOptionsMenu();
     }
 
     public interface FragmentContext {
@@ -183,7 +158,8 @@ public final class AreaDescriptionByAreaListFragment extends Fragment {
                     selectedPosition = recyclerView.getChildAdapterPosition(selectedItemView);
                 }
 
-                onItemSelected(selectedPosition);
+                areaDescriptionListByAreaModel.setSelectedPosition(selectedPosition);
+                fragmentContext.invalidateOptionsMenu();
             });
 
             return new Adapter.ViewHolder(itemView);
@@ -191,14 +167,14 @@ public final class AreaDescriptionByAreaListFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(Adapter.ViewHolder holder, int position) {
-            final AreaDescription areaDescription = items.get(position);
+            final AreaDescription areaDescription = areaDescriptionListByAreaModel.getQueryAdapter().getItem(position);
             holder.textViewId.setText(areaDescription.getId());
             holder.textViewName.setText(areaDescription.getName());
         }
 
         @Override
         public int getItemCount() {
-            return items.size();
+            return areaDescriptionListByAreaModel.getQueryAdapter().getItemCount();
         }
 
         class ViewHolder extends RecyclerView.ViewHolder {
