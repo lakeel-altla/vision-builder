@@ -128,8 +128,6 @@ public final class ArActivity extends AndroidApplication
 
     private boolean tangoSupportInitialized;
 
-    private Actor selectedActor;
-
     private FirebaseQuery<Actor> queryUserActors;
 
     private boolean editMode;
@@ -192,6 +190,20 @@ public final class ArActivity extends AndroidApplication
         paneGroup.add(editModelMenuPane);
         paneGroup.add(imageAssetListPane);
         paneGroup.add(actorEditMenuPane);
+
+        viewModeMenuPane.setOnVisibleChangedListener(visible -> {
+            // Always deselect an actor before when the view mode is active.
+            arModel.setSelectedActor(null);
+
+            if (!visible) {
+                actorMetadataPane.hide();
+            }
+        });
+        actorEditMenuPane.setOnVisibleChangedListener(visible -> {
+            if (!visible) {
+                actorMetadataEditPane.hide();
+            }
+        });
 
         //
         // Set the initial state of views.
@@ -327,16 +339,19 @@ public final class ArActivity extends AndroidApplication
     @Override
     public void onActorSelected(@Nullable Actor actor) {
         runOnUiThread(() -> {
-            selectedActor = actor;
+            arModel.setSelectedActor(actor);
             if (editMode) {
-                if (selectedActor == null) {
+                if (actor == null) {
                     paneGroup.show(R.id.pane_edit_mode_menu);
                 } else {
                     paneGroup.show(R.id.pane_actor_edit_menu);
-                    actorEditMenuPane.setActor(selectedActor);
                 }
             } else {
-                actorMetadataPane.setActor(selectedActor);
+                if (actor == null) {
+                    actorMetadataPane.hide();
+                } else {
+                    actorMetadataPane.show();
+                }
             }
         });
     }
@@ -415,12 +430,11 @@ public final class ArActivity extends AndroidApplication
     @Override
     public void closeActorEditMenu() {
         paneGroup.show(R.id.pane_edit_mode_menu);
-        selectedActor = null;
     }
 
     @Override
     public void showActorMetadataEditPane() {
-        actorMetadataEditPane.setActor(selectedActor);
+        actorMetadataEditPane.show();
     }
 
     //

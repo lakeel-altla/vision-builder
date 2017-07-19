@@ -8,9 +8,9 @@
               android:layout_width="match_parent"
               android:layout_height="match_parent">
 
-    <FrameLayout android:layout_marginBottom="@dimen/content_vertical_margin"
-                 android:layout_width="match_parent"
-                 android:layout_height="wrap_content">
+    <RelativeLayout android:layout_marginBottom="@dimen/content_vertical_margin"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
 
         <ImageButton android:id="@+id/image_button_close"
                      android:src="@drawable/ic_close_black_24dp"
@@ -20,7 +20,14 @@
                      android:layout_width="@dimen/touch_target_width"
                      android:layout_height="@dimen/touch_target_height"/>
 
-    </FrameLayout>
+        <Button android:id="@+id/button_save"
+                android:text="@string/button_save"
+                android:background="@drawable/button_background_overlay"
+                android:layout_alignParentEnd="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+    </RelativeLayout>
 
     <ScrollView android:layout_width="match_parent"
                 android:layout_height="wrap_content">
