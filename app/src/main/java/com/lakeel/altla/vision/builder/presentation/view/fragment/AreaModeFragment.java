@@ -2,7 +2,7 @@ package com.lakeel.altla.vision.builder.presentation.view.fragment;
 
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
-import com.lakeel.altla.vision.builder.presentation.model.SelectAreaSettingsModel;
+import com.lakeel.altla.vision.builder.presentation.model.AreaSettingsModel;
 import com.lakeel.altla.vision.model.Scope;
 
 import android.content.Context;
@@ -28,7 +28,7 @@ import butterknife.ButterKnife;
 public final class AreaModeFragment extends Fragment {
 
     @Inject
-    SelectAreaSettingsModel selectAreaSettingsModel;
+    AreaSettingsModel areaSettingsModel;
 
     @BindView(R.id.radio_group_scope)
     RadioGroup radioGroupScope;
@@ -70,7 +70,7 @@ public final class AreaModeFragment extends Fragment {
         fragmentContext.setHomeAsUpIndicator(R.drawable.ic_arrow_back_white_24dp);
         setHasOptionsMenu(true);
 
-        final Scope scope = selectAreaSettingsModel.getAreaScope();
+        final Scope scope = areaSettingsModel.getAreaScope();
         final int checkedId = (scope == Scope.PUBLIC) ? R.id.radio_button_public : R.id.radio_button_user;
         radioGroupScope.check(checkedId);
     }
@@ -94,7 +94,7 @@ public final class AreaModeFragment extends Fragment {
     public void select() {
         final int checkedId = radioGroupScope.getCheckedRadioButtonId();
         final Scope scope = (checkedId == R.id.radio_button_public) ? Scope.PUBLIC : Scope.USER;
-        selectAreaSettingsModel.selectAreaScope(scope);
+        areaSettingsModel.selectAreaScope(scope);
         fragmentContext.backView();
     }
 

@@ -9,7 +9,7 @@ import com.lakeel.altla.android.log.Log;
 import com.lakeel.altla.android.log.LogFactory;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
-import com.lakeel.altla.vision.builder.presentation.model.SelectAreaSettingsModel;
+import com.lakeel.altla.vision.builder.presentation.model.AreaSettingsModel;
 
 import android.app.Activity;
 import android.content.Context;
@@ -39,7 +39,7 @@ public final class AreaFindFragment extends Fragment {
     private static final int REQUEST_CODE_PLACE_PICKER = 1;
 
     @Inject
-    SelectAreaSettingsModel selectAreaSettingsModel;
+    AreaSettingsModel areaSettingsModel;
 
     @BindView(R.id.button_show_place_picker)
     Button buttonShowPlacePicker;
@@ -88,7 +88,7 @@ public final class AreaFindFragment extends Fragment {
         super.onResume();
 
         if (pickedPlace != null) {
-            selectAreaSettingsModel.selectPlace(pickedPlace);
+            areaSettingsModel.selectPlace(pickedPlace);
             fragmentContext.showAreaByPlaceListView();
             pickedPlace = null;
         }

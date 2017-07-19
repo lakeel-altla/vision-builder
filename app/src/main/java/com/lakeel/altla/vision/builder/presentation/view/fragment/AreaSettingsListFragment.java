@@ -4,7 +4,8 @@ import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.helper.StringResourceHelper;
 import com.lakeel.altla.vision.builder.presentation.model.AreaSettingsListModel;
-import com.lakeel.altla.vision.builder.presentation.model.SelectAreaSettingsModel;
+import com.lakeel.altla.vision.builder.presentation.model.AreaSettingsModel;
+import com.lakeel.altla.vision.builder.presentation.model.OnItemEventAdapter;
 import com.lakeel.altla.vision.model.AreaSettings;
 
 import android.content.Context;
@@ -32,7 +33,7 @@ import butterknife.ButterKnife;
 public final class AreaSettingsListFragment extends Fragment {
 
     @Inject
-    SelectAreaSettingsModel selectAreaSettingsModel;
+    AreaSettingsModel areaSettingsModel;
 
     @Inject
     AreaSettingsListModel areaSettingsListModel;
@@ -41,6 +42,8 @@ public final class AreaSettingsListFragment extends Fragment {
     RecyclerView recyclerView;
 
     private final Adapter adapter = new Adapter();
+
+    private final OnItemEventAdapter onItemEventAdapter = new OnItemEventAdapter(adapter);
 
     private FragmentContext fragmentContext;
 
@@ -81,39 +84,14 @@ public final class AreaSettingsListFragment extends Fragment {
         fragmentContext.setHomeAsUpIndicator(R.drawable.ic_arrow_back_white_24dp);
         setHasOptionsMenu(true);
 
-        areaSettingsListModel.setOnItemEventListener(new AreaSettingsListModel.OnItemEventListener() {
-            @Override
-            public void onDataSetChanged() {
-                adapter.notifyDataSetChanged();
-            }
-
-            @Override
-            public void onItemInserted(int position) {
-                adapter.notifyItemInserted(position);
-            }
-
-            @Override
-            public void onItemChanged(int position) {
-                adapter.notifyItemChanged(position);
-            }
-
-            @Override
-            public void onItemRemoved(int position) {
-                adapter.notifyItemRemoved(position);
-            }
-
-            @Override
-            public void onItemMoved(int fromPosition, int toPosition) {
-                adapter.notifyItemMoved(fromPosition, toPosition);
-            }
-        });
-        areaSettingsListModel.loadAllItems();
+        areaSettingsListModel.getQueryAdapter().setOnItemEventListener(onItemEventAdapter);
+        areaSettingsListModel.queryItems();
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        areaSettingsListModel.setOnItemEventListener(null);
+        areaSettingsListModel.getQueryAdapter().setOnItemEventListener(null);
     }
 
     @Override
@@ -135,7 +113,7 @@ public final class AreaSettingsListFragment extends Fragment {
                 if (areaSettings == null) {
                     throw new IllegalStateException("No item is selected.");
                 } else {
-                    selectAreaSettingsModel.selectAreaSettings(areaSettings);
+                    areaSettingsModel.selectAreaSettings(areaSettings);
                     fragmentContext.backView();
                 }
                 return true;
@@ -190,7 +168,7 @@ public final class AreaSettingsListFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
-            final AreaSettings item = areaSettingsListModel.getItem(position);
+            final AreaSettings item = areaSettingsListModel.getQueryAdapter().getItem(position);
 
             holder.textViewUpdatedAt.setText(String.valueOf(item.getUpdatedAtAsLong()));
             holder.textViewAreaMode.setText(StringResourceHelper.resolveScopeStringResource(item.getAreaScopeAsEnum()));
@@ -200,7 +178,7 @@ public final class AreaSettingsListFragment extends Fragment {
 
         @Override
         public int getItemCount() {
-            return areaSettingsListModel.getItemCount();
+            return areaSettingsListModel.getQueryAdapter().getItemCount();
         }
 
         class ViewHolder extends RecyclerView.ViewHolder {

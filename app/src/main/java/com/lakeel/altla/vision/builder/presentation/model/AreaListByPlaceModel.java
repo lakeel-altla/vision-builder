@@ -2,36 +2,46 @@ package com.lakeel.altla.vision.builder.presentation.model;
 
 import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.helper.FirebaseQuery;
-import com.lakeel.altla.vision.model.AreaSettings;
+import com.lakeel.altla.vision.model.Area;
+import com.lakeel.altla.vision.model.Scope;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-public final class AreaSettingsListModel {
+public final class AreaListByPlaceModel {
 
     private final VisionService visionService;
 
-    private final FirebaseQueryAdapter<AreaSettings> queryAdapter = new FirebaseQueryAdapter<>();
+    private final FirebaseQueryAdapter<Area> queryAdapter = new FirebaseQueryAdapter<>();
 
-    @Nullable
-    private FirebaseQuery<AreaSettings> query;
+    private FirebaseQuery<Area> query;
 
     private int selectedPosition;
 
-    public AreaSettingsListModel(@NonNull VisionService visionService) {
+    public AreaListByPlaceModel(@NonNull VisionService visionService) {
         this.visionService = visionService;
     }
 
     @NonNull
-    public FirebaseQueryAdapter<AreaSettings> getQueryAdapter() {
+    public FirebaseQueryAdapter<Area> getQueryAdapter() {
         return queryAdapter;
     }
 
-    public void queryItems() {
+    public void queryItems(@NonNull Scope scope, @NonNull String placeId) {
         selectedPosition = -1;
         queryAdapter.clear();
 
-        query = visionService.getUserAreaSettingsApi().findAll();
+        switch (scope) {
+            case PUBLIC:
+                // TODO
+                break;
+            case USER:
+                query = visionService.getUserAreaApi().findByPlaceId(placeId);
+                break;
+            default:
+                throw new IllegalArgumentException("An unexpected scope: " + scope);
+        }
+
         query.addListener(queryAdapter);
     }
 
@@ -44,7 +54,7 @@ public final class AreaSettingsListModel {
     }
 
     @Nullable
-    public AreaSettings getSelectedItem() {
+    public Area getSelectedItem() {
         return (selectedPosition < 0) ? null : queryAdapter.getItem(selectedPosition);
     }
 

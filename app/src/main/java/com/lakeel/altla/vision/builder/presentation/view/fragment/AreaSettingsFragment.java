@@ -3,7 +3,7 @@ package com.lakeel.altla.vision.builder.presentation.view.fragment;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.helper.StringResourceHelper;
-import com.lakeel.altla.vision.builder.presentation.model.SelectAreaSettingsModel;
+import com.lakeel.altla.vision.builder.presentation.model.AreaSettingsModel;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -31,7 +31,7 @@ import butterknife.OnClick;
 public final class AreaSettingsFragment extends Fragment {
 
     @Inject
-    SelectAreaSettingsModel selectAreaSettingsModel;
+    AreaSettingsModel areaSettingsModel;
 
     @BindView(R.id.text_view_area_mode)
     TextView textViewAreaMode;
@@ -86,18 +86,18 @@ public final class AreaSettingsFragment extends Fragment {
         setHasOptionsMenu(true);
 
         textViewAreaMode.setText(StringResourceHelper.resolveScopeStringResource(
-                selectAreaSettingsModel.getAreaScope()));
-        textViewAreaName.setText(selectAreaSettingsModel.getAreaName());
-        textViewAreaDescriptionName.setText(selectAreaSettingsModel.getAreaDescriptionName());
+                areaSettingsModel.getAreaScope()));
+        textViewAreaName.setText(areaSettingsModel.getAreaName());
+        textViewAreaDescriptionName.setText(areaSettingsModel.getAreaDescriptionName());
 
-        boolean canShowAreaDescriptionList = (selectAreaSettingsModel.getAreaId() != null);
+        boolean canShowAreaDescriptionList = (areaSettingsModel.getAreaId() != null);
         int id = canShowAreaDescriptionList ?
                 R.color.background_image_button :
                 R.color.background_image_button_disabled;
         imageButtonShowAreaDescriptionList.setColorFilter(getResources().getColor(id));
         imageButtonShowAreaDescriptionList.setEnabled(canShowAreaDescriptionList);
 
-        buttonStart.setEnabled(selectAreaSettingsModel.canStart());
+        buttonStart.setEnabled(areaSettingsModel.canStart());
     }
 
     @Override
@@ -133,8 +133,8 @@ public final class AreaSettingsFragment extends Fragment {
 
     @OnClick(R.id.button_start)
     void onClickStart() {
-        if (selectAreaSettingsModel.canStart()) {
-            selectAreaSettingsModel.start();
+        if (areaSettingsModel.canStart()) {
+            areaSettingsModel.start();
             fragmentContext.backView();
         }
     }

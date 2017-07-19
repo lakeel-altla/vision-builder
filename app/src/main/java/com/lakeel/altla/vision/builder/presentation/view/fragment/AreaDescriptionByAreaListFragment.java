@@ -4,7 +4,7 @@ import com.lakeel.altla.android.log.Log;
 import com.lakeel.altla.android.log.LogFactory;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
-import com.lakeel.altla.vision.builder.presentation.model.SelectAreaSettingsModel;
+import com.lakeel.altla.vision.builder.presentation.model.AreaSettingsModel;
 import com.lakeel.altla.vision.model.AreaDescription;
 
 import android.content.Context;
@@ -43,7 +43,7 @@ public final class AreaDescriptionByAreaListFragment extends Fragment {
     RecyclerView recyclerView;
 
     @Inject
-    SelectAreaSettingsModel selectAreaSettingsModel;
+    AreaSettingsModel areaSettingsModel;
 
     private final List<AreaDescription> items = new ArrayList<>();
 
@@ -95,7 +95,7 @@ public final class AreaDescriptionByAreaListFragment extends Fragment {
         items.clear();
         adapter.notifyDataSetChanged();
 
-        final Disposable disposable = selectAreaSettingsModel
+        final Disposable disposable = areaSettingsModel
                 .loadAreaDescriptionsByArea()
                 .subscribe(areaDescriptions -> {
                     items.addAll(areaDescriptions);
@@ -128,7 +128,7 @@ public final class AreaDescriptionByAreaListFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_select:
-                selectAreaSettingsModel.selectAreaDescription(selectedItem);
+                areaSettingsModel.selectAreaDescription(selectedItem);
                 fragmentContext.backView();
                 return true;
             default:

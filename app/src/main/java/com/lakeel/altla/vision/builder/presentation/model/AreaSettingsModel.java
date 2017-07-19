@@ -2,12 +2,9 @@ package com.lakeel.altla.vision.builder.presentation.model;
 
 import com.google.android.gms.location.places.Place;
 
-import com.lakeel.altla.android.log.Log;
-import com.lakeel.altla.android.log.LogFactory;
 import com.lakeel.altla.vision.api.CurrentUser;
 import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.helper.AreaDescriptionNameComparater;
-import com.lakeel.altla.vision.helper.AreaNameComparater;
 import com.lakeel.altla.vision.model.Area;
 import com.lakeel.altla.vision.model.AreaDescription;
 import com.lakeel.altla.vision.model.AreaSettings;
@@ -22,9 +19,7 @@ import java.util.Objects;
 
 import io.reactivex.Single;
 
-public final class SelectAreaSettingsModel {
-
-    private static final Log LOG = LogFactory.getLog(SelectAreaSettingsModel.class);
+public final class AreaSettingsModel {
 
     private final VisionService visionService;
 
@@ -51,7 +46,7 @@ public final class SelectAreaSettingsModel {
     @Nullable
     private AreaSettings areaSettings;
 
-    public SelectAreaSettingsModel(@NonNull VisionService visionService, @NonNull ArModel arModel) {
+    public AreaSettingsModel(@NonNull VisionService visionService, @NonNull ArModel arModel) {
         this.visionService = visionService;
         this.arModel = arModel;
         if (arModel.getAreaSettings() != null) selectAreaSettings(arModel.getAreaSettings());
@@ -60,6 +55,11 @@ public final class SelectAreaSettingsModel {
     @NonNull
     public Scope getAreaScope() {
         return areaScope;
+    }
+
+    @Nullable
+    public Place getPlace() {
+        return place;
     }
 
     @Nullable
@@ -85,34 +85,6 @@ public final class SelectAreaSettingsModel {
     @Nullable
     public AreaSettings getAreaSettings() {
         return areaSettings;
-    }
-
-    @NonNull
-    public Single<List<Area>> loadAreasByPlace() {
-        if (place == null) throw new IllegalStateException("'place' is null.");
-
-        final String placeId = place.getId();
-
-        return Single.create(e -> {
-            switch (areaScope) {
-                case PUBLIC: {
-                    visionService.getPublicAreaApi()
-                                 .findAreasByPlaceId(placeId, areas -> {
-                                     Collections.sort(areas, AreaNameComparater.INSTANCE);
-                                     e.onSuccess(areas);
-                                 }, e::onError);
-                    break;
-                }
-                case USER: {
-                    visionService.getUserAreaApi()
-                                 .findAreasByPlaceId(placeId, areas -> {
-                                     Collections.sort(areas, AreaNameComparater.INSTANCE);
-                                     e.onSuccess(areas);
-                                 }, e::onError);
-                    break;
-                }
-            }
-        });
     }
 
     @NonNull

@@ -1,10 +1,12 @@
 package com.lakeel.altla.vision.builder.presentation.view.fragment;
 
-import com.lakeel.altla.android.log.Log;
-import com.lakeel.altla.android.log.LogFactory;
+import com.google.android.gms.location.places.Place;
+
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
-import com.lakeel.altla.vision.builder.presentation.model.SelectAreaSettingsModel;
+import com.lakeel.altla.vision.builder.presentation.model.AreaListByPlaceModel;
+import com.lakeel.altla.vision.builder.presentation.model.OnItemEventAdapter;
+import com.lakeel.altla.vision.builder.presentation.model.AreaSettingsModel;
 import com.lakeel.altla.vision.model.Area;
 
 import android.content.Context;
@@ -23,37 +25,28 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.disposables.Disposable;
 
 public final class AreaByPlaceListFragment extends Fragment {
 
-    private static final Log LOG = LogFactory.getLog(AreaByPlaceListFragment.class);
+    @Inject
+    AreaSettingsModel areaSettingsModel;
 
     @Inject
-    SelectAreaSettingsModel selectAreaSettingsModel;
+    AreaListByPlaceModel areaListByPlaceModel;
 
     @BindView(R.id.recycler_view)
     RecyclerView recyclerView;
 
-    private final List<Area> items = new ArrayList<>();
-
     private final Adapter adapter = new Adapter();
 
-    private final CompositeDisposable compositeDisposable = new CompositeDisposable();
+    private final OnItemEventAdapter onItemEventAdapter = new OnItemEventAdapter(adapter);
 
     private FragmentContext fragmentContext;
-
-    private Area selectedItem;
 
     @NonNull
     public static AreaByPlaceListFragment newInstance() {
@@ -92,25 +85,17 @@ public final class AreaByPlaceListFragment extends Fragment {
         fragmentContext.setHomeAsUpIndicator(R.drawable.ic_arrow_back_white_24dp);
         setHasOptionsMenu(true);
 
-        items.clear();
-        adapter.notifyDataSetChanged();
+        final Place place = areaSettingsModel.getPlace();
+        if (place == null) throw new IllegalStateException("No place is selected.");
 
-        final Disposable disposable = selectAreaSettingsModel
-                .loadAreasByPlace()
-                .subscribe(areas -> {
-                    items.addAll(areas);
-                    adapter.notifyDataSetChanged();
-                }, e -> {
-                    LOG.e("Failed.", e);
-                    Toast.makeText(getContext(), R.string.toast_failed, Toast.LENGTH_SHORT).show();
-                });
-        compositeDisposable.add(disposable);
+        areaListByPlaceModel.getQueryAdapter().setOnItemEventListener(onItemEventAdapter);
+        areaListByPlaceModel.queryItems(areaSettingsModel.getAreaScope(), place.getId());
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        compositeDisposable.clear();
+        areaListByPlaceModel.getQueryAdapter().setOnItemEventListener(null);
     }
 
     @Override
@@ -121,29 +106,21 @@ public final class AreaByPlaceListFragment extends Fragment {
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
-        menu.findItem(R.id.action_select).setEnabled(selectedItem != null);
+        menu.findItem(R.id.action_select).setEnabled(areaListByPlaceModel.canSelect());
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_select:
-                selectAreaSettingsModel.selectArea(selectedItem);
+                final Area area = areaListByPlaceModel.getSelectedItem();
+                if (area == null) throw new IllegalStateException("No area is selected.");
+                areaSettingsModel.selectArea(area);
                 fragmentContext.closeAreaByPlaceListView();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
-    }
-
-    private void onItemSelected(int position) {
-        if (0 <= position) {
-            selectedItem = items.get(position);
-        } else {
-            selectedItem = null;
-        }
-
-        fragmentContext.invalidateOptionsMenu();
     }
 
     public interface FragmentContext {
@@ -183,7 +160,8 @@ public final class AreaByPlaceListFragment extends Fragment {
                     selectedPosition = recyclerView.getChildAdapterPosition(selectedItemView);
                 }
 
-                onItemSelected(selectedPosition);
+                areaListByPlaceModel.setSelectedPosition(selectedPosition);
+                fragmentContext.invalidateOptionsMenu();
             });
 
             return new Adapter.ViewHolder(itemView);
@@ -191,7 +169,7 @@ public final class AreaByPlaceListFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(Adapter.ViewHolder holder, int position) {
-            final Area area = items.get(position);
+            final Area area = areaListByPlaceModel.getQueryAdapter().getItem(position);
             holder.textViewId.setText(area.getId());
             holder.textViewName.setText(area.getName());
             holder.textViewLevel.setText(String.valueOf(area.getLevel()));
@@ -199,7 +177,7 @@ public final class AreaByPlaceListFragment extends Fragment {
 
         @Override
         public int getItemCount() {
-            return items.size();
+            return areaListByPlaceModel.getQueryAdapter().getItemCount();
         }
 
         class ViewHolder extends RecyclerView.ViewHolder {
