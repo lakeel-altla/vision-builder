@@ -1,7 +1,7 @@
 package com.lakeel.altla.vision.builder.presentation.model;
 
 import com.lakeel.altla.vision.api.VisionService;
-import com.lakeel.altla.vision.helper.FirebaseQuery;
+import com.lakeel.altla.vision.helper.TypedQuery;
 import com.lakeel.altla.vision.model.AreaSettings;
 
 import android.support.annotation.NonNull;
@@ -14,7 +14,7 @@ public final class AreaSettingsListModel {
     private final FirebaseQueryAdapter<AreaSettings> queryAdapter = new FirebaseQueryAdapter<>();
 
     @Nullable
-    private FirebaseQuery<AreaSettings> query;
+    private TypedQuery<AreaSettings> query;
 
     private int selectedPosition;
 
@@ -31,8 +31,8 @@ public final class AreaSettingsListModel {
         selectedPosition = -1;
         queryAdapter.clear();
 
-        query = visionService.getUserAreaSettingsApi().findAll();
-        query.addListener(queryAdapter);
+        query = visionService.getUserAreaSettingsApi().findAllAreaSettings();
+        query.addTypedChildEventListener(queryAdapter);
     }
 
     public int getSelectedPosition() {

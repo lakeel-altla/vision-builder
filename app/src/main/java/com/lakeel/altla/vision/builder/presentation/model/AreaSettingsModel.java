@@ -138,7 +138,7 @@ public final class AreaSettingsModel {
         }
 
         visionService.getUserAreaSettingsApi()
-                     .save(areaSettings);
+                     .saveAreaSettings(areaSettings);
 
         arModel.selectAreaSettings(areaSettings);
     }

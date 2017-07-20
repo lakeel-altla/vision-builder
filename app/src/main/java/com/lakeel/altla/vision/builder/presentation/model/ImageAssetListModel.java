@@ -1,33 +1,38 @@
 package com.lakeel.altla.vision.builder.presentation.model;
 
 import com.lakeel.altla.vision.api.VisionService;
+import com.lakeel.altla.vision.helper.OnFailureListener;
+import com.lakeel.altla.vision.helper.OnProgressListener;
+import com.lakeel.altla.vision.helper.OnSuccessListener;
 import com.lakeel.altla.vision.helper.TypedQuery;
-import com.lakeel.altla.vision.model.Area;
+import com.lakeel.altla.vision.model.ImageAsset;
 import com.lakeel.altla.vision.model.Scope;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-public final class AreaListByPlaceModel {
+import java.io.File;
+
+public final class ImageAssetListModel {
 
     private final VisionService visionService;
 
-    private final FirebaseQueryAdapter<Area> queryAdapter = new FirebaseQueryAdapter<>();
+    private final FirebaseQueryAdapter<ImageAsset> queryAdapter = new FirebaseQueryAdapter<>();
 
-    private TypedQuery<Area> query;
+    private TypedQuery<ImageAsset> query;
 
     private int selectedPosition;
 
-    public AreaListByPlaceModel(@NonNull VisionService visionService) {
+    public ImageAssetListModel(@NonNull VisionService visionService) {
         this.visionService = visionService;
     }
 
     @NonNull
-    public FirebaseQueryAdapter<Area> getQueryAdapter() {
+    public FirebaseQueryAdapter<ImageAsset> getQueryAdapter() {
         return queryAdapter;
     }
 
-    public void queryItems(@NonNull Scope scope, @NonNull String placeId) {
+    public void queryItems(@NonNull Scope scope) {
         selectedPosition = -1;
         queryAdapter.clear();
 
@@ -36,7 +41,7 @@ public final class AreaListByPlaceModel {
                 // TODO
                 break;
             case USER:
-                query = visionService.getUserAreaApi().findAreaByPlaceId(placeId);
+                query = visionService.getUserImageAssetApi().findAllImageAssets();
                 break;
             default:
                 throw new IllegalArgumentException("An unexpected scope: " + scope);
@@ -54,11 +59,19 @@ public final class AreaListByPlaceModel {
     }
 
     @Nullable
-    public Area getSelectedItem() {
+    public ImageAsset getSelectedItem() {
         return (selectedPosition < 0) ? null : queryAdapter.getItem(selectedPosition);
     }
 
     public boolean canSelect() {
         return 0 <= selectedPosition;
+    }
+
+    public void getCachedFile(@NonNull String assetId,
+                              @Nullable OnSuccessListener<File> onSuccessListener,
+                              @Nullable OnFailureListener onFailureListener,
+                              @Nullable OnProgressListener onProgressListener) {
+        visionService.getUserImageAssetApi()
+                     .getCachedImageAssetFile(assetId, onSuccessListener, onFailureListener, onProgressListener);
     }
 }

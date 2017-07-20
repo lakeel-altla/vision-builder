@@ -3,7 +3,7 @@ package com.lakeel.altla.vision.builder.presentation.model;
 import com.lakeel.altla.android.log.Log;
 import com.lakeel.altla.android.log.LogFactory;
 import com.lakeel.altla.vision.api.VisionService;
-import com.lakeel.altla.vision.helper.FirebaseQuery;
+import com.lakeel.altla.vision.helper.TypedQuery;
 import com.lakeel.altla.vision.model.Actor;
 import com.lakeel.altla.vision.model.AreaSettings;
 
@@ -56,7 +56,7 @@ public final class ArModel {
     }
 
     @NonNull
-    public synchronized FirebaseQuery<Actor> loadUserActors() {
+    public synchronized TypedQuery<Actor> loadUserActors() {
         if (areaSettings == null) throw new IllegalStateException("'areaSettings' is null.");
 
         final String areaId = areaSettings.getAreaId();
@@ -64,7 +64,7 @@ public final class ArModel {
         if (areaId == null) throw new IllegalStateException("Unknown area id.");
 
         return visionService.getUserActorApi()
-                            .findByAreaId(areaId);
+                            .findActorByAreaId(areaId);
     }
 
     public void saveSelectedActor() {
@@ -75,7 +75,7 @@ public final class ArModel {
                 // TODO
                 break;
             case USER:
-                visionService.getUserActorApi().save(selectedActor);
+                visionService.getUserActorApi().saveActor(selectedActor);
                 break;
             default:
                 throw new IllegalArgumentException("An unexpected scope of an actor.");
@@ -90,7 +90,7 @@ public final class ArModel {
                 // TODO
                 break;
             case USER:
-                visionService.getUserActorApi().delete(selectedActor.getId());
+                visionService.getUserActorApi().deleteActor(selectedActor.getId());
                 selectedActor = null;
                 break;
             default:

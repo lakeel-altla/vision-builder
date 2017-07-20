@@ -7,6 +7,7 @@ import com.lakeel.altla.vision.builder.presentation.model.AreaDescriptionListByA
 import com.lakeel.altla.vision.builder.presentation.model.AreaListByPlaceModel;
 import com.lakeel.altla.vision.builder.presentation.model.AreaSettingsListModel;
 import com.lakeel.altla.vision.builder.presentation.model.AreaSettingsModel;
+import com.lakeel.altla.vision.builder.presentation.model.ImageAssetListModel;
 
 import android.app.Activity;
 import android.content.ContentResolver;
@@ -68,5 +69,11 @@ public final class ActivityModule {
     @Provides
     AreaDescriptionListByAreaModel provideAreaDescriptionListByAreaModel(VisionService visionService) {
         return new AreaDescriptionListByAreaModel(visionService);
+    }
+
+    @ActivityScope
+    @Provides
+    ImageAssetListModel provideImageAssetListModel(VisionService visionService) {
+        return new ImageAssetListModel(visionService);
     }
 }

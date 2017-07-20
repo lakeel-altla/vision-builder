@@ -32,9 +32,7 @@ import com.lakeel.altla.vision.builder.presentation.view.pane.ImageAssetListPane
 import com.lakeel.altla.vision.builder.presentation.view.pane.PaneGroup;
 import com.lakeel.altla.vision.builder.presentation.view.pane.PaneLifecycle;
 import com.lakeel.altla.vision.builder.presentation.view.pane.ViewModeMenuPane;
-import com.lakeel.altla.vision.helper.FirebaseQuery;
-import com.lakeel.altla.vision.helper.OnFailureListener;
-import com.lakeel.altla.vision.helper.OnSuccessListener;
+import com.lakeel.altla.vision.helper.TypedQuery;
 import com.lakeel.altla.vision.model.Actor;
 import com.lakeel.altla.vision.model.AreaSettings;
 import com.lakeel.altla.vision.model.Asset;
@@ -55,8 +53,6 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toast;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -64,9 +60,6 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import io.reactivex.Single;
-import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.disposables.Disposable;
 
 public final class ArActivity extends AndroidApplication
         implements ActivityScopeContext,
@@ -102,8 +95,6 @@ public final class ArActivity extends AndroidApplication
     @BindView(R.id.view_top)
     ViewGroup viewTop;
 
-    private final CompositeDisposable compositeDisposable = new CompositeDisposable();
-
     private final PaneLifecycle paneLifecycle = new PaneLifecycle();
 
     private final PaneGroup paneGroup = new PaneGroup();
@@ -128,7 +119,7 @@ public final class ArActivity extends AndroidApplication
 
     private boolean tangoSupportInitialized;
 
-    private FirebaseQuery<Actor> queryUserActors;
+    private TypedQuery<Actor> queryUserActors;
 
     private boolean editMode;
 
@@ -223,7 +214,6 @@ public final class ArActivity extends AndroidApplication
     protected void onStop() {
         super.onStop();
         paneLifecycle.onStop();
-        compositeDisposable.clear();
     }
 
     @Override
@@ -281,15 +271,23 @@ public final class ArActivity extends AndroidApplication
 
                         // TODO: for public scope
                         queryUserActors = arModel.loadUserActors();
-                        queryUserActors.addListener(new FirebaseQuery.BaseChildListener<Actor>() {
+                        queryUserActors.addTypedChildEventListener(new TypedQuery.TypedChildEventListener<Actor>() {
                             @Override
                             public void onChildAdded(@NonNull Actor actor, @Nullable String previousChildName) {
                                 addActor(actor);
                             }
 
                             @Override
+                            public void onChildChanged(@NonNull Actor actor, String previousChildName) {
+                            }
+
+                            @Override
                             public void onChildRemoved(@NonNull Actor actor) {
                                 Gdx.app.postRunnable(() -> arGraphics.removeActor(actor));
+                            }
+
+                            @Override
+                            public void onChildMoved(@NonNull Actor actor, String previousChildName) {
                             }
 
                             @Override
@@ -381,7 +379,7 @@ public final class ArActivity extends AndroidApplication
 
             // Save the actor.
             visionService.getUserActorApi()
-                         .save(actor);
+                         .saveActor(actor);
 
             // Add the actor into the scene.
             addActor(actor);
@@ -414,16 +412,13 @@ public final class ArActivity extends AndroidApplication
                 arGraphics.removeCursor();
             });
         } else {
-            final Disposable disposable = Single.<File>create(e -> {
-                ensureUserImageAssetCacheFile(asset.getId(), e::onSuccess, e::onError);
-            }).subscribe(file -> {
+            visionService.getUserImageAssetApi().getCachedImageAssetFile(asset.getId(), file -> {
                 Gdx.app.postRunnable(() -> {
                     arGraphics.setImageAssetCursor(asset, file);
                 });
             }, e -> {
                 LOG.e("Failed.", e);
-            });
-            compositeDisposable.add(disposable);
+            }, null);
         }
     }
 
@@ -470,30 +465,12 @@ public final class ArActivity extends AndroidApplication
     private void addImageActor(@NonNull Actor actor) {
         if (actor.getAssetId() == null) throw new IllegalArgumentException("actor.getAssetId() must be not null.");
 
-        final Disposable disposable = Single.<File>create(e -> {
-            ensureUserImageAssetCacheFile(actor.getAssetId(), e::onSuccess, e::onError);
-        }).subscribe(file -> {
+        visionService.getUserImageAssetApi().getCachedImageAssetFile(actor.getAssetId(), file -> {
             Gdx.app.postRunnable(() -> {
                 arGraphics.addImageActor(actor, file);
             });
         }, e -> {
             LOG.e("Failed.", e);
-        });
-        compositeDisposable.add(disposable);
-    }
-
-    private void ensureUserImageAssetCacheFile(@NonNull String assetId,
-                                               @NonNull OnSuccessListener<File> onSuccessListener,
-                                               @NonNull OnFailureListener onFailureListener)
-            throws IOException {
-        final File file = visionService.getUserAssetApi().findUserImageAssetCacheFile(assetId);
-        if (file == null) {
-            // Download anc cache the file if it is not cached.
-            visionService.getUserAssetApi()
-                         .downloadUserImageAssetFile(assetId, onSuccessListener, onFailureListener, null);
-        } else {
-            // Stream the cache file if it exists.
-            onSuccessListener.onSuccess(file);
-        }
+        }, null);
     }
 }

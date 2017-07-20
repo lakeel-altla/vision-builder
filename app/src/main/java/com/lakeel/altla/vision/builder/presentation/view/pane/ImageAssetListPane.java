@@ -2,11 +2,13 @@ package com.lakeel.altla.vision.builder.presentation.view.pane;
 
 import com.lakeel.altla.android.log.Log;
 import com.lakeel.altla.android.log.LogFactory;
-import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.helper.ThumbnailLoader;
+import com.lakeel.altla.vision.builder.presentation.model.ImageAssetListModel;
+import com.lakeel.altla.vision.builder.presentation.model.OnItemEventAdapter;
 import com.lakeel.altla.vision.model.ImageAsset;
+import com.lakeel.altla.vision.model.Scope;
 
 import android.app.Activity;
 import android.support.annotation.NonNull;
@@ -19,38 +21,27 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import io.reactivex.Single;
-import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.disposables.Disposable;
 
 public final class ImageAssetListPane extends Pane {
 
     private static final Log LOG = LogFactory.getLog(ImageAssetListPane.class);
 
     @Inject
-    VisionService visionService;
+    ImageAssetListModel imageAssetListModel;
 
     @BindView(R.id.recycler_view)
     RecyclerView recyclerView;
 
     private final PageContext pageContext;
 
-    private final List<ImageAsset> items = new ArrayList<>();
-
     private final Adapter adapter = new Adapter();
 
-    private final CompositeDisposable compositeDisposable = new CompositeDisposable();
-
-    private ImageAsset selectedItem;
+    private final OnItemEventAdapter onItemEventAdapter = new OnItemEventAdapter(adapter);
 
     public ImageAssetListPane(@NonNull Activity activity) {
         super(activity, R.id.pane_image_asset_list);
@@ -64,49 +55,17 @@ public final class ImageAssetListPane extends Pane {
     }
 
     @Override
-    public void onStop() {
-        super.onStop();
-        compositeDisposable.clear();
-    }
-
-    @Override
     protected void onShow() {
         super.onShow();
 
-        items.clear();
-        adapter.notifyDataSetChanged();
-
-        final Disposable disposable = Single.<List<ImageAsset>>create(e -> {
-            visionService.getUserAssetApi()
-                         .findAllUserImageAssets(e::onSuccess, e::onError);
-        }).subscribe(imageAssets -> {
-            items.addAll(imageAssets);
-            adapter.notifyDataSetChanged();
-        }, e -> {
-            LOG.e("Failed.", e);
-        });
-        compositeDisposable.add(disposable);
-    }
-
-    @Override
-    protected void onHide() {
-        super.onHide();
-        compositeDisposable.clear();
+        imageAssetListModel.getQueryAdapter().setOnItemEventListener(onItemEventAdapter);
+        // TODO: The public scope.
+        imageAssetListModel.queryItems(Scope.USER);
     }
 
     @OnClick(R.id.image_button_close)
     void onClickClose() {
         pageContext.showEditModeMenuPane();
-    }
-
-    private void onItemSelected(int position) {
-        if (0 <= position) {
-            selectedItem = items.get(position);
-        } else {
-            selectedItem = null;
-        }
-
-        pageContext.onImageAssetSelected(selectedItem);
     }
 
     public interface PageContext {
@@ -144,7 +103,8 @@ public final class ImageAssetListPane extends Pane {
                     selectedPosition = recyclerView.getChildAdapterPosition(selectedItemView);
                 }
 
-                onItemSelected(selectedPosition);
+                imageAssetListModel.setSelectedPosition(selectedPosition);
+                pageContext.onImageAssetSelected(imageAssetListModel.getSelectedItem());
             });
 
             return new Adapter.ViewHolder(itemView);
@@ -152,31 +112,20 @@ public final class ImageAssetListPane extends Pane {
 
         @Override
         public void onBindViewHolder(Adapter.ViewHolder holder, int position) {
-            final ImageAsset imageAsset = items.get(position);
+            final ImageAsset imageAsset = imageAssetListModel.getQueryAdapter().getItem(position);
             holder.textViewName.setText(imageAsset.getName());
 
-            final File file = visionService.getUserAssetApi().findUserImageAssetCacheFile(imageAsset.getId());
-            if (file == null) {
-                // First, download and cache the file if it is not cached.
-                final Disposable disposable = Single.<File>create(e -> {
-                    visionService.getUserAssetApi()
-                                 .downloadUserImageAssetFile(imageAsset.getId(), e::onSuccess, e::onError, null);
-                }).subscribe(f -> {
-                    thumbnailLoader.load(f, holder.imageViewThumbnail);
-                }, e -> {
-                    LOG.e("Failed.", e);
-                    // TODO: show an error icon as an alternative.
-                });
-                compositeDisposable.add(disposable);
-            } else {
-                // Load from the cached file.
+            imageAssetListModel.getCachedFile(imageAsset.getId(), file -> {
                 thumbnailLoader.load(file, holder.imageViewThumbnail);
-            }
+            }, e -> {
+                LOG.e("Failed.", e);
+                // TODO: show an error icon as an alternative.
+            }, null);
         }
 
         @Override
         public int getItemCount() {
-            return items.size();
+            return imageAssetListModel.getQueryAdapter().getItemCount();
         }
 
         final class ViewHolder extends RecyclerView.ViewHolder {

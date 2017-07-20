@@ -25,7 +25,7 @@ public final class UserDeviceRepository extends BaseDatabaseRepository {
                      .child(device.getId())
                      .setValue(device, (error, reference) -> {
                          if (error != null) {
-                             getLog().e(String.format("Failed to save: reference = %s", reference),
+                             getLog().e(String.format("Failed to saveActor: reference = %s", reference),
                                         error.toException());
                          }
                      });

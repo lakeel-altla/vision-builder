@@ -13,6 +13,7 @@ import com.lakeel.altla.vision.data.repository.firebase.UserDeviceRepository;
 import com.lakeel.altla.vision.data.repository.firebase.UserProfileRepository;
 import com.lakeel.altla.vision.helper.OnFailureListener;
 import com.lakeel.altla.vision.helper.OnSuccessListener;
+import com.lakeel.altla.vision.helper.TypedQuery;
 import com.lakeel.altla.vision.model.Device;
 import com.lakeel.altla.vision.model.Profile;
 
@@ -42,33 +43,43 @@ public final class AuthApi extends BaseVisionApi {
         task.addOnSuccessListener(authResult -> {
             FirebaseUser user = authResult.getUser();
 
-            userProfileRepository.find(user.getUid(), profile -> {
-                // Create the user profile if it does not exist.
-                if (profile == null) {
-                    profile = new Profile();
-                    profile.setId(user.getUid());
-                    profile.setUserId(user.getUid());
-                    profile.setDisplayName(user.getDisplayName());
-                    profile.setEmail(user.getEmail());
-                    if (user.getPhotoUrl() != null) {
-                        profile.setPhotoUri(user.getPhotoUrl().toString());
-                    }
+            userProfileRepository
+                    .find(user.getUid())
+                    .addListenerForSingleValue(new TypedQuery.TypedValueEventListener<Profile>() {
+                        @Override
+                        public void onDataChange(@Nullable Profile profile) {
+                            // Create the user profile if it does not exist.
+                            if (profile == null) {
+                                profile = new Profile();
+                                profile.setId(user.getUid());
+                                profile.setUserId(user.getUid());
+                                profile.setDisplayName(user.getDisplayName());
+                                profile.setEmail(user.getEmail());
+                                if (user.getPhotoUrl() != null) {
+                                    profile.setPhotoUri(user.getPhotoUrl().toString());
+                                }
 
-                    userProfileRepository.save(profile);
-                }
+                                userProfileRepository.save(profile);
+                            }
 
-                Device device = new Device();
-                device.setId(FirebaseInstanceId.getInstance().getId());
-                device.setUserId(user.getUid());
-                device.setCreatedAtAsLong(FirebaseInstanceId.getInstance().getCreationTime());
-                device.setOsName("android");
-                device.setOsModel(Build.MODEL);
-                device.setOsVersion(Build.VERSION.RELEASE);
+                            Device device = new Device();
+                            device.setId(FirebaseInstanceId.getInstance().getId());
+                            device.setUserId(user.getUid());
+                            device.setCreatedAtAsLong(FirebaseInstanceId.getInstance().getCreationTime());
+                            device.setOsName("android");
+                            device.setOsModel(Build.MODEL);
+                            device.setOsVersion(Build.VERSION.RELEASE);
 
-                userDeviceRepository.save(device);
+                            userDeviceRepository.save(device);
 
-                if (onSuccessListener != null) onSuccessListener.onSuccess(null);
-            }, onFailureListener);
+                            if (onSuccessListener != null) onSuccessListener.onSuccess(null);
+                        }
+
+                        @Override
+                        public void onError(@NonNull Exception e) {
+                            if (onFailureListener != null) onFailureListener.onFailure(e);
+                        }
+                    });
         });
 
         task.addOnFailureListener(e -> {

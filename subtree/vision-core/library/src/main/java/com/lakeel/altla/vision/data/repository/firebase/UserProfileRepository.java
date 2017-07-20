@@ -6,10 +6,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import com.lakeel.altla.vision.helper.FirebaseObservableData;
-import com.lakeel.altla.vision.helper.ObservableData;
 import com.lakeel.altla.vision.helper.OnFailureListener;
 import com.lakeel.altla.vision.helper.OnSuccessListener;
+import com.lakeel.altla.vision.helper.TypedQuery;
 import com.lakeel.altla.vision.model.Profile;
 
 import android.support.annotation.NonNull;
@@ -30,9 +29,17 @@ public final class UserProfileRepository extends BaseDatabaseRepository {
                      .child(profile.getUserId())
                      .setValue(profile, (error, reference) -> {
                          if (error != null) {
-                             getLog().e("Failed to save.", error.toException());
+                             getLog().e("Failed to saveActor.", error.toException());
                          }
                      });
+    }
+
+    @NonNull
+    public TypedQuery<Profile> find(@NonNull String userId) {
+        final DatabaseReference reference = getDatabase().getReference()
+                                                         .child(BASE_PATH)
+                                                         .child(userId);
+        return new TypedQuery<>(reference, Profile.class);
     }
 
     public void find(@NonNull String userId, OnSuccessListener<Profile> onSuccessListener,
@@ -52,14 +59,5 @@ public final class UserProfileRepository extends BaseDatabaseRepository {
                              onFailureListener.onFailure(error.toException());
                          }
                      });
-    }
-
-    @NonNull
-    public ObservableData<Profile> observe(@NonNull String userId) {
-        DatabaseReference reference = getDatabase().getReference()
-                                                   .child(BASE_PATH)
-                                                   .child(userId);
-
-        return new FirebaseObservableData<>(reference, snapshot -> snapshot.getValue(Profile.class));
     }
 }

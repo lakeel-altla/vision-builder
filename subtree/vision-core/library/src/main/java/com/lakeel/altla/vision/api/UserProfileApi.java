@@ -1,7 +1,7 @@
 package com.lakeel.altla.vision.api;
 
 import com.lakeel.altla.vision.data.repository.firebase.UserProfileRepository;
-import com.lakeel.altla.vision.helper.ObservableData;
+import com.lakeel.altla.vision.helper.TypedQuery;
 import com.lakeel.altla.vision.model.Profile;
 
 import android.support.annotation.NonNull;
@@ -17,7 +17,7 @@ public final class UserProfileApi extends BaseVisionApi {
     }
 
     @NonNull
-    public ObservableData<Profile> observeUserProfileById(@NonNull String userId) {
-        return userProfileRepository.observe(userId);
+    public TypedQuery<Profile> findProfile(@NonNull String userId) {
+        return userProfileRepository.find(userId);
     }
 }

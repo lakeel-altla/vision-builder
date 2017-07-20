@@ -2,7 +2,7 @@ package com.lakeel.altla.vision.builder.presentation.model;
 
 import com.lakeel.altla.android.log.Log;
 import com.lakeel.altla.android.log.LogFactory;
-import com.lakeel.altla.vision.helper.FirebaseQuery;
+import com.lakeel.altla.vision.helper.TypedQuery;
 import com.lakeel.altla.vision.model.BaseEntity;
 
 import android.support.annotation.NonNull;
@@ -12,7 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public final class FirebaseQueryAdapter<TItem extends BaseEntity> implements FirebaseQuery.ChildListener<TItem> {
+public final class FirebaseQueryAdapter<TItem extends BaseEntity> implements
+                                                                  TypedQuery.TypedChildEventListener<TItem> {
 
     private static final Log LOG = LogFactory.getLog(FirebaseQueryAdapter.class);
 

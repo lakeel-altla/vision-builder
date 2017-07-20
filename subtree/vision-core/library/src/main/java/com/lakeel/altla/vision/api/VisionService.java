@@ -32,6 +32,8 @@ public final class VisionService {
 
     private final UserAssetApi userAssetApi;
 
+    private final UserImageAssetApi userImageAssetApi;
+
     private final UserActorApi userActorApi;
 
     // TODO: This api is used our builder only.
@@ -61,6 +63,7 @@ public final class VisionService {
         userAreaApi = new UserAreaApi(this);
         userAreaDescriptionApi = new UserAreaDescriptionApi(this);
         userAssetApi = new UserAssetApi(this);
+        userImageAssetApi = new UserImageAssetApi(this);
         userActorApi = new UserActorApi(this);
         userAreaSettingsApi = new UserAreaSettingsApi(this);
 
@@ -127,6 +130,11 @@ public final class VisionService {
     @NonNull
     public UserAssetApi getUserAssetApi() {
         return userAssetApi;
+    }
+
+    @NonNull
+    public UserImageAssetApi getUserImageAssetApi() {
+        return userImageAssetApi;
     }
 
     @NonNull

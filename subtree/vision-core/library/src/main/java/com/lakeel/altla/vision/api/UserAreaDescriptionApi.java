@@ -3,7 +3,7 @@ package com.lakeel.altla.vision.api;
 import com.lakeel.altla.vision.data.repository.android.AreaDescriptionCacheRepository;
 import com.lakeel.altla.vision.data.repository.firebase.UserAreaDescriptionFileRepository;
 import com.lakeel.altla.vision.data.repository.firebase.UserAreaDescriptionRepository;
-import com.lakeel.altla.vision.helper.FirebaseQuery;
+import com.lakeel.altla.vision.helper.TypedQuery;
 import com.lakeel.altla.vision.helper.OnFailureListener;
 import com.lakeel.altla.vision.helper.OnProgressListener;
 import com.lakeel.altla.vision.helper.OnSuccessListener;
@@ -33,7 +33,7 @@ public final class UserAreaDescriptionApi extends BaseVisionApi {
         userAreaDescriptionFileRepository = new UserAreaDescriptionFileRepository(visionService.getFirebaseStorage());
     }
 
-    public void save(@NonNull AreaDescription areaDescription) {
+    public void saveAreaDescription(@NonNull AreaDescription areaDescription) {
         if (!CurrentUser.getInstance().getUserId().equals(areaDescription.getUserId())) {
             throw new IllegalArgumentException("Invalid user id.");
         }
@@ -42,7 +42,7 @@ public final class UserAreaDescriptionApi extends BaseVisionApi {
     }
 
     @NonNull
-    public FirebaseQuery<AreaDescription> findByAreaId(@NonNull String areaId) {
+    public TypedQuery<AreaDescription> findAreaDescriptionByAreaId(@NonNull String areaId) {
         return userAreaDescriptionRepository.findByAreaId(CurrentUser.getInstance().getUserId(), areaId);
     }
 

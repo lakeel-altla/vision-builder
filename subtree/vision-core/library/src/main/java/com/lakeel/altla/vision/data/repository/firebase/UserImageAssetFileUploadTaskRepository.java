@@ -3,8 +3,7 @@ package com.lakeel.altla.vision.data.repository.firebase;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 
-import com.lakeel.altla.vision.helper.FirebaseObservableList;
-import com.lakeel.altla.vision.helper.ObservableList;
+import com.lakeel.altla.vision.helper.TypedQuery;
 import com.lakeel.altla.vision.model.ImageAssetFileUploadTask;
 
 import android.support.annotation.NonNull;
@@ -30,20 +29,19 @@ public final class UserImageAssetFileUploadTaskRepository extends BaseDatabaseRe
                      .child(task.getId())
                      .setValue(task, (error, reference) -> {
                          if (error != null) {
-                             getLog().e(String.format("Failed to save: reference = %s", reference),
+                             getLog().e(String.format("Failed to saveActor: reference = %s", reference),
                                         error.toException());
                          }
                      });
     }
 
     @NonNull
-    public ObservableList<ImageAssetFileUploadTask> observeAll(@NonNull String userId) {
-        Query query = getDatabase().getReference()
-                                   .child(BASE_PATH)
-                                   .child(userId)
-                                   .orderByChild(FIELD_ORDER);
-
-        return new FirebaseObservableList<>(query, snapshot -> snapshot.getValue(ImageAssetFileUploadTask.class));
+    public TypedQuery<ImageAssetFileUploadTask> findAll(@NonNull String userId) {
+        final Query query = getDatabase().getReference()
+                                         .child(BASE_PATH)
+                                         .child(userId)
+                                         .orderByChild(FIELD_ORDER);
+        return new TypedQuery<>(query, ImageAssetFileUploadTask.class);
     }
 
     public void delete(@NonNull String userId, @NonNull String assetId) {

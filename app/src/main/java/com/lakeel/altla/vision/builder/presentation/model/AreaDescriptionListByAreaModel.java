@@ -1,7 +1,7 @@
 package com.lakeel.altla.vision.builder.presentation.model;
 
 import com.lakeel.altla.vision.api.VisionService;
-import com.lakeel.altla.vision.helper.FirebaseQuery;
+import com.lakeel.altla.vision.helper.TypedQuery;
 import com.lakeel.altla.vision.model.AreaDescription;
 import com.lakeel.altla.vision.model.Scope;
 
@@ -14,7 +14,7 @@ public final class AreaDescriptionListByAreaModel {
 
     private final FirebaseQueryAdapter<AreaDescription> queryAdapter = new FirebaseQueryAdapter<>();
 
-    private FirebaseQuery<AreaDescription> query;
+    private TypedQuery<AreaDescription> query;
 
     private int selectedPosition;
 
@@ -36,13 +36,13 @@ public final class AreaDescriptionListByAreaModel {
                 // TODO
                 break;
             case USER:
-                query = visionService.getUserAreaDescriptionApi().findByAreaId(areaId);
+                query = visionService.getUserAreaDescriptionApi().findAreaDescriptionByAreaId(areaId);
                 break;
             default:
                 throw new IllegalArgumentException("An unexpected scope: " + scope);
         }
 
-        query.addListener(queryAdapter);
+        query.addTypedChildEventListener(queryAdapter);
     }
 
     public int getSelectedPosition() {

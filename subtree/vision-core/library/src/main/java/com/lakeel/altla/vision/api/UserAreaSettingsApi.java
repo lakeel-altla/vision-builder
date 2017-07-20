@@ -1,7 +1,7 @@
 package com.lakeel.altla.vision.api;
 
 import com.lakeel.altla.vision.data.repository.firebase.UserAreaSettingsRepository;
-import com.lakeel.altla.vision.helper.FirebaseQuery;
+import com.lakeel.altla.vision.helper.TypedQuery;
 import com.lakeel.altla.vision.model.AreaSettings;
 
 import android.support.annotation.NonNull;
@@ -17,11 +17,11 @@ public final class UserAreaSettingsApi extends BaseVisionApi {
     }
 
     @NonNull
-    public FirebaseQuery<AreaSettings> findAll() {
+    public TypedQuery<AreaSettings> findAllAreaSettings() {
         return userAreaSettingsRepository.findAll(CurrentUser.getInstance().getUserId());
     }
 
-    public void save(@NonNull AreaSettings areaSettings) {
+    public void saveAreaSettings(@NonNull AreaSettings areaSettings) {
         if (!CurrentUser.getInstance().getUserId().equals(areaSettings.getUserId())) {
             throw new IllegalArgumentException("Invalid user id.");
         }

@@ -4,8 +4,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 
-import com.lakeel.altla.vision.helper.FirebaseQuery;
-import com.lakeel.altla.vision.helper.FirebaseReference;
+import com.lakeel.altla.vision.helper.TypedQuery;
 import com.lakeel.altla.vision.model.Area;
 
 import android.support.annotation.NonNull;
@@ -33,38 +32,38 @@ public final class UserAreaRepository extends BaseDatabaseRepository {
                      .child(area.getId())
                      .setValue(area, (error, reference) -> {
                          if (error != null) {
-                             getLog().e(String.format("Failed to save: reference = %s", reference),
+                             getLog().e(String.format("Failed to saveActor: reference = %s", reference),
                                         error.toException());
                          }
                      });
     }
 
     @NonNull
-    public FirebaseReference<Area> find(@NonNull String userId, @NonNull String areaId) {
+    public TypedQuery<Area> find(@NonNull String userId, @NonNull String areaId) {
         final DatabaseReference reference = getDatabase().getReference()
                                                          .child(BASE_PATH)
                                                          .child(userId)
                                                          .child(areaId);
-        return new FirebaseReference<>(reference, Area.class);
+        return new TypedQuery<>(reference, Area.class);
     }
 
     @NonNull
-    public FirebaseQuery<Area> findAll(@NonNull String userId) {
+    public TypedQuery<Area> findAll(@NonNull String userId) {
         final Query query = getDatabase().getReference()
                                          .child(BASE_PATH)
                                          .child(userId)
                                          .orderByChild(FIELD_NAME);
-        return new FirebaseQuery<>(query, Area.class);
+        return new TypedQuery<>(query, Area.class);
     }
 
     @NonNull
-    public FirebaseQuery<Area> findByPlaceId(@NonNull String userId, @NonNull String placeId) {
+    public TypedQuery<Area> findByPlaceId(@NonNull String userId, @NonNull String placeId) {
         final Query query = getDatabase().getReference()
                                          .child(BASE_PATH)
                                          .child(userId)
                                          .orderByChild(FIELD_PLACE_ID)
                                          .equalTo(placeId);
-        return new FirebaseQuery<>(query, Area.class);
+        return new TypedQuery<>(query, Area.class);
     }
 
     public void delete(@NonNull String userId, @NonNull String areaId) {

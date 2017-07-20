@@ -41,8 +41,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import io.reactivex.disposables.CompositeDisposable;
-
 public final class ArGraphics extends ApplicationAdapter {
 
     private static final Log LOG = LogFactory.getLog(ArGraphics.class);
@@ -54,8 +52,6 @@ public final class ArGraphics extends ApplicationAdapter {
     private static final float FAR_PLANE_DISTANCE = 10f;
 
     private final FPSLogger fpsLogger = new FPSLogger();
-
-    private final CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     private final Listener listener;
 
@@ -151,13 +147,6 @@ public final class ArGraphics extends ApplicationAdapter {
 
         update();
         draw();
-    }
-
-    @Override
-    public void pause() {
-        super.pause();
-
-        compositeDisposable.clear();
     }
 
     @Override

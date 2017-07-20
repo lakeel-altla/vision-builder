@@ -1,7 +1,7 @@
 package com.lakeel.altla.vision.api;
 
 import com.lakeel.altla.vision.data.repository.firebase.ConnectionRepository;
-import com.lakeel.altla.vision.helper.ObservableData;
+import com.lakeel.altla.vision.helper.TypedQuery;
 
 import android.support.annotation.NonNull;
 
@@ -16,7 +16,7 @@ public final class FirebaseConnectionApi extends BaseVisionApi {
     }
 
     @NonNull
-    public ObservableData<Boolean> observeConnection() {
-        return connectionRepository.observe();
+    public TypedQuery<Boolean> findConnection() {
+        return connectionRepository.find();
     }
 }
