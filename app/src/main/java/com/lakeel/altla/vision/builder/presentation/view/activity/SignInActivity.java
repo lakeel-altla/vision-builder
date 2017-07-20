@@ -19,14 +19,13 @@ import com.lakeel.altla.vision.builder.presentation.di.component.ActivityCompone
 import com.lakeel.altla.vision.builder.presentation.di.module.ActivityModule;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import javax.inject.Inject;
@@ -34,6 +33,9 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+
+import static android.view.View.INVISIBLE;
+import static android.view.View.VISIBLE;
 
 public final class SignInActivity extends AppCompatActivity implements FirebaseAuth.AuthStateListener {
 
@@ -49,11 +51,12 @@ public final class SignInActivity extends AppCompatActivity implements FirebaseA
     @BindView(R.id.sign_in_button)
     SignInButton signInButton;
 
+    @BindView(R.id.progress_bar)
+    ProgressBar progressBar;
+
     private ActivityComponent activityComponent;
 
     private GoogleApiClient googleApiClient;
-
-    private ProgressDialog progressDialog;
 
     private boolean signedInDetected;
 
@@ -104,12 +107,7 @@ public final class SignInActivity extends AppCompatActivity implements FirebaseA
                 .build();
 
         signInButton.setSize(SignInButton.SIZE_STANDARD);
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        hideProgressDialog();
+        progressBar.setVisibility(INVISIBLE);
     }
 
     @Override
@@ -145,8 +143,8 @@ public final class SignInActivity extends AppCompatActivity implements FirebaseA
         if (user != null) {
             if (!signedInDetected) {
                 LOG.i("Signed in to firebase: %s", user.getUid());
-                signInButton.setVisibility(View.GONE);
-                hideProgressDialog();
+                signInButton.setVisibility(INVISIBLE);
+                progressBar.setVisibility(INVISIBLE);
                 Intent intent = TangoIntents.createAdfLoadSaveRequestPermissionIntent();
                 startActivityForResult(intent, REQUEST_CODE_ADF_LOAD_SAVE_REQUEST_PERMISSIONS);
                 signedInDetected = true;
@@ -155,7 +153,7 @@ public final class SignInActivity extends AppCompatActivity implements FirebaseA
             }
         } else {
             LOG.d("Signed out.");
-            signInButton.setVisibility(View.VISIBLE);
+            signInButton.setVisibility(VISIBLE);
         }
     }
 
@@ -201,11 +199,11 @@ public final class SignInActivity extends AppCompatActivity implements FirebaseA
             return;
         }
 
-        showProgressDialog();
+        progressBar.setVisibility(VISIBLE);
 
         visionService.getAuthApi().signInWithGoogle(googleSignInAccount, null, e -> {
             signInButton.setEnabled(true);
-            hideProgressDialog();
+            progressBar.setVisibility(INVISIBLE);
             LOG.e("Failed to sign in to Firebase.", e);
         });
     }
@@ -220,20 +218,5 @@ public final class SignInActivity extends AppCompatActivity implements FirebaseA
         }
 
         finish();
-    }
-
-    private void showProgressDialog() {
-        progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage(getString(R.string.progress_dialog_signin_in));
-        progressDialog.setIndeterminate(true);
-        progressDialog.setCancelable(false);
-        progressDialog.show();
-    }
-
-    private void hideProgressDialog() {
-        if (progressDialog != null) {
-            progressDialog.dismiss();
-            progressDialog = null;
-        }
     }
 }
