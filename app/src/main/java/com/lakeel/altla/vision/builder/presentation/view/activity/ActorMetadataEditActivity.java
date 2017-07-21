@@ -7,11 +7,12 @@ import com.lakeel.altla.vision.builder.presentation.app.MyApplication;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.di.component.ActivityComponent;
 import com.lakeel.altla.vision.builder.presentation.di.module.ActivityModule;
-import com.lakeel.altla.vision.builder.presentation.view.fragment.SettingsFragment;
+import com.lakeel.altla.vision.builder.presentation.view.fragment.ActorMetadataEditFragment;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.NavUtils;
@@ -20,17 +21,17 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
-public final class SettingsActivity extends AppCompatActivity
+public class ActorMetadataEditActivity extends AppCompatActivity
         implements ActivityScopeContext,
-                   SettingsFragment.FragmentContext {
+                   ActorMetadataEditFragment.FragmentContext {
 
-    private static final Log LOG = LogFactory.getLog(SettingsActivity.class);
+    private static final Log LOG = LogFactory.getLog(ActorMetadataEditActivity.class);
 
     private ActivityComponent activityComponent;
 
     @NonNull
     public static Intent createIntent(@NonNull Activity activity) {
-        return new Intent(activity, SettingsActivity.class);
+        return new Intent(activity, ActorMetadataEditActivity.class);
     }
 
     @Override
@@ -44,14 +45,14 @@ public final class SettingsActivity extends AppCompatActivity
         activityComponent.inject(this);
 
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_settings);
+        setContentView(R.layout.activity_actor_metadata_edit);
 
         final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         final ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
-            actionBar.setTitle(R.string.title_settings_view);
+            actionBar.setTitle(R.string.title_actor_metadata_edit_view);
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setHomeAsUpIndicator(R.drawable.ic_clear_white_24dp);
         } else {
@@ -59,7 +60,7 @@ public final class SettingsActivity extends AppCompatActivity
         }
 
         if (savedInstanceState == null) {
-            replaceFragment(SettingsFragment.newInstance());
+            replaceFragment(ActorMetadataEditFragment.newInstance());
         }
     }
 
@@ -76,17 +77,26 @@ public final class SettingsActivity extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
-        NavUtils.navigateUpFromSameTask(this);
+        backView();
     }
 
     @Override
-    public void showSignInView() {
-        // Clear all activities and then start sign in activity.
-        final Intent intent = SignInActivity.createIntent(this);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
-        finish();
+    public void setHomeAsUpIndicator(@DrawableRes int resId) {
+        final ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setHomeAsUpIndicator(resId);
+        } else {
+            LOG.w("ActionBar is null.");
+        }
+    }
+
+    @Override
+    public void backView() {
+        if (0 < getSupportFragmentManager().getBackStackEntryCount()) {
+            getSupportFragmentManager().popBackStack();
+        } else {
+            NavUtils.navigateUpFromSameTask(this);
+        }
     }
 
     @Override

@@ -93,5 +93,9 @@
     <string name="dialog_button_delete">Delete</string>
     <string name="button_set_frame_buffers_visible_true">Show Frame Buffers</string>
     <string name="button_set_frame_buffers_visible_false">Hide Frame Buffers</string>
+    <string name="title_actor_metadata_edit_view">Edit</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>

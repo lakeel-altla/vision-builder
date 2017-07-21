@@ -25,7 +25,6 @@ import com.lakeel.altla.vision.builder.presentation.di.module.ActivityModule;
 import com.lakeel.altla.vision.builder.presentation.graphics.ArGraphics;
 import com.lakeel.altla.vision.builder.presentation.model.ArModel;
 import com.lakeel.altla.vision.builder.presentation.view.pane.ActorEditMenuPane;
-import com.lakeel.altla.vision.builder.presentation.view.pane.ActorMetadataEditPane;
 import com.lakeel.altla.vision.builder.presentation.view.pane.ActorMetadataPane;
 import com.lakeel.altla.vision.builder.presentation.view.pane.DebugMenuPane;
 import com.lakeel.altla.vision.builder.presentation.view.pane.EditModelMenuPane;
@@ -113,8 +112,6 @@ public final class ArActivity extends AndroidApplication
 
     private ActorMetadataPane actorMetadataPane;
 
-    private ActorMetadataEditPane actorMetadataEditPane;
-
     private ActivityComponent activityComponent;
 
     private ArGraphics arGraphics;
@@ -173,7 +170,6 @@ public final class ArActivity extends AndroidApplication
         imageAssetListPane = new ImageAssetListPane(this);
         actorEditMenuPane = new ActorEditMenuPane(this);
         actorMetadataPane = new ActorMetadataPane(this);
-        actorMetadataEditPane = new ActorMetadataEditPane(this);
 
         paneLifecycle.add(debugMenuPane);
         paneLifecycle.add(viewModeMenuPane);
@@ -181,7 +177,6 @@ public final class ArActivity extends AndroidApplication
         paneLifecycle.add(imageAssetListPane);
         paneLifecycle.add(actorEditMenuPane);
         paneLifecycle.add(actorMetadataPane);
-        paneLifecycle.add(actorMetadataEditPane);
 
         paneGroup.add(viewModeMenuPane);
         paneGroup.add(editModelMenuPane);
@@ -196,18 +191,12 @@ public final class ArActivity extends AndroidApplication
                 actorMetadataPane.hide();
             }
         });
-        actorEditMenuPane.setOnVisibleChangedListener(visible -> {
-            if (!visible) {
-                actorMetadataEditPane.hide();
-            }
-        });
 
         //
         // Set the initial state of views.
         //
         paneGroup.show(R.id.pane_view_mode_menu);
         actorMetadataPane.hide();
-        actorMetadataEditPane.hide();
     }
 
     @Override
@@ -445,7 +434,9 @@ public final class ArActivity extends AndroidApplication
 
     @Override
     public void showActorMetadataEditPane() {
-        actorMetadataEditPane.show();
+//        actorMetadataEditPane.show();
+        final Intent intent = ActorMetadataEditActivity.createIntent(this);
+        startActivity(intent);
     }
 
     //

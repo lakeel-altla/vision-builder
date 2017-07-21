@@ -33,9 +33,6 @@
             <include android:id="@+id/pane_actor_metadata"
                      layout="@layout/pane_actor_metadata"/>
 
-            <include android:id="@+id/pane_actor_metadata_edit"
-                     layout="@layout/pane_actor_metadata_edit"/>
-
         </FrameLayout>
 
     </android.support.percent.PercentFrameLayout>
