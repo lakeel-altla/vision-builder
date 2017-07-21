@@ -430,7 +430,7 @@ public final class ArGraphics extends ApplicationAdapter {
             // Flip the texture because its origin in OpenGL is the buttom left.
             final Texture colorBufferTexture = picker.getColorBufferTexture();
             if (colorBufferTexture != null) {
-                spriteBatch.draw(colorBufferTexture, 0, Gdx.graphics.getHeight() - 512, 512, 512,
+                spriteBatch.draw(colorBufferTexture, 0, 0, 512, 512,
                                  0, 0, colorBufferTexture.getWidth(), colorBufferTexture.getHeight(), false, true);
             }
             spriteBatch.enableBlending();
