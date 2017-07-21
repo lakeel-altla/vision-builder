@@ -13,12 +13,14 @@ import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g3d.Environment;
+import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultTextureBinder;
+import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.RenderContext;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
@@ -40,6 +42,9 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import static com.badlogic.gdx.graphics.VertexAttributes.Usage.ColorPacked;
+import static com.badlogic.gdx.graphics.VertexAttributes.Usage.Position;
 
 public final class ArGraphics extends ApplicationAdapter {
 
@@ -109,6 +114,14 @@ public final class ArGraphics extends ApplicationAdapter {
 
     private boolean removeCursorRequested;
 
+    private Model actorAxesModel;
+
+    private ActorAxesObject actorAxesObject;
+
+    private ActorObject touchedActorObject;
+
+    private boolean actorAxesObjectVisible;
+
     public ArGraphics(@NonNull Display display, @NonNull Listener listener) {
         this.display = display;
         this.listener = listener;
@@ -130,6 +143,9 @@ public final class ArGraphics extends ApplicationAdapter {
         modelBatch = new ModelBatch(renderContext);
 
         picker.init();
+
+        actorAxesModel = new ModelBuilder().createXYZCoordinates(0.25f, new Material(), Position | ColorPacked);
+        actorAxesObject = new ActorAxesObject(actorAxesModel);
 
         spriteBatch = new SpriteBatch();
     }
@@ -210,6 +226,10 @@ public final class ArGraphics extends ApplicationAdapter {
         if (actorObject == null) throw new IllegalArgumentException("Invalid actor id: " + actor.getId());
 
         actorObjects.removeValue(actorObject, true);
+    }
+
+    public void setActorAxesObjectVisible(boolean actorAxesObjectVisible) {
+        this.actorAxesObjectVisible = actorAxesObjectVisible;
     }
 
     private void update() {
@@ -310,7 +330,7 @@ public final class ArGraphics extends ApplicationAdapter {
             LOG.d("Created an AR object: actorId = %s", actor.getId());
         }
 
-        if (removeCursorRequested) {
+        if (cursorModel != null && removeCursorRequested) {
             cursorModel.dispose();
             cursorModel = null;
             cursorObject = null;
@@ -325,6 +345,10 @@ public final class ArGraphics extends ApplicationAdapter {
 
         if (cursorObject != null) {
             cursorObject.update(camera.position, tangoPoseRotation);
+        }
+
+        if (actorAxesObjectVisible && touchedActorObject != null) {
+            actorAxesObject.transform(touchedActorObject);
         }
     }
 
@@ -342,6 +366,10 @@ public final class ArGraphics extends ApplicationAdapter {
         visibleInstances.clear();
         visibleInstances.addAll(actorObjects);
         if (cursorObject != null) visibleInstances.add(cursorObject);
+
+        if (actorAxesObjectVisible) {
+            visibleInstances.add(actorAxesObject);
+        }
 
         pickableInstances.clear();
         if (cursorObject == null) {
@@ -365,18 +393,19 @@ public final class ArGraphics extends ApplicationAdapter {
 
             if (instance == null) {
                 if (cursorObject == null) {
-                    listener.onActorSelected(null);
+                    touchedActorObject = null;
+                    listener.onActorTouched(null);
                 }
             } else if (instance instanceof ActorObject) {
-                final ActorObject actorObject = (ActorObject) instance;
-                listener.onActorSelected(actorObject.actor);
+                touchedActorObject = (ActorObject) instance;
+                listener.onActorTouched(touchedActorObject.actor);
             } else if (instance instanceof CursorObject) {
                 final CursorObject cursorObject = (CursorObject) instance;
-                listener.onCursorSelected(cursorObject.asset,
-                                          cursorObject.assetType,
-                                          new Vector3(cursorObject.position),
-                                          new Quaternion(cursorObject.rotation),
-                                          new Vector3(1, 1, 1));
+                listener.onCursorTouched(cursorObject.asset,
+                                         cursorObject.assetType,
+                                         new Vector3(cursorObject.position),
+                                         new Quaternion(cursorObject.rotation),
+                                         new Vector3(1, 1, 1));
                 // Remove the cursor.
                 removeCursor();
             } else {
@@ -389,23 +418,25 @@ public final class ArGraphics extends ApplicationAdapter {
         renderContext.end();
 
         // Draw frame buffers.
-        spriteBatch.begin();
-        spriteBatch.disableBlending();
-        // Flip the texture because its origin in OpenGL is the buttom left.
-        final Texture colorBufferTexture = picker.getColorBufferTexture();
-        if (colorBufferTexture != null) {
-            spriteBatch.draw(colorBufferTexture, 0, Gdx.graphics.getHeight() - 512, 512, 512,
-                             0, 0, colorBufferTexture.getWidth(), colorBufferTexture.getHeight(), false, true);
+        if (false) {
+            spriteBatch.begin();
+            spriteBatch.disableBlending();
+            // Flip the texture because its origin in OpenGL is the buttom left.
+            final Texture colorBufferTexture = picker.getColorBufferTexture();
+            if (colorBufferTexture != null) {
+                spriteBatch.draw(colorBufferTexture, 0, Gdx.graphics.getHeight() - 512, 512, 512,
+                                 0, 0, colorBufferTexture.getWidth(), colorBufferTexture.getHeight(), false, true);
+            }
+            spriteBatch.enableBlending();
+            spriteBatch.end();
         }
-        spriteBatch.enableBlending();
-        spriteBatch.end();
     }
 
     public interface Listener {
 
-        void onActorSelected(@Nullable Actor actor);
+        void onActorTouched(@Nullable Actor actor);
 
-        void onCursorSelected(@NonNull Asset asset, @NonNull AssetType assetType,
-                              @NonNull Vector3 position, @NonNull Quaternion rotation, @NonNull Vector3 scale);
+        void onCursorTouched(@NonNull Asset asset, @NonNull AssetType assetType,
+                             @NonNull Vector3 position, @NonNull Quaternion rotation, @NonNull Vector3 scale);
     }
 }

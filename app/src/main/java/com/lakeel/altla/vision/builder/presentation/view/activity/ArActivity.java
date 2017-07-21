@@ -335,7 +335,7 @@ public final class ArActivity extends AndroidApplication
     }
 
     @Override
-    public void onActorSelected(@Nullable Actor actor) {
+    public void onActorTouched(@Nullable Actor actor) {
         runOnUiThread(() -> {
             arModel.setSelectedActor(actor);
             if (editMode) {
@@ -344,6 +344,9 @@ public final class ArActivity extends AndroidApplication
                 } else {
                     paneGroup.show(R.id.pane_actor_edit_menu);
                 }
+                Gdx.app.postRunnable(() -> {
+                    arGraphics.setActorAxesObjectVisible(actor != null);
+                });
             } else {
                 if (actor == null) {
                     actorMetadataPane.hide();
@@ -355,8 +358,8 @@ public final class ArActivity extends AndroidApplication
     }
 
     @Override
-    public void onCursorSelected(@NonNull Asset asset, @NonNull AssetType assetType, @NonNull Vector3 position,
-                                 @NonNull Quaternion rotation, @NonNull Vector3 scale) {
+    public void onCursorTouched(@NonNull Asset asset, @NonNull AssetType assetType, @NonNull Vector3 position,
+                                @NonNull Quaternion rotation, @NonNull Vector3 scale) {
         runOnUiThread(() -> {
             final Actor actor = new Actor();
             actor.setUserId(CurrentUser.getInstance().getUserId());
