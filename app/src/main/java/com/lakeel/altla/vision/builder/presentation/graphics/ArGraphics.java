@@ -106,6 +106,8 @@ public final class ArGraphics extends ApplicationAdapter {
 
     private final Array<ModelInstance> pickableInstances = new Array<>();
 
+    private boolean debugFrameBuffersVisible;
+
     private CursorBuildRequest cursorBuildRequest;
 
     private Model cursorModel;
@@ -196,6 +198,10 @@ public final class ArGraphics extends ApplicationAdapter {
 
     public void onFrameAvailable() {
         frameAvailable.set(true);
+    }
+
+    public void setDebugFrameBuffersVisible(boolean debugFrameBuffersVisible) {
+        this.debugFrameBuffersVisible = debugFrameBuffersVisible;
     }
 
     public void setImageAssetCursor(@NonNull ImageAsset asset, @NonNull File imageCache) {
@@ -418,7 +424,7 @@ public final class ArGraphics extends ApplicationAdapter {
         renderContext.end();
 
         // Draw frame buffers.
-        if (false) {
+        if (debugFrameBuffersVisible) {
             spriteBatch.begin();
             spriteBatch.disableBlending();
             // Flip the texture because its origin in OpenGL is the buttom left.

@@ -37,7 +37,7 @@ public final class ImageAssetListPane extends Pane {
     @BindView(R.id.recycler_view)
     RecyclerView recyclerView;
 
-    private final PageContext pageContext;
+    private final PaneContext paneContext;
 
     private final Adapter adapter = new Adapter();
 
@@ -48,7 +48,7 @@ public final class ImageAssetListPane extends Pane {
 
         ((ActivityScopeContext) activity).getActivityComponent().inject(this);
 
-        pageContext = (PageContext) activity;
+        paneContext = (PaneContext) activity;
 
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(activity, LinearLayoutManager.HORIZONTAL, false));
@@ -65,10 +65,10 @@ public final class ImageAssetListPane extends Pane {
 
     @OnClick(R.id.image_button_close)
     void onClickClose() {
-        pageContext.showEditModeMenuPane();
+        paneContext.showEditModeMenuPane();
     }
 
-    public interface PageContext {
+    public interface PaneContext {
 
         void onImageAssetSelected(@Nullable ImageAsset asset);
 
@@ -104,7 +104,7 @@ public final class ImageAssetListPane extends Pane {
                 }
 
                 imageAssetListModel.setSelectedPosition(selectedPosition);
-                pageContext.onImageAssetSelected(imageAssetListModel.getSelectedItem());
+                paneContext.onImageAssetSelected(imageAssetListModel.getSelectedItem());
             });
 
             return new Adapter.ViewHolder(itemView);

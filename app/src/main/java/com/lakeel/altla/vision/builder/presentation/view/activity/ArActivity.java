@@ -27,6 +27,7 @@ import com.lakeel.altla.vision.builder.presentation.model.ArModel;
 import com.lakeel.altla.vision.builder.presentation.view.pane.ActorEditMenuPane;
 import com.lakeel.altla.vision.builder.presentation.view.pane.ActorMetadataEditPane;
 import com.lakeel.altla.vision.builder.presentation.view.pane.ActorMetadataPane;
+import com.lakeel.altla.vision.builder.presentation.view.pane.DebugMenuPane;
 import com.lakeel.altla.vision.builder.presentation.view.pane.EditModelMenuPane;
 import com.lakeel.altla.vision.builder.presentation.view.pane.ImageAssetListPane;
 import com.lakeel.altla.vision.builder.presentation.view.pane.PaneGroup;
@@ -64,10 +65,11 @@ import butterknife.ButterKnife;
 public final class ArActivity extends AndroidApplication
         implements ActivityScopeContext,
                    ArGraphics.Listener,
+                   DebugMenuPane.PaneContext,
                    ViewModeMenuPane.PaneContext,
-                   EditModelMenuPane.PageContext,
-                   ImageAssetListPane.PageContext,
-                   ActorEditMenuPane.PageContext {
+                   EditModelMenuPane.PaneContext,
+                   ImageAssetListPane.PaneContext,
+                   ActorEditMenuPane.PaneContext {
 
     private static final Log LOG = LogFactory.getLog(ArActivity.class);
 
@@ -98,6 +100,8 @@ public final class ArActivity extends AndroidApplication
     private final PaneLifecycle paneLifecycle = new PaneLifecycle();
 
     private final PaneGroup paneGroup = new PaneGroup();
+
+    private DebugMenuPane debugMenuPane;
 
     private ViewModeMenuPane viewModeMenuPane;
 
@@ -163,6 +167,7 @@ public final class ArActivity extends AndroidApplication
         viewTop.addView(view, 0);
 
         // Initialize sub views
+        debugMenuPane = new DebugMenuPane(this);
         viewModeMenuPane = new ViewModeMenuPane(this);
         editModelMenuPane = new EditModelMenuPane(this);
         imageAssetListPane = new ImageAssetListPane(this);
@@ -170,6 +175,7 @@ public final class ArActivity extends AndroidApplication
         actorMetadataPane = new ActorMetadataPane(this);
         actorMetadataEditPane = new ActorMetadataEditPane(this);
 
+        paneLifecycle.add(debugMenuPane);
         paneLifecycle.add(viewModeMenuPane);
         paneLifecycle.add(editModelMenuPane);
         paneLifecycle.add(imageAssetListPane);
@@ -386,6 +392,13 @@ public final class ArActivity extends AndroidApplication
 
             // Add the actor into the scene.
             addActor(actor);
+        });
+    }
+
+    @Override
+    public void setDebugFrameBuffersVisible(boolean visible) {
+        Gdx.app.postRunnable(() -> {
+            arGraphics.setDebugFrameBuffersVisible(visible);
         });
     }
 

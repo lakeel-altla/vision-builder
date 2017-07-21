@@ -9,25 +9,25 @@ import butterknife.OnClick;
 
 public final class EditModelMenuPane extends Pane {
 
-    private final PageContext pageContext;
+    private final PaneContext paneContext;
 
     public EditModelMenuPane(@NonNull Activity activity) {
         super(activity, R.id.pane_edit_mode_menu);
 
-        pageContext = (PageContext) activity;
+        paneContext = (PaneContext) activity;
     }
 
     @OnClick(R.id.image_button_switch_to_view_mode)
     void onClickSwitchToViewMode() {
-        pageContext.showViewModeMenuPane();
+        paneContext.showViewModeMenuPane();
     }
 
     @OnClick(R.id.image_button_show_image_asset_list_pane)
     void onClickShowAssetManagerPane() {
-        pageContext.showImageAssetListPane();
+        paneContext.showImageAssetListPane();
     }
 
-    public interface PageContext {
+    public interface PaneContext {
 
         void showViewModeMenuPane();
 

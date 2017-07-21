@@ -91,5 +91,7 @@
     <string name="dialog_message_confirm_delete">Delete the actor?</string>
     <string name="dialog_button_cancel">Cancel</string>
     <string name="dialog_button_delete">Delete</string>
+    <string name="button_set_frame_buffers_visible_true">Show Frame Buffers</string>
+    <string name="button_set_frame_buffers_visible_false">Hide Frame Buffers</string>
 
 </resources>

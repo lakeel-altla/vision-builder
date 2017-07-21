@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_marginStart="@dimen/content_horizontal_margin"
+              android:layout_marginEnd="@dimen/content_horizontal_margin"
+              android:layout_marginTop="@dimen/content_vertical_margin"
+              android:layout_marginBottom="@dimen/content_vertical_margin"
+              android:orientation="vertical"
+              android:layout_gravity="bottom"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content">
+
+    <Button android:id="@+id/button_set_frame_buffers_visible"
+            android:text="@string/button_set_frame_buffers_visible_true"
+            android:textColor="@drawable/button_text_color"
+            android:background="@drawable/button_background"
+            android:paddingStart="@dimen/content_horizontal_margin"
+            android:paddingEnd="@dimen/content_horizontal_margin"
+            android:layout_marginBottom="@dimen/content_vertical_margin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+    <ImageButton android:id="@+id/image_button_expand"
+                 android:background="@drawable/button_background_circle"
+                 android:src="@drawable/ic_bug_report_black_24dp"
+                 android:tint="@color/foreground_overlay"
+                 android:layout_width="@dimen/touch_target_width"
+                 android:layout_height="@dimen/touch_target_height"/>
+
+    <ImageButton android:id="@+id/image_button_collapse"
+                 android:background="@drawable/button_background_circle"
+                 android:src="@drawable/ic_close_black_24dp"
+                 android:tint="@color/foreground_overlay"
+                 android:layout_width="@dimen/touch_target_width"
+                 android:layout_height="@dimen/touch_target_height"/>
+
+</LinearLayout>

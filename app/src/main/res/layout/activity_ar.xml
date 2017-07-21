@@ -7,6 +7,9 @@
              android:layout_height="match_parent"
              tools:context=".presentation.view.activity.ArActivity">
 
+    <include android:id="@+id/pane_debug_menu"
+             layout="@layout/pane_debug_menu"/>
+
     <include android:id="@+id/pane_view_mode_menu"
              layout="@layout/pane_view_mode_menu"/>
 

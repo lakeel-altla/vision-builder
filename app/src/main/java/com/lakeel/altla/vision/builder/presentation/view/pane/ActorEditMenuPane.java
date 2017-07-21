@@ -17,23 +17,23 @@ public final class ActorEditMenuPane extends Pane {
     @Inject
     ArModel arModel;
 
-    private final PageContext pageContext;
+    private final PaneContext paneContext;
 
     public ActorEditMenuPane(@NonNull Activity activity) {
         super(activity, R.id.pane_actor_edit_menu);
 
         ((ActivityScopeContext) activity).getActivityComponent().inject(this);
-        pageContext = (PageContext) activity;
+        paneContext = (PaneContext) activity;
     }
 
     @OnClick(R.id.image_button_close)
     void onClickClose() {
-        pageContext.closeActorEditMenu();
+        paneContext.closeActorEditMenu();
     }
 
     @OnClick(R.id.image_button_show_actor_metadata_edit_pane)
     void onClickShowActorMetadataEditPane() {
-        pageContext.showActorMetadataEditPane();
+        paneContext.showActorMetadataEditPane();
     }
 
     @OnClick(R.id.image_button_delete)
@@ -48,7 +48,7 @@ public final class ActorEditMenuPane extends Pane {
                 .show();
     }
 
-    public interface PageContext {
+    public interface PaneContext {
 
         void closeActorEditMenu();
 
