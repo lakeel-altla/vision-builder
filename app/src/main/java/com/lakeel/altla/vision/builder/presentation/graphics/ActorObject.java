@@ -12,10 +12,7 @@ import android.support.annotation.NonNull;
 public final class ActorObject extends ModelInstance {
 
     // A temp vector.
-    private static final Vector3 TEMP_BASE_DIRECTION = new Vector3();
-
-    // A temp vector.
-    private static final Vector3 TEMP_DIRECTION = new Vector3();
+    private static final Vector3 TEMP_AXIS_VECTOR = new Vector3();
 
     // A temp vector.
     private static final Vector3 TEMP_TRANSLATION = new Vector3();
@@ -48,26 +45,14 @@ public final class ActorObject extends ModelInstance {
     }
 
     public void translateAlong(@NonNull Axis axis, float distance) {
-        switch (axis) {
-            case X:
-                TEMP_BASE_DIRECTION.set(Vector3.X);
-                break;
-            case Y:
-                TEMP_BASE_DIRECTION.set(Vector3.Y);
-                break;
-            case Z:
-                TEMP_BASE_DIRECTION.set(Vector3.Z);
-                break;
-            default:
-                throw new IllegalArgumentException("An unexpected 'axis' value: " + axis);
-        }
+        axis.toVector3(TEMP_AXIS_VECTOR);
 
         // Resolve the direction of a specified axis.
         transform.getRotation(TEMP_ROTATION);
-        TEMP_DIRECTION.set(TEMP_BASE_DIRECTION).mul(TEMP_ROTATION);
+        TEMP_AXIS_VECTOR.mul(TEMP_ROTATION).nor();
 
         // Calculate the translaton along the specified axis.
-        TEMP_TRANSLATION.set(TEMP_DIRECTION);
+        TEMP_TRANSLATION.set(TEMP_AXIS_VECTOR);
         TEMP_TRANSLATION.scl(distance);
 
         // Get the position of this actor.
@@ -80,8 +65,23 @@ public final class ActorObject extends ModelInstance {
 
     public void fixTranslation() {
         transform.getTranslation(TEMP_POSITION);
-        actor.setPositionX(TEMP_POSITION.x);
-        actor.setPositionY(TEMP_POSITION.y);
-        actor.setPositionZ(TEMP_POSITION.z);
+        actor.setPosition(TEMP_POSITION.x,
+                          TEMP_POSITION.y,
+                          TEMP_POSITION.z);
+    }
+
+    public void rotateAround(@NonNull Axis axis, float degrees) {
+        axis.toVector3(TEMP_AXIS_VECTOR);
+
+        // Rotate.
+        transform.rotate(TEMP_AXIS_VECTOR, degrees);
+    }
+
+    public void fixRotation() {
+        transform.getRotation(TEMP_ROTATION);
+        actor.setOrientation(TEMP_ROTATION.x,
+                             TEMP_ROTATION.y,
+                             TEMP_ROTATION.z,
+                             TEMP_ROTATION.w);
     }
 }

@@ -78,6 +78,8 @@ public final class ActorEditMenuPane extends Pane {
         void setSelectedActorLocked(boolean locked);
 
         void setTranslationEnabled(boolean enabled, @Nullable Axis axis);
+
+        void setRotationEnabled(boolean enabled, @Nullable Axis axis);
     }
 
     class TransformMenu {
@@ -142,12 +144,6 @@ public final class ActorEditMenuPane extends Pane {
         @OnClick(R.id.button_translate_menu)
         void onClickMenu() {
             setSelected(!buttonMenu.isSelected());
-            if (buttonMenu.isSelected()) {
-                transformMenu.rotateMenu.setSelected(false);
-                transformMenu.scaleMenu.setSelected(false);
-            } else {
-                paneContext.setTranslationEnabled(false, null);
-            }
         }
 
         @OnClick(R.id.button_translate_x_axis)
@@ -178,6 +174,13 @@ public final class ActorEditMenuPane extends Pane {
                 if (!selected) {
                     button.setSelected(false);
                 }
+            }
+
+            if (selected) {
+                transformMenu.rotateMenu.setSelected(false);
+                transformMenu.scaleMenu.setSelected(false);
+            } else {
+                paneContext.setTranslationEnabled(false, null);
             }
         }
 
@@ -219,28 +222,27 @@ public final class ActorEditMenuPane extends Pane {
         @OnClick(R.id.button_rotate_menu)
         void onClickMenu() {
             setSelected(!buttonMenu.isSelected());
-            if (buttonMenu.isSelected()) {
-                transformMenu.translateMenu.setSelected(false);
-                transformMenu.scaleMenu.setSelected(false);
-            }
         }
 
         @OnClick(R.id.button_rotate_x_axis)
         void onClickXAxis() {
             resetOptions();
             buttonXAxis.setSelected(true);
+            paneContext.setRotationEnabled(true, Axis.X);
         }
 
         @OnClick(R.id.button_rotate_y_axis)
         void onClickYAxis() {
             resetOptions();
             buttonYAxis.setSelected(true);
+            paneContext.setRotationEnabled(true, Axis.Y);
         }
 
         @OnClick(R.id.button_rotate_z_axis)
         void onClickZAxis() {
             resetOptions();
             buttonZAxis.setSelected(true);
+            paneContext.setRotationEnabled(true, Axis.Z);
         }
 
         void setSelected(boolean selected) {
@@ -250,6 +252,13 @@ public final class ActorEditMenuPane extends Pane {
                 if (!selected) {
                     button.setSelected(false);
                 }
+            }
+
+            if (selected) {
+                transformMenu.translateMenu.setSelected(false);
+                transformMenu.scaleMenu.setSelected(false);
+            } else {
+                paneContext.setRotationEnabled(false, null);
             }
         }
 

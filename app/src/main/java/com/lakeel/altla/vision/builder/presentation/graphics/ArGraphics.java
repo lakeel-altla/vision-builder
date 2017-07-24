@@ -134,8 +134,10 @@ public final class ArGraphics extends ApplicationAdapter {
 
     private boolean translationEnabled;
 
+    private boolean rotationEnabled;
+
     @Nullable
-    private Axis translationAxis;
+    private Axis transformAxis;
 
     public ArGraphics(@NonNull Display display, @NonNull Listener listener) {
         this.display = display;
@@ -191,23 +193,47 @@ public final class ArGraphics extends ApplicationAdapter {
             @Override
             public boolean pan(float x, float y, float deltaX, float deltaY) {
                 LOG.d("pan: x = %f, y = %f, deltaX = %f, deltaY = %f", x, y, deltaX, deltaY);
-                if (translationEnabled && translationAxis != null && touchedActorObject != null) {
-                    final float distance;
-                    switch (translationAxis) {
-                        case X:
-                            distance = deltaX * 0.001f;
-                            break;
-                        case Y:
-                            distance = -deltaY * 0.001f;
-                            break;
-                        case Z:
-                            distance = deltaY * 0.001f;
-                            break;
-                        default:
-                            throw new IllegalStateException("An unexpected axis: " + translationAxis);
+                if (touchedActorObject != null) {
+                    if (translationEnabled && transformAxis != null) {
+                        float distance;
+                        switch (transformAxis) {
+                            case X:
+                                distance = deltaX;
+                                break;
+                            case Y:
+                                distance = -deltaY;
+                                break;
+                            case Z:
+                                distance = deltaY;
+                                break;
+                            default:
+                                throw new IllegalStateException("An unexpected axis: " + transformAxis);
+                        }
+                        // TODO
+                        final float coeff = 0.001f;
+                        distance *= coeff;
+                        touchedActorObject.translateAlong(transformAxis, distance);
+                        return true;
+                    } else if (rotationEnabled && transformAxis != null) {
+                        float degrees;
+                        switch (transformAxis) {
+                            case X:
+                                degrees = deltaY;
+                                break;
+                            case Y:
+                                degrees = deltaX;
+                                break;
+                            case Z:
+                                degrees = -deltaX;
+                                break;
+                            default:
+                                throw new IllegalStateException("An unexpected axis: " + transformAxis);
+                        }
+                        // TODO
+                        final float coeff = 0.5f;
+                        degrees *= coeff;
+                        touchedActorObject.rotateAround(transformAxis, degrees);
                     }
-                    touchedActorObject.translateAlong(translationAxis, distance);
-                    return true;
                 }
                 return false;
             }
@@ -215,9 +241,14 @@ public final class ArGraphics extends ApplicationAdapter {
             @Override
             public boolean panStop(float x, float y, int pointer, int button) {
                 LOG.d("panStop: x = %f, y = %f, pointer = %d, button = %d");
-                if (translationEnabled && translationAxis != null && touchedActorObject != null) {
-                    touchedActorObject.fixTranslation();
-                    listener.onActorChanged(touchedActorObject.actor);
+                if (touchedActorObject != null) {
+                    if (translationEnabled && transformAxis != null) {
+                        touchedActorObject.fixTranslation();
+                        listener.onActorChanged(touchedActorObject.actor);
+                    } else if (rotationEnabled && transformAxis != null) {
+                        touchedActorObject.fixRotation();
+                        listener.onActorChanged(touchedActorObject.actor);
+                    }
                 }
                 return false;
             }
@@ -335,7 +366,12 @@ public final class ArGraphics extends ApplicationAdapter {
 
     public void setTranslationEnabled(boolean translationEnabled, @Nullable Axis axis) {
         this.translationEnabled = translationEnabled;
-        translationAxis = translationEnabled ? axis : null;
+        transformAxis = translationEnabled ? axis : null;
+    }
+
+    public void setRotationEnabled(boolean rotationEnabled, @Nullable Axis axis) {
+        this.rotationEnabled = rotationEnabled;
+        transformAxis = rotationEnabled ? axis : null;
     }
 
     private void update() {

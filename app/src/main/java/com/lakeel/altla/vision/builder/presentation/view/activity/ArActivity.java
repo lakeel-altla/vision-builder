@@ -464,6 +464,13 @@ public final class ArActivity extends AndroidApplication
         });
     }
 
+    @Override
+    public void setRotationEnabled(boolean enabled, @Nullable Axis axis) {
+        Gdx.app.postRunnable(() -> {
+            arGraphics.setRotationEnabled(enabled, axis);
+        });
+    }
+
     //
     // NOTE:
     //

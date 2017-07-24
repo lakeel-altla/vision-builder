@@ -154,6 +154,12 @@ public final class Actor extends BaseEntity {
         this.positionZ = positionZ;
     }
 
+    public void setPosition(double x, double y, double z) {
+        positionX = x;
+        positionY = y;
+        positionZ = z;
+    }
+
     public double getOrientationX() {
         return orientationX;
     }
@@ -186,6 +192,13 @@ public final class Actor extends BaseEntity {
         this.orientationW = orientationW;
     }
 
+    public void setOrientation(double x, double y, double z, double w) {
+        orientationX = x;
+        orientationY = y;
+        orientationZ = z;
+        orientationW = w;
+    }
+
     public double getScaleX() {
         return scaleX;
     }
@@ -208,5 +221,11 @@ public final class Actor extends BaseEntity {
 
     public void setScaleZ(double scaleZ) {
         this.scaleZ = scaleZ;
+    }
+
+    public void setScale(double x, double y, double z) {
+        scaleX = x;
+        scaleY = y;
+        scaleZ = z;
     }
 }
