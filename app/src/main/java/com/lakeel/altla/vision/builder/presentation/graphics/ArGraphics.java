@@ -285,13 +285,13 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
         LOG.d("panStop: x = %f, y = %f, pointer = %d, button = %d");
         if (touchedActorObject != null) {
             if (translationEnabled && transformAxis != null) {
-                touchedActorObject.fixTranslation();
+                touchedActorObject.stopTranslate();
                 listener.onActorChanged(touchedActorObject.actor);
             } else if (rotationEnabled && transformAxis != null) {
-                touchedActorObject.fixRotation();
+                touchedActorObject.stopRotate();
                 listener.onActorChanged(touchedActorObject.actor);
             } else if (scaleEnabled) {
-                touchedActorObject.fixScaling();
+                touchedActorObject.stopScale();
                 listener.onActorChanged(touchedActorObject.actor);
             }
         }
@@ -505,7 +505,11 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
         }
 
         if (actorAxesObjectVisible && touchedActorObject != null) {
-            actorAxesObject.transform(touchedActorObject);
+            actorAxesObject.update(touchedActorObject);
+        }
+
+        for (final ActorObject actorObject : actorObjects) {
+            actorObject.update();
         }
     }
 
