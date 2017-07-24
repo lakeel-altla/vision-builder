@@ -35,6 +35,8 @@
     <color name="foreground_overlay_disabled">#44ffffff</color>
     <!-- black (50%) -->
     <color name="background_overlay">#88000000</color>
+    <!-- black (25%) -->
+    <color name="background_overlay_disabled">#44000000</color>
     <!-- royalblue (75%) -->
     <color name="background_overlay_button_pressed">#cc4169e1</color>
     <!-- royalblue (75%) -->

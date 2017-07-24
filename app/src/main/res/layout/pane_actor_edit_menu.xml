@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_marginStart="@dimen/content_horizontal_margin"
-              android:layout_marginEnd="@dimen/content_horizontal_margin"
-              android:layout_marginTop="@dimen/content_vertical_margin"
-              android:layout_marginBottom="@dimen/content_vertical_margin"
-              android:orientation="horizontal"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_marginStart="@dimen/content_horizontal_margin"
+                android:layout_marginEnd="@dimen/content_horizontal_margin"
+                android:layout_marginTop="@dimen/content_vertical_margin"
+                android:layout_marginBottom="@dimen/content_vertical_margin"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
 
     <ImageButton android:id="@+id/image_button_close"
                  android:background="@drawable/button_background_circle"
@@ -15,10 +14,149 @@
                  android:layout_width="@dimen/touch_target_width"
                  android:layout_height="@dimen/touch_target_height"/>
 
-    <ImageButton android:id="@+id/image_button_show_actor_metadata_edit_pane"
+    <ImageButton android:id="@+id/image_button_transform_menu"
+                 android:background="@drawable/button_background_circle_toggle"
+                 android:src="@drawable/ic_transform_black_24dp"
+                 android:tint="@color/foreground_overlay"
+                 android:layout_toEndOf="@id/image_button_close"
+                 android:layout_marginStart="@dimen/content_horizontal_margin"
+                 android:layout_width="@dimen/touch_target_width"
+                 android:layout_height="@dimen/touch_target_height"/>
+
+    <Button android:id="@+id/button_translate_menu"
+            android:background="@drawable/button_background_circle_toggle"
+            android:text="@string/button_translate_menu"
+            android:textColor="@color/foreground_button"
+            android:layout_marginTop="@dimen/content_vertical_margin"
+            android:layout_below="@id/image_button_transform_menu"
+            android:layout_alignStart="@id/image_button_transform_menu"
+            android:layout_width="@dimen/touch_target_width"
+            android:layout_height="@dimen/touch_target_height"/>
+
+    <LinearLayout android:id="@+id/view_group_translate_menu_options"
+                  android:layout_toEndOf="@id/button_translate_menu"
+                  android:layout_alignTop="@id/button_translate_menu"
+                  android:layout_marginStart="@dimen/content_horizontal_margin"
+                  android:orientation="horizontal"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content">
+
+        <Button android:id="@+id/button_translate_x_axis"
+                android:background="@drawable/button_background_circle_toggle"
+                android:text="@string/button_x_axis"
+                android:textColor="@color/foreground_button"
+                android:layout_width="@dimen/touch_target_width"
+                android:layout_height="@dimen/touch_target_height"/>
+
+        <Button android:id="@+id/button_translate_y_axis"
+                android:background="@drawable/button_background_circle_toggle"
+                android:text="@string/button_y_axis"
+                android:textColor="@color/foreground_button"
+                android:layout_marginStart="@dimen/content_horizontal_margin"
+                android:layout_width="@dimen/touch_target_width"
+                android:layout_height="@dimen/touch_target_height"/>
+
+        <Button android:id="@+id/button_translate_z_axis"
+                android:background="@drawable/button_background_circle_toggle"
+                android:text="@string/button_z_axis"
+                android:textColor="@color/foreground_button"
+                android:layout_marginStart="@dimen/content_horizontal_margin"
+                android:layout_width="@dimen/touch_target_width"
+                android:layout_height="@dimen/touch_target_height"/>
+
+    </LinearLayout>
+
+    <Button android:id="@+id/button_rotate_menu"
+            android:background="@drawable/button_background_circle_toggle"
+            android:text="@string/button_rotate_menu"
+            android:textColor="@color/foreground_button"
+            android:layout_marginTop="@dimen/content_vertical_margin"
+            android:layout_below="@id/button_translate_menu"
+            android:layout_alignStart="@id/image_button_transform_menu"
+            android:layout_width="@dimen/touch_target_width"
+            android:layout_height="@dimen/touch_target_height"/>
+
+    <LinearLayout android:id="@+id/view_group_rotate_menu_options"
+                  android:layout_toEndOf="@id/button_rotate_menu"
+                  android:layout_alignTop="@id/button_rotate_menu"
+                  android:layout_marginStart="@dimen/content_horizontal_margin"
+                  android:orientation="horizontal"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content">
+
+        <Button android:id="@+id/button_rotate_x_axis"
+                android:background="@drawable/button_background_circle_toggle"
+                android:text="@string/button_x_axis"
+                android:textColor="@color/foreground_button"
+                android:layout_width="@dimen/touch_target_width"
+                android:layout_height="@dimen/touch_target_height"/>
+
+        <Button android:id="@+id/button_rotate_y_axis"
+                android:background="@drawable/button_background_circle_toggle"
+                android:text="@string/button_y_axis"
+                android:textColor="@color/foreground_button"
+                android:layout_marginStart="@dimen/content_horizontal_margin"
+                android:layout_width="@dimen/touch_target_width"
+                android:layout_height="@dimen/touch_target_height"/>
+
+        <Button android:id="@+id/button_rotate_z_axis"
+                android:background="@drawable/button_background_circle_toggle"
+                android:text="@string/button_z_axis"
+                android:textColor="@color/foreground_button"
+                android:layout_marginStart="@dimen/content_horizontal_margin"
+                android:layout_width="@dimen/touch_target_width"
+                android:layout_height="@dimen/touch_target_height"/>
+
+    </LinearLayout>
+
+    <Button android:id="@+id/button_scale_menu"
+            android:background="@drawable/button_background_circle_toggle"
+            android:text="@string/button_scale_menu"
+            android:textColor="@color/foreground_button"
+            android:layout_marginTop="@dimen/content_vertical_margin"
+            android:layout_below="@id/button_rotate_menu"
+            android:layout_alignStart="@id/image_button_transform_menu"
+            android:layout_width="@dimen/touch_target_width"
+            android:layout_height="@dimen/touch_target_height"/>
+
+    <LinearLayout android:id="@+id/view_group_scale_menu_options"
+                  android:layout_toEndOf="@id/button_scale_menu"
+                  android:layout_alignTop="@id/button_scale_menu"
+                  android:layout_marginStart="@dimen/content_horizontal_margin"
+                  android:orientation="horizontal"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content">
+
+        <Button android:id="@+id/button_scale_x_axis"
+                android:background="@drawable/button_background_circle_toggle"
+                android:text="@string/button_x_axis"
+                android:textColor="@color/foreground_button"
+                android:layout_width="@dimen/touch_target_width"
+                android:layout_height="@dimen/touch_target_height"/>
+
+        <Button android:id="@+id/button_scale_y_axis"
+                android:background="@drawable/button_background_circle_toggle"
+                android:text="@string/button_y_axis"
+                android:textColor="@color/foreground_button"
+                android:layout_marginStart="@dimen/content_horizontal_margin"
+                android:layout_width="@dimen/touch_target_width"
+                android:layout_height="@dimen/touch_target_height"/>
+
+        <Button android:id="@+id/button_scale_z_axis"
+                android:background="@drawable/button_background_circle_toggle"
+                android:text="@string/button_z_axis"
+                android:textColor="@color/foreground_button"
+                android:layout_marginStart="@dimen/content_horizontal_margin"
+                android:layout_width="@dimen/touch_target_width"
+                android:layout_height="@dimen/touch_target_height"/>
+
+    </LinearLayout>
+
+    <ImageButton android:id="@+id/image_button_show_actor_metadata_edit_view"
                  android:background="@drawable/button_background_circle"
                  android:src="@drawable/ic_description_black_24dp"
                  android:tint="@color/foreground_overlay"
+                 android:layout_toEndOf="@id/image_button_transform_menu"
                  android:layout_marginStart="@dimen/content_vertical_margin"
                  android:layout_width="@dimen/touch_target_width"
                  android:layout_height="@dimen/touch_target_height"/>
@@ -27,8 +165,9 @@
                  android:background="@drawable/button_background_circle"
                  android:src="@drawable/ic_delete_black_24dp"
                  android:tint="@color/foreground_overlay"
+                 android:layout_toEndOf="@id/image_button_show_actor_metadata_edit_view"
                  android:layout_marginStart="@dimen/content_vertical_margin"
                  android:layout_width="@dimen/touch_target_width"
                  android:layout_height="@dimen/touch_target_height"/>
 
-</LinearLayout>
+</RelativeLayout>

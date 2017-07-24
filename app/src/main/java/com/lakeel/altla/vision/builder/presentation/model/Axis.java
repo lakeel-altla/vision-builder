@@ -9,10 +9,10 @@ public enum Axis {
     Y(1),
     Z(2);
 
-    private final int mValue;
+    private final int value;
 
     Axis(int value) {
-        mValue = value;
+        this.value = value;
     }
 
     /**
@@ -21,6 +21,6 @@ public enum Axis {
      * @return The value assigned to this instance.
      */
     public int getValue() {
-        return mValue;
+        return value;
     }
 }

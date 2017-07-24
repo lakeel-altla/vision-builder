@@ -4,9 +4,6 @@
     <string name="button_translate">TRANSLATE</string>
     <string name="button_rotate">ROTATE</string>
     <string name="button_scale">SCALE</string>
-    <string name="button_x_axis">X-axis</string>
-    <string name="button_y_axis">Y-axis</string>
-    <string name="button_z_axis">Z-axis</string>
     <string name="button_edit">Edit</string>
     <string name="button_create">Create</string>
     <string name="button_delete">DELETE</string>
@@ -97,5 +94,11 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="button_translate_menu">T</string>
+    <string name="button_x_axis">X</string>
+    <string name="button_y_axis">Y</string>
+    <string name="button_z_axis">Z</string>
+    <string name="button_rotate_menu">R</string>
+    <string name="button_scale_menu">S</string>
 
 </resources>

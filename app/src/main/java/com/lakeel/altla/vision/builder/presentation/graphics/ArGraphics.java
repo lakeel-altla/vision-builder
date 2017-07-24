@@ -22,12 +22,15 @@ import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultTextureBinder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.RenderContext;
+import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.math.Quaternion;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Queue;
 import com.lakeel.altla.android.log.Log;
 import com.lakeel.altla.android.log.LogFactory;
+import com.lakeel.altla.vision.builder.presentation.model.Axis;
 import com.lakeel.altla.vision.model.Actor;
 import com.lakeel.altla.vision.model.Asset;
 import com.lakeel.altla.vision.model.AssetType;
@@ -36,11 +39,10 @@ import com.projecttango.tangosupport.TangoSupport;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.util.SimpleArrayMap;
 import android.view.Display;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.badlogic.gdx.graphics.VertexAttributes.Usage.ColorPacked;
@@ -92,15 +94,15 @@ public final class ArGraphics extends ApplicationAdapter {
 
     private final ColorObjectPicker picker = new ColorObjectPicker();
 
-    private final Map<String, Actor> actorMap = new HashMap<>();
+    private final SimpleArrayMap<String, Actor> actorMap = new SimpleArrayMap<>();
 
     private final Queue<ActorBuildRequest> actorBuildRequestQueue = new Queue<>();
 
-    private final Map<String, Model> modelMap = new HashMap<>();
+    private final SimpleArrayMap<String, Model> modelMap = new SimpleArrayMap<>();
 
     private final Array<ActorObject> actorObjects = new Array<>();
 
-    private final Map<String, ActorObject> actorObjectMap = new HashMap<>();
+    private final SimpleArrayMap<String, ActorObject> actorObjectMap = new SimpleArrayMap<>();
 
     private final Array<ModelInstance> visibleInstances = new Array<>();
 
@@ -108,10 +110,13 @@ public final class ArGraphics extends ApplicationAdapter {
 
     private boolean debugFrameBuffersVisible;
 
+    @Nullable
     private CursorBuildRequest cursorBuildRequest;
 
+    @Nullable
     private Model cursorModel;
 
+    @Nullable
     private CursorObject cursorObject;
 
     private boolean removeCursorRequested;
@@ -120,9 +125,17 @@ public final class ArGraphics extends ApplicationAdapter {
 
     private ActorAxesObject actorAxesObject;
 
+    @Nullable
     private ActorObject touchedActorObject;
 
+    private boolean touchedActorObjectLocked;
+
     private boolean actorAxesObjectVisible;
+
+    private boolean translationEnabled;
+
+    @Nullable
+    private Axis translationAxis;
 
     public ArGraphics(@NonNull Display display, @NonNull Listener listener) {
         this.display = display;
@@ -150,6 +163,83 @@ public final class ArGraphics extends ApplicationAdapter {
         actorAxesObject = new ActorAxesObject(actorAxesModel);
 
         spriteBatch = new SpriteBatch();
+
+        Gdx.input.setInputProcessor(new GestureDetector(new GestureDetector.GestureListener() {
+            @Override
+            public boolean touchDown(float x, float y, int pointer, int button) {
+                return false;
+            }
+
+            @Override
+            public boolean tap(float x, float y, int count, int button) {
+                LOG.d("tap: x = %f, y = %f, count = %d, button = %d", x, y, count, button);
+                return false;
+            }
+
+            @Override
+            public boolean longPress(float x, float y) {
+                LOG.d("longPress: x = %f, y = %f", x, y);
+                return false;
+            }
+
+            @Override
+            public boolean fling(float velocityX, float velocityY, int button) {
+                LOG.d("fling: velocityX = %f, velocityY = %f, button = %d", velocityX, velocityY, button);
+                return false;
+            }
+
+            @Override
+            public boolean pan(float x, float y, float deltaX, float deltaY) {
+                LOG.d("pan: x = %f, y = %f, deltaX = %f, deltaY = %f", x, y, deltaX, deltaY);
+                if (translationEnabled && translationAxis != null && touchedActorObject != null) {
+                    final float distance;
+                    switch (translationAxis) {
+                        case X:
+                            distance = deltaX * 0.001f;
+                            break;
+                        case Y:
+                            distance = -deltaY * 0.001f;
+                            break;
+                        case Z:
+                            distance = deltaY * 0.001f;
+                            break;
+                        default:
+                            throw new IllegalStateException("An unexpected axis: " + translationAxis);
+                    }
+                    touchedActorObject.translateAlong(translationAxis, distance);
+                    return true;
+                }
+                return false;
+            }
+
+            @Override
+            public boolean panStop(float x, float y, int pointer, int button) {
+                LOG.d("panStop: x = %f, y = %f, pointer = %d, button = %d");
+                if (translationEnabled && translationAxis != null && touchedActorObject != null) {
+                    touchedActorObject.fixTranslation();
+                    listener.onActorChanged(touchedActorObject.actor);
+                }
+                return false;
+            }
+
+            @Override
+            public boolean zoom(float initialDistance, float distance) {
+                LOG.d("zoom: initialDistance = %f, distance = %f", initialDistance, distance);
+                return false;
+            }
+
+            @Override
+            public boolean pinch(Vector2 initialPointer1, Vector2 initialPointer2, Vector2 pointer1, Vector2 pointer2) {
+                LOG.d("pinch: initialPointer1 = %s, initialPointer2 = %s, pointer1 = %s, pointer2 = %s",
+                      initialPointer1, initialPointer2, pointer1, pointer2);
+                return false;
+            }
+
+            @Override
+            public void pinchStop() {
+                LOG.d("pinchStop");
+            }
+        }));
     }
 
     @Override
@@ -178,9 +268,10 @@ public final class ArGraphics extends ApplicationAdapter {
         spriteBatch.dispose();
         picker.dispose();
 
-        for (Model model : modelMap.values()) {
-            model.dispose();
+        for (int i = 0; i < modelMap.size(); i++) {
+            modelMap.valueAt(i).dispose();
         }
+        modelMap.clear();
     }
 
     // Invoked in Tango thread.
@@ -234,8 +325,17 @@ public final class ArGraphics extends ApplicationAdapter {
         actorObjects.removeValue(actorObject, true);
     }
 
+    public void setTouchedActorObjectLocked(boolean touchedActorObjectLocked) {
+        this.touchedActorObjectLocked = touchedActorObjectLocked;
+    }
+
     public void setActorAxesObjectVisible(boolean actorAxesObjectVisible) {
         this.actorAxesObjectVisible = actorAxesObjectVisible;
+    }
+
+    public void setTranslationEnabled(boolean translationEnabled, @Nullable Axis axis) {
+        this.translationEnabled = translationEnabled;
+        translationAxis = translationEnabled ? axis : null;
     }
 
     private void update() {
@@ -399,19 +499,23 @@ public final class ArGraphics extends ApplicationAdapter {
 
             if (instance == null) {
                 if (cursorObject == null) {
-                    touchedActorObject = null;
-                    listener.onActorTouched(null);
+                    if (!touchedActorObjectLocked) {
+                        touchedActorObject = null;
+                        listener.onActorObjectTouched(null);
+                    }
                 }
             } else if (instance instanceof ActorObject) {
-                touchedActorObject = (ActorObject) instance;
-                listener.onActorTouched(touchedActorObject.actor);
+                if (!touchedActorObjectLocked) {
+                    touchedActorObject = (ActorObject) instance;
+                    listener.onActorObjectTouched(touchedActorObject.actor);
+                }
             } else if (instance instanceof CursorObject) {
                 final CursorObject cursorObject = (CursorObject) instance;
-                listener.onCursorTouched(cursorObject.asset,
-                                         cursorObject.assetType,
-                                         new Vector3(cursorObject.position),
-                                         new Quaternion(cursorObject.rotation),
-                                         new Vector3(1, 1, 1));
+                listener.onCursorObjectTouched(cursorObject.asset,
+                                               cursorObject.assetType,
+                                               new Vector3(cursorObject.position),
+                                               new Quaternion(cursorObject.rotation),
+                                               new Vector3(1, 1, 1));
                 // Remove the cursor.
                 removeCursor();
             } else {
@@ -440,9 +544,11 @@ public final class ArGraphics extends ApplicationAdapter {
 
     public interface Listener {
 
-        void onActorTouched(@Nullable Actor actor);
+        void onActorObjectTouched(@Nullable Actor actor);
 
-        void onCursorTouched(@NonNull Asset asset, @NonNull AssetType assetType,
-                             @NonNull Vector3 position, @NonNull Quaternion rotation, @NonNull Vector3 scale);
+        void onCursorObjectTouched(@NonNull Asset asset, @NonNull AssetType assetType,
+                                   @NonNull Vector3 position, @NonNull Quaternion rotation, @NonNull Vector3 scale);
+
+        void onActorChanged(@NonNull Actor actor);
     }
 }

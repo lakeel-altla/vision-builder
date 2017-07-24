@@ -24,6 +24,7 @@ import com.lakeel.altla.vision.builder.presentation.di.component.ActivityCompone
 import com.lakeel.altla.vision.builder.presentation.di.module.ActivityModule;
 import com.lakeel.altla.vision.builder.presentation.graphics.ArGraphics;
 import com.lakeel.altla.vision.builder.presentation.model.ArModel;
+import com.lakeel.altla.vision.builder.presentation.model.Axis;
 import com.lakeel.altla.vision.builder.presentation.view.pane.ActorEditMenuPane;
 import com.lakeel.altla.vision.builder.presentation.view.pane.ActorMetadataPane;
 import com.lakeel.altla.vision.builder.presentation.view.pane.DebugMenuPane;
@@ -330,7 +331,7 @@ public final class ArActivity extends AndroidApplication
     }
 
     @Override
-    public void onActorTouched(@Nullable Actor actor) {
+    public void onActorObjectTouched(@Nullable Actor actor) {
         runOnUiThread(() -> {
             arModel.setSelectedActor(actor);
             if (editMode) {
@@ -353,9 +354,10 @@ public final class ArActivity extends AndroidApplication
     }
 
     @Override
-    public void onCursorTouched(@NonNull Asset asset, @NonNull AssetType assetType, @NonNull Vector3 position,
-                                @NonNull Quaternion rotation, @NonNull Vector3 scale) {
+    public void onCursorObjectTouched(@NonNull Asset asset, @NonNull AssetType assetType, @NonNull Vector3 position,
+                                      @NonNull Quaternion rotation, @NonNull Vector3 scale) {
         runOnUiThread(() -> {
+            // TODO: use ArModel.
             final Actor actor = new Actor();
             actor.setUserId(CurrentUser.getInstance().getUserId());
             actor.setScopeAsEnum(Scope.USER);
@@ -381,6 +383,16 @@ public final class ArActivity extends AndroidApplication
 
             // Add the actor into the scene.
             addActor(actor);
+        });
+    }
+
+    @Override
+    public void onActorChanged(@NonNull Actor actor) {
+        runOnUiThread(() -> {
+            // TODO: use ArModel.
+            // Save the actor.
+            visionService.getUserActorApi()
+                         .saveActor(actor);
         });
     }
 
@@ -433,10 +445,23 @@ public final class ArActivity extends AndroidApplication
     }
 
     @Override
-    public void showActorMetadataEditPane() {
-//        actorMetadataEditPane.show();
+    public void showActorMetadataEditView() {
         final Intent intent = ActorMetadataEditActivity.createIntent(this);
         startActivity(intent);
+    }
+
+    @Override
+    public void setSelectedActorLocked(boolean locked) {
+        Gdx.app.postRunnable(() -> {
+            arGraphics.setTouchedActorObjectLocked(locked);
+        });
+    }
+
+    @Override
+    public void setTranslationEnabled(boolean enabled, @Nullable Axis axis) {
+        Gdx.app.postRunnable(() -> {
+            arGraphics.setTranslationEnabled(enabled, axis);
+        });
     }
 
     //
