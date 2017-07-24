@@ -80,6 +80,8 @@ public final class ActorEditMenuPane extends Pane {
         void setTranslationEnabled(boolean enabled, @Nullable Axis axis);
 
         void setRotationEnabled(boolean enabled, @Nullable Axis axis);
+
+        void setScaleEnabled(boolean enabled);
     }
 
     class TransformMenu {
@@ -281,18 +283,6 @@ public final class ActorEditMenuPane extends Pane {
         @BindView(R.id.button_scale_menu)
         Button buttonMenu;
 
-        @BindView(R.id.button_scale_x_axis)
-        Button buttonXAxis;
-
-        @BindView(R.id.button_scale_y_axis)
-        Button buttonYAxis;
-
-        @BindView(R.id.button_scale_z_axis)
-        Button buttonZAxis;
-
-        @BindViews({ R.id.button_scale_x_axis, R.id.button_scale_y_axis, R.id.button_scale_z_axis })
-        List<Button> buttonOptions;
-
         ScaleMenu() {
             ButterKnife.bind(this, view);
         }
@@ -306,29 +296,9 @@ public final class ActorEditMenuPane extends Pane {
             }
         }
 
-        @OnClick(R.id.button_scale_x_axis)
-        void onClickXAxis() {
-            buttonXAxis.setSelected(true);
-        }
-
-        @OnClick(R.id.button_scale_y_axis)
-        void onClickYAxis() {
-            buttonYAxis.setSelected(true);
-        }
-
-        @OnClick(R.id.button_scale_z_axis)
-        void onClickZAxis() {
-            buttonZAxis.setSelected(true);
-        }
-
         void setSelected(boolean selected) {
             buttonMenu.setSelected(selected);
-            for (final Button button : buttonOptions) {
-                button.setVisibility(selected ? VISIBLE : GONE);
-                if (!selected) {
-                    button.setSelected(false);
-                }
-            }
+            paneContext.setScaleEnabled(selected);
         }
 
         void setVisible(boolean visible) {

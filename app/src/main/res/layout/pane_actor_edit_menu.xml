@@ -119,39 +119,6 @@
             android:layout_width="@dimen/touch_target_width"
             android:layout_height="@dimen/touch_target_height"/>
 
-    <LinearLayout android:id="@+id/view_group_scale_menu_options"
-                  android:layout_toEndOf="@id/button_scale_menu"
-                  android:layout_alignTop="@id/button_scale_menu"
-                  android:layout_marginStart="@dimen/content_horizontal_margin"
-                  android:orientation="horizontal"
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content">
-
-        <Button android:id="@+id/button_scale_x_axis"
-                android:background="@drawable/button_background_circle_toggle"
-                android:text="@string/button_x_axis"
-                android:textColor="@color/foreground_button"
-                android:layout_width="@dimen/touch_target_width"
-                android:layout_height="@dimen/touch_target_height"/>
-
-        <Button android:id="@+id/button_scale_y_axis"
-                android:background="@drawable/button_background_circle_toggle"
-                android:text="@string/button_y_axis"
-                android:textColor="@color/foreground_button"
-                android:layout_marginStart="@dimen/content_horizontal_margin"
-                android:layout_width="@dimen/touch_target_width"
-                android:layout_height="@dimen/touch_target_height"/>
-
-        <Button android:id="@+id/button_scale_z_axis"
-                android:background="@drawable/button_background_circle_toggle"
-                android:text="@string/button_z_axis"
-                android:textColor="@color/foreground_button"
-                android:layout_marginStart="@dimen/content_horizontal_margin"
-                android:layout_width="@dimen/touch_target_width"
-                android:layout_height="@dimen/touch_target_height"/>
-
-    </LinearLayout>
-
     <ImageButton android:id="@+id/image_button_show_actor_metadata_edit_view"
                  android:background="@drawable/button_background_circle"
                  android:src="@drawable/ic_description_black_24dp"

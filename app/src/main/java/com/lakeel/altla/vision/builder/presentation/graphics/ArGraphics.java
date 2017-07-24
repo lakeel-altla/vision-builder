@@ -48,7 +48,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static com.badlogic.gdx.graphics.VertexAttributes.Usage.ColorPacked;
 import static com.badlogic.gdx.graphics.VertexAttributes.Usage.Position;
 
-public final class ArGraphics extends ApplicationAdapter {
+public final class ArGraphics extends ApplicationAdapter implements GestureDetector.GestureListener {
 
     private static final Log LOG = LogFactory.getLog(ArGraphics.class);
 
@@ -57,6 +57,12 @@ public final class ArGraphics extends ApplicationAdapter {
     private static final float NEAR_PLANE_DISTANCE = 0.1f;
 
     private static final float FAR_PLANE_DISTANCE = 10f;
+
+    private static final float TRANSLATION_COEFF = 0.001f;
+
+    private static final float ROTATION_COEFF = 0.5f;
+
+    private static final float SCALING_COEFF = 0.001f;
 
     private final FPSLogger fpsLogger = new FPSLogger();
 
@@ -136,6 +142,8 @@ public final class ArGraphics extends ApplicationAdapter {
 
     private boolean rotationEnabled;
 
+    private boolean scaleEnabled;
+
     @Nullable
     private Axis transformAxis;
 
@@ -166,111 +174,7 @@ public final class ArGraphics extends ApplicationAdapter {
 
         spriteBatch = new SpriteBatch();
 
-        Gdx.input.setInputProcessor(new GestureDetector(new GestureDetector.GestureListener() {
-            @Override
-            public boolean touchDown(float x, float y, int pointer, int button) {
-                return false;
-            }
-
-            @Override
-            public boolean tap(float x, float y, int count, int button) {
-                LOG.d("tap: x = %f, y = %f, count = %d, button = %d", x, y, count, button);
-                return false;
-            }
-
-            @Override
-            public boolean longPress(float x, float y) {
-                LOG.d("longPress: x = %f, y = %f", x, y);
-                return false;
-            }
-
-            @Override
-            public boolean fling(float velocityX, float velocityY, int button) {
-                LOG.d("fling: velocityX = %f, velocityY = %f, button = %d", velocityX, velocityY, button);
-                return false;
-            }
-
-            @Override
-            public boolean pan(float x, float y, float deltaX, float deltaY) {
-                LOG.d("pan: x = %f, y = %f, deltaX = %f, deltaY = %f", x, y, deltaX, deltaY);
-                if (touchedActorObject != null) {
-                    if (translationEnabled && transformAxis != null) {
-                        float distance;
-                        switch (transformAxis) {
-                            case X:
-                                distance = deltaX;
-                                break;
-                            case Y:
-                                distance = -deltaY;
-                                break;
-                            case Z:
-                                distance = deltaY;
-                                break;
-                            default:
-                                throw new IllegalStateException("An unexpected axis: " + transformAxis);
-                        }
-                        // TODO
-                        final float coeff = 0.001f;
-                        distance *= coeff;
-                        touchedActorObject.translateAlong(transformAxis, distance);
-                        return true;
-                    } else if (rotationEnabled && transformAxis != null) {
-                        float degrees;
-                        switch (transformAxis) {
-                            case X:
-                                degrees = deltaY;
-                                break;
-                            case Y:
-                                degrees = deltaX;
-                                break;
-                            case Z:
-                                degrees = -deltaX;
-                                break;
-                            default:
-                                throw new IllegalStateException("An unexpected axis: " + transformAxis);
-                        }
-                        // TODO
-                        final float coeff = 0.5f;
-                        degrees *= coeff;
-                        touchedActorObject.rotateAround(transformAxis, degrees);
-                    }
-                }
-                return false;
-            }
-
-            @Override
-            public boolean panStop(float x, float y, int pointer, int button) {
-                LOG.d("panStop: x = %f, y = %f, pointer = %d, button = %d");
-                if (touchedActorObject != null) {
-                    if (translationEnabled && transformAxis != null) {
-                        touchedActorObject.fixTranslation();
-                        listener.onActorChanged(touchedActorObject.actor);
-                    } else if (rotationEnabled && transformAxis != null) {
-                        touchedActorObject.fixRotation();
-                        listener.onActorChanged(touchedActorObject.actor);
-                    }
-                }
-                return false;
-            }
-
-            @Override
-            public boolean zoom(float initialDistance, float distance) {
-                LOG.d("zoom: initialDistance = %f, distance = %f", initialDistance, distance);
-                return false;
-            }
-
-            @Override
-            public boolean pinch(Vector2 initialPointer1, Vector2 initialPointer2, Vector2 pointer1, Vector2 pointer2) {
-                LOG.d("pinch: initialPointer1 = %s, initialPointer2 = %s, pointer1 = %s, pointer2 = %s",
-                      initialPointer1, initialPointer2, pointer1, pointer2);
-                return false;
-            }
-
-            @Override
-            public void pinchStop() {
-                LOG.d("pinchStop");
-            }
-        }));
+        Gdx.input.setInputProcessor(new GestureDetector(this));
     }
 
     @Override
@@ -303,6 +207,113 @@ public final class ArGraphics extends ApplicationAdapter {
             modelMap.valueAt(i).dispose();
         }
         modelMap.clear();
+    }
+
+    @Override
+    public boolean touchDown(float x, float y, int pointer, int button) {
+        return false;
+    }
+
+    @Override
+    public boolean tap(float x, float y, int count, int button) {
+        LOG.d("tap: x = %f, y = %f, count = %d, button = %d", x, y, count, button);
+        return false;
+    }
+
+    @Override
+    public boolean longPress(float x, float y) {
+        LOG.d("longPress: x = %f, y = %f", x, y);
+        return false;
+    }
+
+    @Override
+    public boolean fling(float velocityX, float velocityY, int button) {
+        LOG.d("fling: velocityX = %f, velocityY = %f, button = %d", velocityX, velocityY, button);
+        return false;
+    }
+
+    @Override
+    public boolean pan(float x, float y, float deltaX, float deltaY) {
+        LOG.d("pan: x = %f, y = %f, deltaX = %f, deltaY = %f", x, y, deltaX, deltaY);
+        if (touchedActorObject != null) {
+            if (translationEnabled && transformAxis != null) {
+                float distance;
+                switch (transformAxis) {
+                    case X:
+                        distance = deltaX;
+                        break;
+                    case Y:
+                        distance = -deltaY;
+                        break;
+                    case Z:
+                        distance = deltaY;
+                        break;
+                    default:
+                        throw new IllegalStateException("An unexpected axis: " + transformAxis);
+                }
+                distance *= TRANSLATION_COEFF;
+                touchedActorObject.translate(transformAxis, distance);
+                return true;
+            } else if (rotationEnabled && transformAxis != null) {
+                float degrees;
+                switch (transformAxis) {
+                    case X:
+                        degrees = deltaY;
+                        break;
+                    case Y:
+                        degrees = deltaX;
+                        break;
+                    case Z:
+                        degrees = -deltaX;
+                        break;
+                    default:
+                        throw new IllegalStateException("An unexpected axis: " + transformAxis);
+                }
+                degrees *= ROTATION_COEFF;
+                touchedActorObject.rotate(transformAxis, degrees);
+            } else if (scaleEnabled) {
+                float delta = (Math.abs(deltaY) <= Math.abs(deltaX)) ? deltaX : -deltaY;
+                delta *= SCALING_COEFF;
+                touchedActorObject.scale(delta);
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean panStop(float x, float y, int pointer, int button) {
+        LOG.d("panStop: x = %f, y = %f, pointer = %d, button = %d");
+        if (touchedActorObject != null) {
+            if (translationEnabled && transformAxis != null) {
+                touchedActorObject.fixTranslation();
+                listener.onActorChanged(touchedActorObject.actor);
+            } else if (rotationEnabled && transformAxis != null) {
+                touchedActorObject.fixRotation();
+                listener.onActorChanged(touchedActorObject.actor);
+            } else if (scaleEnabled) {
+                touchedActorObject.fixScaling();
+                listener.onActorChanged(touchedActorObject.actor);
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean zoom(float initialDistance, float distance) {
+        LOG.d("zoom: initialDistance = %f, distance = %f", initialDistance, distance);
+        return false;
+    }
+
+    @Override
+    public boolean pinch(Vector2 initialPointer1, Vector2 initialPointer2, Vector2 pointer1, Vector2 pointer2) {
+        LOG.d("pinch: initialPointer1 = %s, initialPointer2 = %s, pointer1 = %s, pointer2 = %s",
+              initialPointer1, initialPointer2, pointer1, pointer2);
+        return false;
+    }
+
+    @Override
+    public void pinchStop() {
+        LOG.d("pinchStop");
     }
 
     // Invoked in Tango thread.
@@ -372,6 +383,10 @@ public final class ArGraphics extends ApplicationAdapter {
     public void setRotationEnabled(boolean rotationEnabled, @Nullable Axis axis) {
         this.rotationEnabled = rotationEnabled;
         transformAxis = rotationEnabled ? axis : null;
+    }
+
+    public void setScaleEnabled(boolean scaleEnabled) {
+        this.scaleEnabled = scaleEnabled;
     }
 
     private void update() {

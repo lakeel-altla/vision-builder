@@ -1,10 +1,12 @@
 package com.lakeel.altla.vision.builder.presentation.graphics;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
+import com.badlogic.gdx.graphics.g3d.attributes.IntAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.lakeel.altla.android.log.Log;
@@ -36,7 +38,10 @@ public final class ImageAssetModelBuilder implements AssetModelBuilder {
         LOG.d("Loading the texture: path = %s", imageCache.getPath());
 
         final Texture texture = new Texture(Gdx.files.absolute(imageCache.getPath()));
-        final Material material = new Material(TextureAttribute.createDiffuse(texture), new BlendingAttribute());
+
+        final Material material = new Material(TextureAttribute.createDiffuse(texture),
+                                               new BlendingAttribute(),
+                                               IntAttribute.createCullFace(GL20.GL_NONE));
 
         final ModelBuilder modelBuilder = new ModelBuilder();
         final Model model = modelBuilder.createRect(

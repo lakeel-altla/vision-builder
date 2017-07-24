@@ -8,11 +8,13 @@ import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.VertexAttribute;
+import com.badlogic.gdx.graphics.g3d.Attribute;
 import com.badlogic.gdx.graphics.g3d.Attributes;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.graphics.g3d.attributes.IntAttribute;
 import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
 import com.badlogic.gdx.graphics.g3d.utils.RenderContext;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
@@ -146,8 +148,16 @@ public final class ColorObjectPicker implements Disposable {
             for (int j = offset; j < renderables.size; j++) {
                 final Renderable renderable = renderables.get(j);
                 renderable.shader = pickShader;
-                // Render meshes with the empty attributes to ignore the material (e.g. blending) of models.
+
+                // Render meshes with custom attributes ignoring a material of models.
+                final Attribute attribute = renderable.material.get(IntAttribute.CullFace);
+                if (attribute != null) {
+                    ATTRIBUTES.set(attribute);
+                }
+
                 pickShader.render(renderable, ATTRIBUTES);
+
+                ATTRIBUTES.clear();
             }
         }
 

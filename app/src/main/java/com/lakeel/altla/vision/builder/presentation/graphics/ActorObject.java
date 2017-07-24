@@ -11,17 +11,21 @@ import android.support.annotation.NonNull;
 
 public final class ActorObject extends ModelInstance {
 
-    // A temp vector.
-    private static final Vector3 TEMP_AXIS_VECTOR = new Vector3();
+    private static final float MAX_SCALING_RATIO = 1.2f;
+
+    private static final float MIN_SCALING_RATIO = 0.8f;
 
     // A temp vector.
-    private static final Vector3 TEMP_TRANSLATION = new Vector3();
+    private static final Vector3 TEMP_AXIS_VECTOR = new Vector3();
 
     // A temp vector.
     private static final Quaternion TEMP_ROTATION = new Quaternion();
 
     // A temp vector.
-    private static final Vector3 TEMP_POSITION = new Vector3();
+    private static final Vector3 TEMP_TRANSLATION = new Vector3();
+
+    // A temp vector.
+    private static final Vector3 TEMP_SCALE = new Vector3();
 
     public final Actor actor;
 
@@ -44,7 +48,7 @@ public final class ActorObject extends ModelInstance {
                         (float) actor.getScaleZ() * transform.getScaleZ());
     }
 
-    public void translateAlong(@NonNull Axis axis, float distance) {
+    public void translate(@NonNull Axis axis, float distance) {
         axis.toVector3(TEMP_AXIS_VECTOR);
 
         // Resolve the direction of a specified axis.
@@ -52,28 +56,25 @@ public final class ActorObject extends ModelInstance {
         TEMP_AXIS_VECTOR.mul(TEMP_ROTATION).nor();
 
         // Calculate the translaton along the specified axis.
-        TEMP_TRANSLATION.set(TEMP_AXIS_VECTOR);
-        TEMP_TRANSLATION.scl(distance);
+        TEMP_AXIS_VECTOR.scl(distance);
 
         // Get the position of this actor.
-        transform.getTranslation(TEMP_POSITION);
+        transform.getTranslation(TEMP_TRANSLATION);
 
         // Calculate and set the new position of this actor.
-        TEMP_POSITION.add(TEMP_TRANSLATION);
-        transform.setTranslation(TEMP_POSITION);
+        TEMP_TRANSLATION.add(TEMP_AXIS_VECTOR);
+        transform.setTranslation(TEMP_TRANSLATION);
     }
 
     public void fixTranslation() {
-        transform.getTranslation(TEMP_POSITION);
-        actor.setPosition(TEMP_POSITION.x,
-                          TEMP_POSITION.y,
-                          TEMP_POSITION.z);
+        transform.getTranslation(TEMP_TRANSLATION);
+        actor.setPosition(TEMP_TRANSLATION.x,
+                          TEMP_TRANSLATION.y,
+                          TEMP_TRANSLATION.z);
     }
 
-    public void rotateAround(@NonNull Axis axis, float degrees) {
+    public void rotate(@NonNull Axis axis, float degrees) {
         axis.toVector3(TEMP_AXIS_VECTOR);
-
-        // Rotate.
         transform.rotate(TEMP_AXIS_VECTOR, degrees);
     }
 
@@ -83,5 +84,17 @@ public final class ActorObject extends ModelInstance {
                              TEMP_ROTATION.y,
                              TEMP_ROTATION.z,
                              TEMP_ROTATION.w);
+    }
+
+    public void scale(float delta) {
+        final float ratio = Math.min(Math.max(1 + delta, MIN_SCALING_RATIO), MAX_SCALING_RATIO);
+        transform.scale(ratio, ratio, ratio);
+    }
+
+    public void fixScaling() {
+        transform.getScale(TEMP_SCALE);
+        actor.setScale(TEMP_SCALE.x,
+                       TEMP_SCALE.y,
+                       TEMP_SCALE.z);
     }
 }

@@ -471,6 +471,13 @@ public final class ArActivity extends AndroidApplication
         });
     }
 
+    @Override
+    public void setScaleEnabled(boolean enabled) {
+        Gdx.app.postRunnable(() -> {
+            arGraphics.setScaleEnabled(enabled);
+        });
+    }
+
     //
     // NOTE:
     //
