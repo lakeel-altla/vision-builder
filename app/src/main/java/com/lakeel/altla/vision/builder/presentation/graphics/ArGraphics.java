@@ -10,6 +10,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.FPSLogger;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g3d.Environment;
@@ -22,6 +23,7 @@ import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultTextureBinder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.RenderContext;
+import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector2;
@@ -97,6 +99,8 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
     private ModelBatch modelBatch;
 
     private SpriteBatch spriteBatch;
+
+    private FrameBuffer frameBuffer;
 
     private final ColorObjectPicker picker = new ColorObjectPicker();
 
@@ -181,6 +185,12 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
     public void resize(int width, int height) {
         super.resize(width, height);
 
+        if (frameBuffer != null) {
+            frameBuffer.dispose();
+            frameBuffer = null;
+        }
+        frameBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, width, height, true);
+
         cameraConfigured = false;
     }
 
@@ -207,6 +217,11 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
             modelMap.valueAt(i).dispose();
         }
         modelMap.clear();
+
+        if (frameBuffer != null) {
+            frameBuffer.dispose();
+            frameBuffer = null;
+        }
     }
 
     @Override
@@ -514,11 +529,36 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
     }
 
     private void draw() {
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
-
         if (!cameraConfigured) return;
 
         renderContext.begin();
+
+        // Draw the scene.
+        drawScene();
+
+        // Draw and handle the object picker.
+        drawColorObjectPicker();
+
+        renderContext.end();
+
+        // Draw the frame buffer for the scene to the screen
+        spriteBatch.begin();
+        spriteBatch.disableBlending();
+        final Texture texture = frameBuffer.getColorBufferTexture();
+        spriteBatch.draw(texture,
+                         0, 0, Gdx.graphics.getBackBufferWidth(), Gdx.graphics.getBackBufferHeight(),
+                         0, 0, texture.getWidth(), texture.getHeight(),
+                         false, true);
+        spriteBatch.end();
+
+        // Draw frame buffers for debug.
+        drawDebugFrameBuffers();
+    }
+
+    private void drawScene() {
+        frameBuffer.begin();
+
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
         // Draw the camera preview.
         cameraPreview.draw();
@@ -532,6 +572,15 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
             visibleInstances.add(actorAxesObject);
         }
 
+        // Draw models.
+        modelBatch.begin(camera);
+        modelBatch.render(visibleInstances, environment);
+        modelBatch.end();
+
+        frameBuffer.end();
+    }
+
+    private void drawColorObjectPicker() {
         pickableInstances.clear();
         if (cursorObject == null) {
             pickableInstances.addAll(actorObjects);
@@ -539,12 +588,6 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
             pickableInstances.add(cursorObject);
         }
 
-        // Draw models.
-        modelBatch.begin(camera);
-        modelBatch.render(visibleInstances, environment);
-        modelBatch.end();
-
-        // Begin the picking section.
         picker.begin(camera, renderContext);
         picker.render(pickableInstances);
 
@@ -579,18 +622,19 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
         }
 
         picker.end();
+    }
 
-        renderContext.end();
-
-        // Draw frame buffers.
+    private void drawDebugFrameBuffers() {
         if (debugFrameBuffersVisible) {
             spriteBatch.begin();
             spriteBatch.disableBlending();
             // Flip the texture because its origin in OpenGL is the buttom left.
-            final Texture colorBufferTexture = picker.getColorBufferTexture();
-            if (colorBufferTexture != null) {
-                spriteBatch.draw(colorBufferTexture, 0, 0, 512, 512,
-                                 0, 0, colorBufferTexture.getWidth(), colorBufferTexture.getHeight(), false, true);
+            final Texture texture = picker.getColorBufferTexture();
+            if (texture != null) {
+                spriteBatch.draw(texture,
+                                 0, 0, 512, 512,
+                                 0, 0, texture.getWidth(), texture.getHeight(),
+                                 false, true);
             }
             spriteBatch.enableBlending();
             spriteBatch.end();
