@@ -1,5 +1,6 @@
 package com.lakeel.altla.vision.builder.presentation.graphics;
 
+import com.google.atap.tango.mesh.TangoMesh;
 import com.google.atap.tangoservice.Tango;
 import com.google.atap.tangoservice.TangoCameraIntrinsics;
 import com.google.atap.tangoservice.TangoException;
@@ -45,6 +46,7 @@ import android.support.v4.util.SimpleArrayMap;
 import android.view.Display;
 
 import java.io.File;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.badlogic.gdx.graphics.VertexAttributes.Usage.ColorPacked;
@@ -65,6 +67,8 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
     private static final float ROTATION_COEFF = 0.5f;
 
     private static final float SCALING_COEFF = 0.001f;
+
+    private static final int DEBUG_FRAME_BUFFER_VIEW_SIZE = 512;
 
     private final FPSLogger fpsLogger = new FPSLogger();
 
@@ -100,7 +104,11 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
 
     private SpriteBatch spriteBatch;
 
-    private FrameBuffer frameBuffer;
+    private FrameBuffer sceneFrameBuffer;
+
+    private FrameBuffer tangoMeshesFrameBuffer;
+
+    private TangoMeshRenderer tangoMeshRenderer;
 
     private final ColorObjectPicker picker = new ColorObjectPicker();
 
@@ -178,6 +186,8 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
 
         spriteBatch = new SpriteBatch();
 
+        tangoMeshRenderer = new TangoMeshRenderer();
+
         Gdx.input.setInputProcessor(new GestureDetector(this));
     }
 
@@ -185,11 +195,17 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
     public void resize(int width, int height) {
         super.resize(width, height);
 
-        if (frameBuffer != null) {
-            frameBuffer.dispose();
-            frameBuffer = null;
+        if (sceneFrameBuffer != null) {
+            sceneFrameBuffer.dispose();
+            sceneFrameBuffer = null;
         }
-        frameBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, width, height, true);
+        sceneFrameBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, width, height, true);
+
+        if (tangoMeshesFrameBuffer != null) {
+            tangoMeshesFrameBuffer.dispose();
+            tangoMeshesFrameBuffer = null;
+        }
+        tangoMeshesFrameBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, width, height, true);
 
         cameraConfigured = false;
     }
@@ -218,9 +234,14 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
         }
         modelMap.clear();
 
-        if (frameBuffer != null) {
-            frameBuffer.dispose();
-            frameBuffer = null;
+        if (sceneFrameBuffer != null) {
+            sceneFrameBuffer.dispose();
+            sceneFrameBuffer = null;
+        }
+
+        if (tangoMeshesFrameBuffer != null) {
+            tangoMeshesFrameBuffer.dispose();
+            tangoMeshesFrameBuffer = null;
         }
     }
 
@@ -346,6 +367,10 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
 
     public void onFrameAvailable() {
         frameAvailable.set(true);
+    }
+
+    public void updateTangoMeshes(@NonNull List<TangoMesh> tangoMeshes) {
+        tangoMeshRenderer.update(tangoMeshes);
     }
 
     public void setDebugFrameBuffersVisible(boolean debugFrameBuffersVisible) {
@@ -533,6 +558,8 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
 
         renderContext.begin();
 
+        drawTangoMesh();
+
         // Draw the scene.
         drawScene();
 
@@ -544,7 +571,7 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
         // Draw the frame buffer for the scene to the screen
         spriteBatch.begin();
         spriteBatch.disableBlending();
-        final Texture texture = frameBuffer.getColorBufferTexture();
+        final Texture texture = sceneFrameBuffer.getColorBufferTexture();
         spriteBatch.draw(texture,
                          0, 0, Gdx.graphics.getBackBufferWidth(), Gdx.graphics.getBackBufferHeight(),
                          0, 0, texture.getWidth(), texture.getHeight(),
@@ -552,11 +579,13 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
         spriteBatch.end();
 
         // Draw frame buffers for debug.
-        drawDebugFrameBuffers();
+        if (debugFrameBuffersVisible) {
+            drawDebugFrameBuffers();
+        }
     }
 
     private void drawScene() {
-        frameBuffer.begin();
+        sceneFrameBuffer.begin();
 
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
@@ -577,7 +606,18 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
         modelBatch.render(visibleInstances, environment);
         modelBatch.end();
 
-        frameBuffer.end();
+        sceneFrameBuffer.end();
+    }
+
+    private void drawTangoMesh() {
+        tangoMeshesFrameBuffer.begin();
+
+        Gdx.gl.glClearColor(1, 1, 1, 1);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+
+        tangoMeshRenderer.render(camera);
+
+        tangoMeshesFrameBuffer.end();
     }
 
     private void drawColorObjectPicker() {
@@ -625,19 +665,22 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
     }
 
     private void drawDebugFrameBuffers() {
-        if (debugFrameBuffersVisible) {
-            spriteBatch.begin();
-            spriteBatch.disableBlending();
+        spriteBatch.begin();
+        spriteBatch.disableBlending();
+        drawDebugColorBuffer(picker.getColorBufferTexture(), 0);
+        drawDebugColorBuffer(tangoMeshesFrameBuffer.getColorBufferTexture(), 1);
+        spriteBatch.enableBlending();
+        spriteBatch.end();
+    }
+
+    private void drawDebugColorBuffer(@Nullable final Texture texture, final int index) {
+        final int x = index * DEBUG_FRAME_BUFFER_VIEW_SIZE;
+        if (texture != null) {
             // Flip the texture because its origin in OpenGL is the buttom left.
-            final Texture texture = picker.getColorBufferTexture();
-            if (texture != null) {
-                spriteBatch.draw(texture,
-                                 0, 0, 512, 512,
-                                 0, 0, texture.getWidth(), texture.getHeight(),
-                                 false, true);
-            }
-            spriteBatch.enableBlending();
-            spriteBatch.end();
+            spriteBatch.draw(texture,
+                             x, 0, DEBUG_FRAME_BUFFER_VIEW_SIZE, DEBUG_FRAME_BUFFER_VIEW_SIZE,
+                             0, 0, texture.getWidth(), texture.getHeight(),
+                             false, true);
         }
     }
 

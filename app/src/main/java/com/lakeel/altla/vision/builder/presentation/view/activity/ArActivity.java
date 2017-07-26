@@ -6,6 +6,7 @@ import com.google.atap.tangoservice.TangoConfig;
 import com.google.atap.tangoservice.TangoCoordinateFramePair;
 import com.google.atap.tangoservice.TangoException;
 import com.google.atap.tangoservice.TangoOutOfDateException;
+import com.google.atap.tangoservice.TangoPointCloudData;
 import com.google.atap.tangoservice.TangoPoseData;
 
 import com.badlogic.gdx.Gdx;
@@ -23,6 +24,7 @@ import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.di.component.ActivityComponent;
 import com.lakeel.altla.vision.builder.presentation.di.module.ActivityModule;
 import com.lakeel.altla.vision.builder.presentation.graphics.ArGraphics;
+import com.lakeel.altla.vision.builder.presentation.helper.TangoMesher;
 import com.lakeel.altla.vision.builder.presentation.model.ArModel;
 import com.lakeel.altla.vision.builder.presentation.model.Axis;
 import com.lakeel.altla.vision.builder.presentation.view.pane.ActorEditMenuPane;
@@ -124,6 +126,8 @@ public final class ArActivity extends AndroidApplication
     private TypedQuery<Actor> queryUserActors;
 
     private boolean editMode;
+
+    private TangoMesher tangoMesher;
 
     @NonNull
     public static Intent createIntent(@NonNull Activity activity) {
@@ -241,17 +245,42 @@ public final class ArActivity extends AndroidApplication
                     // Javadoc says, "LEARNINGMODE and loading AREADESCRIPTION cannot be used if drift correction is enabled."
 //                    config.putBoolean(TangoConfig.KEY_BOOLEAN_DRIFT_CORRECTION, true);
 
+                    // Depth information is needed for the mesh reconstruction.
+                    config.putBoolean(TangoConfig.KEY_BOOLEAN_DEPTH, true);
+                    config.putInt(TangoConfig.KEY_INT_DEPTH_MODE, TangoConfig.TANGO_DEPTH_MODE_POINT_CLOUD);
+
                     final AreaSettings areaSettings = arModel.getAreaSettings();
                     if (areaSettings != null && areaSettings.getAreaDescriptionId() != null) {
                         config.putString(TangoConfig.KEY_STRING_AREADESCRIPTION, areaSettings.getAreaDescriptionId());
                     }
 
+                    tangoMesher = new TangoMesher(tangoMeshes -> {
+                        Gdx.app.postRunnable(() -> {
+                            arGraphics.updateTangoMeshes(tangoMeshes);
+                        });
+                    });
+                    // Set camera intrinsics to TangoMesher.
+                    tangoMesher.setColorCameraCalibration(
+                            tango.getCameraIntrinsics(TangoCameraIntrinsics.TANGO_CAMERA_COLOR));
+                    tangoMesher.setDepthCameraCalibration(tango.getCameraIntrinsics(
+                            TangoCameraIntrinsics.TANGO_CAMERA_DEPTH));
+                    // Start the scene reconstruction. We will start getting new meshes from TangoMesher. These
+                    // meshes will be rendered to a depth texture to do the occlusion.
+                    tangoMesher.startSceneReconstruction();
+
                     tango.connect(config);
                     tango.connectListener(COORDINATE_FRAME_PAIRS, new Tango.TangoUpdateCallback() {
                         @Override
-                        public void onFrameAvailable(int cameraId) {
+                        public void onFrameAvailable(final int cameraId) {
                             if (cameraId == TangoCameraIntrinsics.TANGO_CAMERA_COLOR) {
                                 Gdx.app.postRunnable(arGraphics::onFrameAvailable);
+                            }
+                        }
+
+                        @Override
+                        public void onPointCloudAvailable(final TangoPointCloudData pointCloudData) {
+                            if (tangoMesher != null) {
+                                tangoMesher.onPointCloudAvailable(pointCloudData);
                             }
                         }
                     });
@@ -275,6 +304,7 @@ public final class ArActivity extends AndroidApplication
 
                             @Override
                             public void onChildChanged(@NonNull Actor actor, String previousChildName) {
+                                // TODO
                             }
 
                             @Override
@@ -310,6 +340,13 @@ public final class ArActivity extends AndroidApplication
 
         // Disconnect the tango service.
         synchronized (this) {
+            if (tangoMesher != null) {
+                tangoMesher.stopSceneReconstruction();
+                tangoMesher.resetSceneReconstruction();
+                tangoMesher.release();
+                tangoMesher = null;
+            }
+
             if (tango != null) {
                 LOG.d("Disconnecting tango...");
                 arGraphics.onTangoDisconnecting();

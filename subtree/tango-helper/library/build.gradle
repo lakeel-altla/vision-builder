@@ -22,4 +22,5 @@ android {
 dependencies {
     compile "com.google.tango:sdk-base:1.53"
     compile "com.google.tango:support-base:1.53"
+    compile "com.google.tango:support-reconstruction:1.53"
 }
