@@ -65,7 +65,7 @@ public final class CameraPreview implements Closeable {
         mesh.setTexCoords(texCoords);
     }
 
-    public void draw() {
+    public void render() {
         shaderProgram.begin();
 
         int positionHandle = shaderProgram.getAttributeLocation("a_Position");

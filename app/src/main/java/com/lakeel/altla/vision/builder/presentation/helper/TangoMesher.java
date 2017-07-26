@@ -44,8 +44,19 @@ public final class TangoMesher {
     }
 
     public TangoMesher(@NonNull final OnTangoMeshesAvailableListener listener) {
+        // SEE:
+        // https://developers.google.com/tango/apis/c/reconstruction/reference/group/config-params
         final Tango3dReconstructionConfig config = new Tango3dReconstructionConfig();
+        // Default is true.
         config.putBoolean("generate_color", false);
+        // Default is false.
+        config.putBoolean("use_parallel_integration", false);
+        // Default is 3.5 (in meters).
+        config.putDouble(Tango3dReconstructionConfig.MAX_DEPTH, 5d);
+        // Default is false.
+        config.putBoolean(Tango3dReconstructionConfig.USE_SPACE_CLEARING, true);
+        // Default is 1.
+        config.putInt("min_num_vertices", 4);
         tango3dReconstruction = new Tango3dReconstruction(config);
 
         handlerThread.start();
@@ -73,7 +84,7 @@ public final class TangoMesher {
                     return;
                 }
 
-                final List<int[]> gridIndices = tango3dReconstruction.update(pointCloudData, poseData, null, null);
+                final List<int[]> gridIndices = tango3dReconstruction.update(pointCloudData, poseData);
                 final int count = gridIndices.size();
                 final List<TangoMesh> tangoMeshes = new ArrayList<>(count);
                 for (int i = 0; i < count; i++) {

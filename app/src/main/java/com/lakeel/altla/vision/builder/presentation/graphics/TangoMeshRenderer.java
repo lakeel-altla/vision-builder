@@ -26,16 +26,16 @@ public final class TangoMeshRenderer implements Disposable {
 
     private static final int MESH_CACHE_SIZE = 200;
 
-    private static final Matrix4 WORLD_TRANSFORM = new Matrix4();
+    private final Matrix4 worldTransform = new Matrix4();
 
-    private static final Matrix4 MVP = new Matrix4();
+    private final Matrix4 mvp = new Matrix4();
 
     private final Material material = new Material();
 
     private final MeshList meshList = new MeshList();
 
     public TangoMeshRenderer() {
-        WORLD_TRANSFORM.rotate(Vector3.X, -90);
+        worldTransform.rotate(Vector3.X, -90);
     }
 
     @Override
@@ -57,12 +57,12 @@ public final class TangoMeshRenderer implements Disposable {
     }
 
     public void render(@NonNull Camera camera) {
-        MVP.set(camera.combined).mul(WORLD_TRANSFORM);
+        mvp.set(camera.combined).mul(worldTransform);
 
         material.shaderProgram.begin();
 
         for (int i = 0; i < meshList.meshMap.size(); i++) {
-            meshList.meshMap.valueAt(i).render(MVP);
+            meshList.meshMap.valueAt(i).render(mvp);
         }
 
         material.shaderProgram.end();

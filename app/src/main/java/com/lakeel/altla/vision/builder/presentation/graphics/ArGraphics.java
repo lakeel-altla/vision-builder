@@ -60,7 +60,8 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
 
     private static final float NEAR_PLANE_DISTANCE = 0.1f;
 
-    private static final float FAR_PLANE_DISTANCE = 10f;
+    // See the tango 3D reconstruction config 'max_depth'.
+    private static final float FAR_PLANE_DISTANCE = 5f;
 
     private static final float TRANSLATION_COEFF = 0.001f;
 
@@ -195,17 +196,24 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
     public void resize(int width, int height) {
         super.resize(width, height);
 
-        if (sceneFrameBuffer != null) {
-            sceneFrameBuffer.dispose();
-            sceneFrameBuffer = null;
-        }
-        sceneFrameBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, width, height, true);
-
         if (tangoMeshesFrameBuffer != null) {
             tangoMeshesFrameBuffer.dispose();
             tangoMeshesFrameBuffer = null;
         }
         tangoMeshesFrameBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, width, height, true);
+
+        if (sceneFrameBuffer != null) {
+            sceneFrameBuffer.dispose();
+            sceneFrameBuffer = null;
+        }
+        sceneFrameBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, width, height, false);
+        // Share the depth buffer.
+        Gdx.gl.glBindFramebuffer(GL20.GL_FRAMEBUFFER, sceneFrameBuffer.getFramebufferHandle());
+        Gdx.gl.glFramebufferRenderbuffer(GL20.GL_FRAMEBUFFER,
+                                         GL20.GL_DEPTH_ATTACHMENT,
+                                         GL20.GL_RENDERBUFFER,
+                                         tangoMeshesFrameBuffer.getDepthBufferHandle());
+        Gdx.gl.glBindFramebuffer(GL20.GL_FRAMEBUFFER, 0);
 
         cameraConfigured = false;
     }
@@ -560,13 +568,13 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
 
         renderContext.begin();
 
-        drawTangoMesh();
+        renderTangoMeshes();
 
         // Draw the scene.
-        drawScene();
+        renderScene();
 
         // Draw and handle the object picker.
-        drawColorObjectPicker();
+        renderColorObjectPicker();
 
         renderContext.end();
 
@@ -582,17 +590,34 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
 
         // Draw frame buffers for debug.
         if (debugFrameBuffersVisible) {
-            drawDebugFrameBuffers();
+            renderDebugFrameBuffers();
         }
     }
 
-    private void drawScene() {
-        sceneFrameBuffer.begin();
+    private void renderTangoMeshes() {
+        tangoMeshesFrameBuffer.begin();
 
+        Gdx.gl.glClearColor(1, 1, 1, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
+        renderContext.setDepthMask(true);
+        renderContext.setDepthTest(GL20.GL_LEQUAL);
+
+        tangoMeshRenderer.render(camera);
+
+        tangoMeshesFrameBuffer.end();
+    }
+
+    private void renderScene() {
+        sceneFrameBuffer.begin();
+
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+        renderContext.setDepthMask(false);
+        renderContext.setDepthTest(0);
+
         // Draw the camera preview.
-        cameraPreview.draw();
+        cameraPreview.render();
 
         // TODO: Do frustum culling.
         visibleInstances.clear();
@@ -603,6 +628,9 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
             visibleInstances.add(actorAxesObject);
         }
 
+        renderContext.setDepthMask(true);
+        renderContext.setDepthTest(GL20.GL_LEQUAL);
+
         // Draw models.
         modelBatch.begin(camera);
         modelBatch.render(visibleInstances, environment);
@@ -611,18 +639,7 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
         sceneFrameBuffer.end();
     }
 
-    private void drawTangoMesh() {
-        tangoMeshesFrameBuffer.begin();
-
-        Gdx.gl.glClearColor(1, 1, 1, 1);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
-
-        tangoMeshRenderer.render(camera);
-
-        tangoMeshesFrameBuffer.end();
-    }
-
-    private void drawColorObjectPicker() {
+    private void renderColorObjectPicker() {
         pickableInstances.clear();
         if (cursorObject == null) {
             pickableInstances.addAll(actorObjects);
@@ -666,16 +683,16 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
         picker.end();
     }
 
-    private void drawDebugFrameBuffers() {
+    private void renderDebugFrameBuffers() {
         spriteBatch.begin();
         spriteBatch.disableBlending();
-        drawDebugColorBuffer(picker.getColorBufferTexture(), 0);
-        drawDebugColorBuffer(tangoMeshesFrameBuffer.getColorBufferTexture(), 1);
+        renderDebugColorBuffer(picker.getColorBufferTexture(), 0);
+        renderDebugColorBuffer(tangoMeshesFrameBuffer.getColorBufferTexture(), 1);
         spriteBatch.enableBlending();
         spriteBatch.end();
     }
 
-    private void drawDebugColorBuffer(@Nullable final Texture texture, final int index) {
+    private void renderDebugColorBuffer(@Nullable final Texture texture, final int index) {
         final int x = index * DEBUG_FRAME_BUFFER_VIEW_SIZE;
         if (texture != null) {
             // Flip the texture because its origin in OpenGL is the buttom left.

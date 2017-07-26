@@ -245,7 +245,7 @@ public final class ArActivity extends AndroidApplication
                     // Javadoc says, "LEARNINGMODE and loading AREADESCRIPTION cannot be used if drift correction is enabled."
 //                    config.putBoolean(TangoConfig.KEY_BOOLEAN_DRIFT_CORRECTION, true);
 
-                    // Depth information is needed for the mesh reconstruction.
+                    // Depth information is needed for the 3d reconstruction.
                     config.putBoolean(TangoConfig.KEY_BOOLEAN_DEPTH, true);
                     config.putInt(TangoConfig.KEY_INT_DEPTH_MODE, TangoConfig.TANGO_DEPTH_MODE_POINT_CLOUD);
 
