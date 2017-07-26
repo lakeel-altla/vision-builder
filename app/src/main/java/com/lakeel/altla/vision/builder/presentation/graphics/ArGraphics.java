@@ -243,6 +243,8 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
             tangoMeshesFrameBuffer.dispose();
             tangoMeshesFrameBuffer = null;
         }
+
+        tangoMeshRenderer.dispose();
     }
 
     @Override

@@ -41,6 +41,7 @@ public final class TangoMeshRenderer implements Disposable {
     @Override
     public void dispose() {
         material.dispose();
+        meshList.dispose();
     }
 
     public void update(@NonNull List<TangoMesh> tangoMeshes) {
@@ -172,6 +173,12 @@ public final class TangoMeshRenderer implements Disposable {
         public void dispose() {
             shaderProgram.dispose();
         }
+
+        public void bindVariables(@NonNull final Matrix4 mvp) {
+            shaderProgram.enableVertexAttribute(positionHandle);
+            shaderProgram.setVertexAttribute(positionHandle, NUM_VERTEX_COORD, GL20.GL_FLOAT, false, 0, 0);
+            shaderProgram.setUniformMatrix(mvpHandle, mvp);
+        }
     }
 
     private class Mesh implements Disposable {
@@ -198,15 +205,7 @@ public final class TangoMeshRenderer implements Disposable {
             vertexBuffer.bind();
             indexBuffer.bind();
 
-            material.shaderProgram.enableVertexAttribute(material.positionHandle);
-            material.shaderProgram.setVertexAttribute(material.positionHandle,
-                                                      NUM_VERTEX_COORD,
-                                                      GL20.GL_FLOAT,
-                                                      false,
-                                                      0,
-                                                      0);
-            material.shaderProgram.setUniformMatrix(material.mvpHandle, mvp);
-
+            material.bindVariables(mvp);
             Gdx.gl.glDrawElements(GL20.GL_TRIANGLES, numFaces * 3, GL20.GL_UNSIGNED_INT, 0);
 
             vertexBuffer.unbind();
@@ -214,7 +213,7 @@ public final class TangoMeshRenderer implements Disposable {
         }
     }
 
-    private class MeshList {
+    private class MeshList implements Disposable {
 
         final SimpleArrayMap<GridIndex, Mesh> meshMap = new SimpleArrayMap<>();
 
@@ -229,6 +228,13 @@ public final class TangoMeshRenderer implements Disposable {
                 meshMap.put(gridIndex, mesh);
             }
             return mesh;
+        }
+
+        @Override
+        public void dispose() {
+            for (int i = 0; i < meshMap.size(); i++) {
+                meshMap.valueAt(i).dispose();
+            }
         }
 
         private class MeshCache extends LruCache<GridIndex, Mesh> {
