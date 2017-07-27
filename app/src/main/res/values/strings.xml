@@ -74,6 +74,7 @@
     <string name="title_area_by_place_list_view">Select Area</string>
     <string name="title_area_description_by_area_list_view">Select Area Description</string>
     <string name="title_settings_view">Settings</string>
+    <string name="title_actor_metadata_edit_view">Edit</string>
 
     <string name="action_create">Create</string>
     <string name="action_debug">Debug ON/OFF</string>
@@ -85,21 +86,23 @@
     <string name="action_select">Select</string>
 
     <string name="input_error_required">Required.</string>
+
     <string name="dialog_message_confirm_delete">Delete the actor?</string>
     <string name="dialog_button_cancel">Cancel</string>
     <string name="dialog_button_delete">Delete</string>
+
     <string name="button_set_frame_buffers_visible_true">Show Frame Buffers</string>
     <string name="button_set_frame_buffers_visible_false">Hide Frame Buffers</string>
     <string name="button_set_tango_meshes_visible_true">Show Tango Meshes</string>
     <string name="button_set_tango_meshes_visible_false">Hide Tango Meshes</string>
-
-    <string name="title_actor_metadata_edit_view">Edit</string>
-
     <string name="button_translate_menu">T</string>
     <string name="button_x_axis">X</string>
     <string name="button_y_axis">Y</string>
     <string name="button_z_axis">Z</string>
     <string name="button_rotate_menu">R</string>
     <string name="button_scale_menu">S</string>
+    <string name="button_show_settings">Settings</string>
+    <string name="button_switch_to_edit_mode">Edit</string>
+    <string name="button_show_image_asset_list_pane">Image Actor</string>
 
 </resources>

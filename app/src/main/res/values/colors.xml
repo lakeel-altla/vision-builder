@@ -58,6 +58,11 @@
     <color name="button_background_focused">#cc4169e1</color>
 
     <!-- white -->
+    <color name="button_text_color_selected">#ffffff</color>
+    <!-- royalblue (75%) -->
+    <color name="button_background_selected">#cc4169e1</color>
+
+    <!-- white -->
     <color name="button_text_color_default">#ffffff</color>
     <!-- black (50%) -->
     <!--<color name="button_background_default">#88000000</color>-->

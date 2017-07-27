@@ -1,26 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_marginStart="@dimen/content_horizontal_margin"
-              android:layout_marginEnd="@dimen/content_horizontal_margin"
-              android:layout_marginTop="@dimen/content_vertical_margin"
-              android:layout_marginBottom="@dimen/content_vertical_margin"
-              android:orientation="horizontal"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_marginStart="@dimen/content_horizontal_margin"
+                android:layout_marginEnd="@dimen/content_horizontal_margin"
+                android:layout_marginTop="@dimen/content_vertical_margin"
+                android:layout_marginBottom="@dimen/content_vertical_margin"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
 
     <ImageButton android:id="@+id/image_button_switch_to_view_mode"
-                 android:background="@drawable/button_background_circle"
-                 android:src="@drawable/ic_remove_red_eye_black_24dp"
+                 android:src="@drawable/ic_arrow_back_black_24dp"
                  android:tint="@color/foreground_overlay"
+                 android:background="@drawable/button_background_circle"
                  android:layout_width="@dimen/touch_target_width"
                  android:layout_height="@dimen/touch_target_height"/>
 
-    <ImageButton android:id="@+id/image_button_show_image_asset_list_pane"
-                 android:background="@drawable/button_background_circle"
-                 android:src="@drawable/ic_image_black_24dp"
+    <ImageButton android:id="@+id/image_button_expand_add_actor_menu"
+                 android:src="@drawable/ic_add_black_24dp"
                  android:tint="@color/foreground_overlay"
+                 android:background="@drawable/button_background_circle"
+                 android:layout_toEndOf="@id/image_button_switch_to_view_mode"
                  android:layout_marginStart="@dimen/content_vertical_margin"
                  android:layout_width="@dimen/touch_target_width"
                  android:layout_height="@dimen/touch_target_height"/>
 
-</LinearLayout>
+    <LinearLayout android:id="@+id/view_group_add_actor_menu"
+                  android:orientation="vertical"
+                  android:layout_marginTop="@dimen/content_vertical_margin"
+                  android:layout_below="@id/image_button_expand_add_actor_menu"
+                  android:layout_alignStart="@id/image_button_expand_add_actor_menu"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content">
+
+        <Button android:id="@+id/button_show_image_asset_list_pane"
+                android:text="@string/button_show_image_asset_list_pane"
+                android:textAlignment="viewStart"
+                android:textColor="@color/foreground_button"
+                android:background="@drawable/button_background"
+                android:paddingStart="@dimen/content_horizontal_margin"
+                android:paddingEnd="@dimen/content_horizontal_margin"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+
+</RelativeLayout>

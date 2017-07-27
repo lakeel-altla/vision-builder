@@ -4,14 +4,11 @@ import com.lakeel.altla.vision.builder.R;
 
 import android.app.Activity;
 import android.support.annotation.NonNull;
-import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 
-import java.util.List;
-
 import butterknife.BindView;
-import butterknife.BindViews;
 import butterknife.OnClick;
 
 import static android.view.View.GONE;
@@ -22,11 +19,8 @@ public final class DebugMenuPane extends Pane {
     @BindView(R.id.image_button_expand)
     ImageButton imageButtonEnpand;
 
-    @BindView(R.id.image_button_collapse)
-    ImageButton imageButtonCollapse;
-
-    @BindViews({ R.id.button_set_frame_buffers_visible, R.id.button_set_tango_meshes_visible })
-    List<View> optionViews;
+    @BindView(R.id.view_group_options)
+    ViewGroup viewGroupOptions;
 
     @BindView(R.id.button_set_frame_buffers_visible)
     Button buttonSetFrameBuffersVisible;
@@ -36,60 +30,40 @@ public final class DebugMenuPane extends Pane {
 
     private final PaneContext paneContext;
 
-    private boolean debugFrameBuffersVisible;
-
-    private boolean debugTangoMeshesVisible;
-
     public DebugMenuPane(@NonNull Activity activity) {
         super(activity, R.id.pane_debug_menu);
         paneContext = (PaneContext) activity;
-        collapse();
-    }
-
-    public void expand() {
-        imageButtonEnpand.setVisibility(GONE);
-        imageButtonCollapse.setVisibility(VISIBLE);
-        for (final View view : optionViews) {
-            view.setVisibility(VISIBLE);
-        }
-    }
-
-    public void collapse() {
-        imageButtonEnpand.setVisibility(VISIBLE);
-        imageButtonCollapse.setVisibility(GONE);
-        for (final View view : optionViews) {
-            view.setVisibility(GONE);
-        }
+        imageButtonEnpand.setSelected(false);
+        viewGroupOptions.setVisibility(GONE);
     }
 
     @OnClick(R.id.image_button_expand)
     void onClickExpand() {
-        expand();
-    }
-
-    @OnClick(R.id.image_button_collapse)
-    void onClickCollapse() {
-        collapse();
+        final boolean selected = !imageButtonEnpand.isSelected();
+        imageButtonEnpand.setSelected(selected);
+        viewGroupOptions.setVisibility(selected ? VISIBLE : GONE);
     }
 
     @OnClick(R.id.button_set_frame_buffers_visible)
     void onClickSetFrameBuffersVisible() {
-        debugFrameBuffersVisible = !debugFrameBuffersVisible;
-        final int resId = debugFrameBuffersVisible ?
+        final boolean selected = !buttonSetFrameBuffersVisible.isSelected();
+        buttonSetFrameBuffersVisible.setSelected(selected);
+        final int resId = selected ?
                 R.string.button_set_frame_buffers_visible_false :
                 R.string.button_set_frame_buffers_visible_true;
         buttonSetFrameBuffersVisible.setText(resId);
-        paneContext.setDebugFrameBuffersVisible(debugFrameBuffersVisible);
+        paneContext.setDebugFrameBuffersVisible(selected);
     }
 
     @OnClick(R.id.button_set_tango_meshes_visible)
     void onClickSetTangoMeshesVisible() {
-        debugTangoMeshesVisible = !debugTangoMeshesVisible;
-        final int resId = debugTangoMeshesVisible ?
+        final boolean selected = !buttonSetTangoMeshesVisible.isSelected();
+        buttonSetTangoMeshesVisible.setSelected(selected);
+        final int resId = selected ?
                 R.string.button_set_tango_meshes_visible_false :
                 R.string.button_set_tango_meshes_visible_true;
         buttonSetTangoMeshesVisible.setText(resId);
-        paneContext.setDebugTangoMeshesVisible(debugTangoMeshesVisible);
+        paneContext.setDebugTangoMeshesVisible(selected);
     }
 
     public interface PaneContext {

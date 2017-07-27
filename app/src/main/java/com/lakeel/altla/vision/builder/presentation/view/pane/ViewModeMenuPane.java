@@ -9,10 +9,13 @@ import com.lakeel.altla.vision.builder.presentation.view.activity.SettingsActivi
 import android.app.Activity;
 import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageButton;
 
 import javax.inject.Inject;
 
-import butterknife.ButterKnife;
+import butterknife.BindView;
 import butterknife.OnClick;
 
 import static android.view.View.GONE;
@@ -23,6 +26,15 @@ public final class ViewModeMenuPane extends Pane {
     @Inject
     ArModel arModel;
 
+    @BindView(R.id.image_button_expand_options)
+    ImageButton imageButtonExpandOptions;
+
+    @BindView(R.id.view_group_options)
+    ViewGroup viewGroupOptions;
+
+    @BindView(R.id.button_switch_to_edit_mode)
+    Button buttonSwitchToEditMode;
+
     private final PaneContext paneContext;
 
     public ViewModeMenuPane(@NonNull Activity activity) {
@@ -31,8 +43,9 @@ public final class ViewModeMenuPane extends Pane {
         ((ActivityScopeContext) activity).getActivityComponent().inject(this);
         paneContext = (PaneContext) activity;
 
-        ButterKnife.findById(view, R.id.image_button_switch_to_edit_mode)
-                   .setVisibility(arModel.canEdit() ? VISIBLE : GONE);
+        imageButtonExpandOptions.setSelected(false);
+        viewGroupOptions.setVisibility(GONE);
+        buttonSwitchToEditMode.setVisibility(arModel.canEdit() ? VISIBLE : GONE);
     }
 
     @OnClick(R.id.image_button_show_area_settings)
@@ -41,12 +54,19 @@ public final class ViewModeMenuPane extends Pane {
         activity.startActivity(intent);
     }
 
-    @OnClick(R.id.image_button_switch_to_edit_mode)
+    @OnClick(R.id.image_button_expand_options)
+    void onClickExpandOptions() {
+        final boolean selected = !imageButtonExpandOptions.isSelected();
+        imageButtonExpandOptions.setSelected(selected);
+        viewGroupOptions.setVisibility(selected ? VISIBLE : GONE);
+    }
+
+    @OnClick(R.id.button_switch_to_edit_mode)
     void onClickSwitchToEditMode() {
         paneContext.showEditModeMenuPane();
     }
 
-    @OnClick(R.id.image_button_show_settings)
+    @OnClick(R.id.button_show_settings)
     void onClickShowSettings() {
         final Intent intent = SettingsActivity.createIntent(activity);
         activity.startActivity(intent);
