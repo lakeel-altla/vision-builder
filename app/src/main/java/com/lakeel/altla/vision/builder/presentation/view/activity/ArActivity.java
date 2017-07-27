@@ -409,9 +409,6 @@ public final class ArActivity extends AndroidApplication
             // Save the actor.
             visionService.getUserActorApi()
                          .saveActor(actor);
-
-            // Add the actor into the scene.
-            addActor(actor);
         });
     }
 
