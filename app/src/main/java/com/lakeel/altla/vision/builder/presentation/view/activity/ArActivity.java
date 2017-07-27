@@ -254,19 +254,12 @@ public final class ArActivity extends AndroidApplication
                         config.putString(TangoConfig.KEY_STRING_AREADESCRIPTION, areaSettings.getAreaDescriptionId());
                     }
 
-                    tangoMesher = new TangoMesher(tangoMeshes -> {
+                    tangoMesher = new TangoMesher(tango, tangoMeshes -> {
                         Gdx.app.postRunnable(() -> {
                             arGraphics.updateTangoMeshes(tangoMeshes);
                         });
                     });
-                    // Set camera intrinsics to TangoMesher.
-                    tangoMesher.setColorCameraCalibration(
-                            tango.getCameraIntrinsics(TangoCameraIntrinsics.TANGO_CAMERA_COLOR));
-                    tangoMesher.setDepthCameraCalibration(tango.getCameraIntrinsics(
-                            TangoCameraIntrinsics.TANGO_CAMERA_DEPTH));
-                    // Start the scene reconstruction. We will start getting new meshes from TangoMesher. These
-                    // meshes will be rendered to a depth texture to do the occlusion.
-                    tangoMesher.startSceneReconstruction();
+                    tangoMesher.start();
 
                     tango.connect(config);
                     tango.connectListener(COORDINATE_FRAME_PAIRS, new Tango.TangoUpdateCallback() {
@@ -341,8 +334,7 @@ public final class ArActivity extends AndroidApplication
         // Disconnect the tango service.
         synchronized (this) {
             if (tangoMesher != null) {
-                tangoMesher.stopSceneReconstruction();
-                tangoMesher.resetSceneReconstruction();
+                tangoMesher.stop();
                 tangoMesher.release();
                 tangoMesher = null;
             }
@@ -437,6 +429,13 @@ public final class ArActivity extends AndroidApplication
     public void setDebugFrameBuffersVisible(boolean visible) {
         Gdx.app.postRunnable(() -> {
             arGraphics.setDebugFrameBuffersVisible(visible);
+        });
+    }
+
+    @Override
+    public void setDebugTangoMeshesVisible(boolean visible) {
+        Gdx.app.postRunnable(() -> {
+            arGraphics.setDebugTangoMeshesVisible(visible);
         });
     }
 

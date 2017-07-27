@@ -3,6 +3,7 @@ package com.lakeel.altla.vision.builder.presentation.helper;
 import com.google.atap.tango.mesh.TangoMesh;
 import com.google.atap.tango.reconstruction.Tango3dReconstruction;
 import com.google.atap.tango.reconstruction.Tango3dReconstructionConfig;
+import com.google.atap.tangoservice.Tango;
 import com.google.atap.tangoservice.TangoCameraIntrinsics;
 import com.google.atap.tangoservice.TangoPointCloudData;
 import com.google.atap.tangoservice.TangoPoseData;
@@ -35,22 +36,16 @@ public final class TangoMesher {
 
     private Runnable runnable;
 
-    /**
-     * Callback for when meshes are available.
-     */
-    public interface OnTangoMeshesAvailableListener {
-
-        void onTangoMeshesAvailable(@NonNull List<TangoMesh> tangoMeshes);
-    }
-
-    public TangoMesher(@NonNull final OnTangoMeshesAvailableListener listener) {
+    public TangoMesher(@NonNull Tango tango, @NonNull final OnTangoMeshesAvailableListener listener) {
         // SEE:
         // https://developers.google.com/tango/apis/c/reconstruction/reference/group/config-params
         final Tango3dReconstructionConfig config = new Tango3dReconstructionConfig();
         // Default is true.
         config.putBoolean("generate_color", false);
         // Default is false.
-        config.putBoolean("use_parallel_integration", false);
+        config.putBoolean("use_parallel_integration", true);
+        // Default is 0.03 (in meters).
+//        config.putDouble("resolution", 0.05d);
         // Default is 3.5 (in meters).
         config.putDouble(Tango3dReconstructionConfig.MAX_DEPTH, 5d);
         // Default is false.
@@ -58,6 +53,10 @@ public final class TangoMesher {
         // Default is 1.
         config.putInt("min_num_vertices", 4);
         tango3dReconstruction = new Tango3dReconstruction(config);
+        tango3dReconstruction.setColorCameraCalibration(
+                tango.getCameraIntrinsics(TangoCameraIntrinsics.TANGO_CAMERA_COLOR));
+        tango3dReconstruction.setDepthCameraCalibration(tango.getCameraIntrinsics(
+                TangoCameraIntrinsics.TANGO_CAMERA_DEPTH));
 
         handlerThread.start();
         handler = new Handler(handlerThread.getLooper());
@@ -73,9 +72,11 @@ public final class TangoMesher {
                     return;
                 }
 
+                // NOTE:
+                // Match the frame pairs to ones for the color camera pose.
                 final TangoPoseData poseData = TangoSupport.getPoseAtTime(
                         pointCloudData.timestamp,
-                        TangoPoseData.COORDINATE_FRAME_START_OF_SERVICE,
+                        TangoPoseData.COORDINATE_FRAME_AREA_DESCRIPTION,
                         TangoPoseData.COORDINATE_FRAME_CAMERA_DEPTH,
                         TangoSupport.TANGO_SUPPORT_ENGINE_TANGO,
                         TangoSupport.TANGO_SUPPORT_ENGINE_TANGO,
@@ -101,40 +102,27 @@ public final class TangoMesher {
     }
 
     /**
-     * Synchronize access to mTango3dReconstruction. This runs in UI thread.
+     * Synchronize access to Tango3dReconstruction. This runs in UI thread.
      */
     public synchronized void release() {
         reconstructionActive = false;
+        tango3dReconstruction.clear();
         tango3dReconstruction.release();
     }
 
-    public void startSceneReconstruction() {
+    public void start() {
         reconstructionActive = true;
     }
 
-    public void stopSceneReconstruction() {
+    public void stop() {
         reconstructionActive = false;
     }
 
     /**
-     * Synchronize access to mTango3dReconstruction. This runs in UI thread.
+     * Synchronize access to Tango3dReconstruction. This runs in UI thread.
      */
-    public synchronized void resetSceneReconstruction() {
+    public synchronized void clear() {
         tango3dReconstruction.clear();
-    }
-
-    /**
-     * Synchronize access to mTango3dReconstruction. This runs in UI thread.
-     */
-    public synchronized void setColorCameraCalibration(TangoCameraIntrinsics calibration) {
-        tango3dReconstruction.setColorCameraCalibration(calibration);
-    }
-
-    /**
-     * Synchronize access to mTango3dReconstruction. This runs in UI thread.
-     */
-    public synchronized void setDepthCameraCalibration(TangoCameraIntrinsics calibration) {
-        tango3dReconstruction.setDepthCameraCalibration(calibration);
     }
 
     /**
@@ -151,5 +139,10 @@ public final class TangoMesher {
         tangoPointCloudManager.updatePointCloud(pointCloudData);
         handler.removeCallbacksAndMessages(null);
         handler.post(runnable);
+    }
+
+    public interface OnTangoMeshesAvailableListener {
+
+        void onTangoMeshesAvailable(@NonNull List<TangoMesh> tangoMeshes);
     }
 }

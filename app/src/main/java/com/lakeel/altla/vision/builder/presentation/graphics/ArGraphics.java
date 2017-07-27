@@ -129,6 +129,8 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
 
     private boolean debugFrameBuffersVisible;
 
+    private boolean debugTangoMeshesVisible;
+
     @Nullable
     private CursorBuildRequest cursorBuildRequest;
 
@@ -387,6 +389,10 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
         this.debugFrameBuffersVisible = debugFrameBuffersVisible;
     }
 
+    public void setDebugTangoMeshesVisible(boolean debugTangoMeshesVisible) {
+        this.debugTangoMeshesVisible = debugTangoMeshesVisible;
+    }
+
     public void setImageAssetCursor(@NonNull ImageAsset asset, @NonNull File imageCache) {
         final ImageAssetModelBuilder builder = new ImageAssetModelBuilder(imageCache);
         cursorBuildRequest = new CursorBuildRequest(asset, AssetType.IMAGE, builder);
@@ -603,6 +609,7 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
         renderContext.setDepthMask(true);
         renderContext.setDepthTest(GL20.GL_LEQUAL);
 
+        tangoMeshRenderer.setPrimitiveType(GL20.GL_TRIANGLES);
         tangoMeshRenderer.render(camera);
 
         tangoMeshesFrameBuffer.end();
@@ -618,6 +625,11 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
 
         // Draw the camera preview.
         cameraPreview.render();
+
+        if (debugTangoMeshesVisible) {
+            tangoMeshRenderer.setPrimitiveType(GL20.GL_LINES);
+            tangoMeshRenderer.render(camera);
+        }
 
         // TODO: Do frustum culling.
         visibleInstances.clear();

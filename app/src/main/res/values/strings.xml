@@ -90,10 +90,11 @@
     <string name="dialog_button_delete">Delete</string>
     <string name="button_set_frame_buffers_visible_true">Show Frame Buffers</string>
     <string name="button_set_frame_buffers_visible_false">Hide Frame Buffers</string>
+    <string name="button_set_tango_meshes_visible_true">Show Tango Meshes</string>
+    <string name="button_set_tango_meshes_visible_false">Hide Tango Meshes</string>
+
     <string name="title_actor_metadata_edit_view">Edit</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="button_translate_menu">T</string>
     <string name="button_x_axis">X</string>
     <string name="button_y_axis">Y</string>

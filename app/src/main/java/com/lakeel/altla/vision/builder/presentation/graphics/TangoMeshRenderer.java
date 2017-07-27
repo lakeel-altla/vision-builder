@@ -34,6 +34,8 @@ public final class TangoMeshRenderer implements Disposable {
 
     private final MeshList meshList = new MeshList();
 
+    private int primitiveType = GL20.GL_TRIANGLES;
+
     public TangoMeshRenderer() {
         worldTransform.rotate(Vector3.X, -90);
     }
@@ -42,6 +44,10 @@ public final class TangoMeshRenderer implements Disposable {
     public void dispose() {
         material.dispose();
         meshList.dispose();
+    }
+
+    public void setPrimitiveType(int primitiveType) {
+        this.primitiveType = primitiveType;
     }
 
     public void update(@NonNull List<TangoMesh> tangoMeshes) {
@@ -68,7 +74,7 @@ public final class TangoMeshRenderer implements Disposable {
         material.shaderProgram.end();
     }
 
-    private class VertexBuffer implements Disposable {
+    private static class VertexBuffer implements Disposable {
 
         // The service will always pass four-byte floats.
         static final int SIZE_OF_FLOAT = 4;
@@ -102,7 +108,7 @@ public final class TangoMeshRenderer implements Disposable {
         }
     }
 
-    private class IndexBuffer implements Disposable {
+    private static class IndexBuffer implements Disposable {
 
         // The service will always pass four-byte integers.
         static final int SIZE_OF_INT = 4;
@@ -137,7 +143,7 @@ public final class TangoMeshRenderer implements Disposable {
         }
     }
 
-    private class Material implements Disposable {
+    private static class Material implements Disposable {
 
         static final String VERTEX_SHADER_SOURCE =
                 "attribute vec4 a_Position;\n" +
@@ -154,7 +160,8 @@ public final class TangoMeshRenderer implements Disposable {
                 "varying vec4 v_Position;\n" +
                 "\n" +
                 "void main() {\n" +
-                "  gl_FragColor = vec4(v_Position.z/v_Position.w,0,0,1);\n" +
+                "  float depth = v_Position.z/v_Position.w;\n" +
+                "  gl_FragColor = vec4(depth,depth,depth,1);\n" +
                 "}\n";
 
         final ShaderProgram shaderProgram;
@@ -206,7 +213,7 @@ public final class TangoMeshRenderer implements Disposable {
             indexBuffer.bind();
 
             material.bindVariables(mvp);
-            Gdx.gl.glDrawElements(GL20.GL_TRIANGLES, numFaces * 3, GL20.GL_UNSIGNED_INT, 0);
+            Gdx.gl.glDrawElements(primitiveType, numFaces * 3, GL20.GL_UNSIGNED_INT, 0);
 
             vertexBuffer.unbind();
             indexBuffer.unbind();
