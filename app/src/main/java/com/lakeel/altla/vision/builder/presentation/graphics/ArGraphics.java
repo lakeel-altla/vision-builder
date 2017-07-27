@@ -111,7 +111,7 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
 
     private TangoMeshRenderer tangoMeshRenderer;
 
-    private final ColorObjectPicker picker = new ColorObjectPicker();
+    private ColorObjectPicker picker;
 
     private final SimpleArrayMap<String, Actor> actorMap = new SimpleArrayMap<>();
 
@@ -182,7 +182,7 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
 
         modelBatch = new ModelBatch(renderContext);
 
-        picker.init();
+        picker = new ColorObjectPicker();
 
         actorAxesModel = new ModelBuilder().createXYZCoordinates(0.25f, new Material(), Position | ColorPacked);
         actorAxesObject = new ActorAxesObject(actorAxesModel);
@@ -216,6 +216,8 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
                                          GL20.GL_RENDERBUFFER,
                                          tangoMeshesFrameBuffer.getDepthBufferHandle());
         Gdx.gl.glBindFramebuffer(GL20.GL_FRAMEBUFFER, 0);
+
+        picker.resize(width, height);
 
         cameraConfigured = false;
     }
