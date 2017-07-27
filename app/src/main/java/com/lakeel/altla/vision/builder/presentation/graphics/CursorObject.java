@@ -18,7 +18,7 @@ public final class CursorObject extends ModelInstance {
 
     public final Vector3 position = new Vector3();
 
-    public final Quaternion rotation = new Quaternion();
+    public final Quaternion orientation = new Quaternion();
 
     public final Vector3 direction = new Vector3();
 
@@ -32,12 +32,12 @@ public final class CursorObject extends ModelInstance {
         this.assetType = assetType;
     }
 
-    public void update(@NonNull Vector3 cameraPosition, @NonNull Quaternion cameraRotation) {
+    public void update(@NonNull Vector3 cameraPosition, @NonNull Quaternion cameraOrientation) {
         // Calculate the view matrix.
         direction.set(cameraPosition.x, cameraPosition.y, cameraPosition.z - 1);
         up.set(0, 1, 0);
-        cameraRotation.transform(direction);
-        cameraRotation.transform(up);
+        cameraOrientation.transform(direction);
+        cameraOrientation.transform(up);
 
         view.idt();
         view.setToLookAt(cameraPosition, direction, up);
@@ -48,9 +48,9 @@ public final class CursorObject extends ModelInstance {
         position.mul(view);
 
         // Use the camera rotation as an own one.
-        rotation.set(cameraRotation);
+        orientation.set(cameraOrientation);
         transform.idt();
-        transform.rotate(rotation);
+        transform.rotate(orientation);
 
         transform.setTranslation(position);
     }

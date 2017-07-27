@@ -15,12 +15,6 @@ public final class ActorObject extends ModelInstance {
 
     private static final float MIN_SCALE_RATIO = 0.8f;
 
-    // A temp vector.
-    private static final Vector3 TEMP_AXIS_VECTOR = new Vector3();
-
-    // A temp vector.
-    private static final Quaternion TEMP_ORIENTATION = new Quaternion();
-
     public final Actor actor;
 
     public final Vector3 position = new Vector3();
@@ -30,6 +24,12 @@ public final class ActorObject extends ModelInstance {
     public final Vector3 scale = new Vector3();
 
     public boolean transformDirty;
+
+    // A temp vector.
+    private final Vector3 tempAxisVector = new Vector3();
+
+    // A temp vector.
+    private final Quaternion tempOrientation = new Quaternion();
 
     public ActorObject(@NonNull Model model, @NonNull Actor actor) {
         super(model);
@@ -53,16 +53,16 @@ public final class ActorObject extends ModelInstance {
     }
 
     public void translate(@NonNull Axis axis, float distance) {
-        axis.toVector3(TEMP_AXIS_VECTOR);
+        axis.toVector3(tempAxisVector);
 
         // Calculate the direction of a specified axis.
-        TEMP_AXIS_VECTOR.mul(orientation).nor();
+        tempAxisVector.mul(orientation).nor();
 
         // Calculate a translaton along the specified axis.
-        TEMP_AXIS_VECTOR.scl(distance);
+        tempAxisVector.scl(distance);
 
         // Calculate and set a new position of this actor.
-        position.add(TEMP_AXIS_VECTOR);
+        position.add(tempAxisVector);
 
         transformDirty = true;
     }
@@ -72,9 +72,9 @@ public final class ActorObject extends ModelInstance {
     }
 
     public void rotate(@NonNull Axis axis, float degrees) {
-        axis.toVector3(TEMP_AXIS_VECTOR);
-        TEMP_ORIENTATION.setFromAxis(TEMP_AXIS_VECTOR, degrees);
-        orientation.mul(TEMP_ORIENTATION);
+        axis.toVector3(tempAxisVector);
+        tempOrientation.setFromAxis(tempAxisVector, degrees);
+        orientation.mul(tempOrientation);
 
         transformDirty = true;
     }

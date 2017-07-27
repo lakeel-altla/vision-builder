@@ -699,7 +699,7 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
                 listener.onCursorObjectTouched(cursorObject.asset,
                                                cursorObject.assetType,
                                                new Vector3(cursorObject.position),
-                                               new Quaternion(cursorObject.rotation),
+                                               new Quaternion(cursorObject.orientation),
                                                new Vector3(1, 1, 1));
                 // Remove the cursor.
                 removeCursor();
