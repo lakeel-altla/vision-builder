@@ -31,7 +31,7 @@ import java.nio.ByteOrder;
 
 public final class ColorObjectPicker implements Disposable {
 
-    private static final String PICK_FRAGMENT_SHADER_SOURCE =
+    private static final String FRAGMENT_SHADER_SOURCE =
             "#ifdef GL_ES\n" +
             "precision mediump float;\n" +
             "#endif\n" +
@@ -64,7 +64,9 @@ public final class ColorObjectPicker implements Disposable {
         }
     };
 
-    private DefaultShader pickShader;
+    private final ByteBuffer byteBuffer;
+
+    private DefaultShader shader;
 
     private Camera camera;
 
@@ -73,17 +75,19 @@ public final class ColorObjectPicker implements Disposable {
     private FrameBuffer frameBuffer;
 
     public ColorObjectPicker() {
+        byteBuffer = ByteBuffer.allocateDirect(4).order(ByteOrder.nativeOrder());
+
         final Renderable renderable = new Renderable();
         renderable.environment = new Environment();
         renderable.material = new Material();
         renderable.meshPart.mesh = new Mesh(true, 4, 4, VertexAttribute.Position());
 
-        pickShader = new DefaultShader(renderable, new DefaultShader.Config() {
+        shader = new DefaultShader(renderable, new DefaultShader.Config() {
             {
-                this.fragmentShader = PICK_FRAGMENT_SHADER_SOURCE;
+                this.fragmentShader = FRAGMENT_SHADER_SOURCE;
             }
         });
-        pickShader.init();
+        shader.init();
     }
 
     @Override
@@ -92,20 +96,20 @@ public final class ColorObjectPicker implements Disposable {
             frameBuffer.dispose();
             frameBuffer = null;
         }
-        if (pickShader != null) {
-            pickShader.dispose();
-            pickShader = null;
+        if (shader != null) {
+            shader.dispose();
+            shader = null;
         }
     }
 
-    public void resize(final int width, final int height) {
+    public void resize(int width, int height) {
         if (frameBuffer != null) {
             frameBuffer.dispose();
         }
         frameBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, width, height, true);
     }
 
-    public void begin(@NonNull final Camera camera, @NonNull final RenderContext renderContext) {
+    public void begin(@NonNull Camera camera, @NonNull RenderContext renderContext) {
         this.camera = camera;
         this.renderContext = renderContext;
         frameBuffer.begin();
@@ -119,11 +123,11 @@ public final class ColorObjectPicker implements Disposable {
         Gdx.gl.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
-        pickShader.begin(camera, renderContext);
+        shader.begin(camera, renderContext);
 
         for (int i = 0; i < instances.size; i++) {
             Color.rgba8888ToColor(color, i);
-            pickShader.program.setUniformf("u_Color", color.r, color.g, color.b, color.a);
+            shader.program.setUniformf("u_Color", color.r, color.g, color.b, color.a);
 
             final int offset = renderables.size;
             final ModelInstance instance = instances.get(i);
@@ -131,7 +135,7 @@ public final class ColorObjectPicker implements Disposable {
 
             for (int j = offset; j < renderables.size; j++) {
                 final Renderable renderable = renderables.get(j);
-                renderable.shader = pickShader;
+                renderable.shader = shader;
 
                 // Render meshes with custom attributes ignoring a material of models.
                 final Attribute attribute = renderable.material.get(IntAttribute.CullFace);
@@ -139,31 +143,28 @@ public final class ColorObjectPicker implements Disposable {
                     ATTRIBUTES.set(attribute);
                 }
 
-                pickShader.render(renderable, ATTRIBUTES);
+                shader.render(renderable, ATTRIBUTES);
 
                 ATTRIBUTES.clear();
             }
         }
 
-        pickShader.end();
+        shader.end();
 
         renderablePool.clear();
         renderables.clear();
     }
 
     @Nullable
-    public ModelInstance pick(@NonNull final Array<ModelInstance> instances, final int x, final int y) {
-        final ByteBuffer buffer = ByteBuffer.allocateDirect(4);
-        buffer.order(ByteOrder.nativeOrder());
+    public ModelInstance pick(@NonNull Array<ModelInstance> instances, int x, int y) {
+        Gdx.gl.glReadPixels(x, frameBuffer.getHeight() - y, 1, 1, GL20.GL_RGBA, GL20.GL_UNSIGNED_BYTE, byteBuffer);
 
-        Gdx.gl.glReadPixels(x, frameBuffer.getHeight() - y, 1, 1, GL20.GL_RGBA, GL20.GL_UNSIGNED_BYTE, buffer);
+        byteBuffer.rewind();
 
-        buffer.rewind();
-
-        final int r = buffer.get(0) & 0xff;
-        final int g = buffer.get(1) & 0xff;
-        final int b = buffer.get(2) & 0xff;
-        final int a = buffer.get(3) & 0xff;
+        final int r = byteBuffer.get(0) & 0xff;
+        final int g = byteBuffer.get(1) & 0xff;
+        final int b = byteBuffer.get(2) & 0xff;
+        final int a = byteBuffer.get(3) & 0xff;
         final int index = (r << 24) | (g << 16) | (b << 8) | a;
 
         if (0 <= index && index < instances.size) {
