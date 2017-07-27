@@ -3,11 +3,11 @@ package com.lakeel.altla.vision.builder.presentation.graphics;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.badlogic.gdx.utils.Disposable;
 import com.projecttango.tangosupport.TangoSupport;
 
 import android.opengl.GLES11Ext;
 
-import java.io.Closeable;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -19,7 +19,7 @@ import java.nio.ShortBuffer;
  *
  * A preview of the RGB camera rendered as background using OpenGL.
  */
-public final class CameraPreview implements Closeable {
+public final class CameraPreview implements Disposable {
 
     private static final String VERTEX_SHADER_SOURCE =
             "attribute vec2 a_Position;\n" +
@@ -39,38 +39,37 @@ public final class CameraPreview implements Closeable {
             "  gl_FragColor = texture2D(u_Texture,v_TexCoord);\n" +
             "}";
 
-    private Mesh mesh;
+    private final Mesh mesh;
 
-    private Texture texture;
+    private final Texture texture;
 
-    private ShaderProgram shaderProgram;
+    private final ShaderProgram shaderProgram;
 
     public CameraPreview() {
         mesh = new Mesh();
-
         texture = new Texture();
-
         shaderProgram = new ShaderProgram(VERTEX_SHADER_SOURCE, FRAGMENT_SHADER_SOURCE);
     }
 
     @Override
-    public void close() {
-        texture.close();
-        mesh.close();
+    public void dispose() {
+        texture.dispose();
+        mesh.dispose();
         shaderProgram.dispose();
     }
 
     public void updateTextureUv(int displayRotation) {
-        float[] texCoords = TangoSupport.getVideoOverlayUVBasedOnDisplayRotation(Mesh.TEX_COORDS, displayRotation);
+        final float[] texCoords =
+                TangoSupport.getVideoOverlayUVBasedOnDisplayRotation(Mesh.TEX_COORDS, displayRotation);
         mesh.setTexCoords(texCoords);
     }
 
     public void render() {
         shaderProgram.begin();
 
-        int positionHandle = shaderProgram.getAttributeLocation("a_Position");
-        int texCoordHandle = shaderProgram.getAttributeLocation("a_TexCoord");
-        int textureHandle = shaderProgram.getUniformLocation("u_Texture");
+        final int positionHandle = shaderProgram.getAttributeLocation("a_Position");
+        final int texCoordHandle = shaderProgram.getAttributeLocation("a_TexCoord");
+        final int textureHandle = shaderProgram.getUniformLocation("u_Texture");
 
         texture.bind();
         Gdx.gl.glUniform1i(textureHandle, 0);
@@ -84,9 +83,9 @@ public final class CameraPreview implements Closeable {
         return texture.handle;
     }
 
-    private static final class Texture implements Closeable {
+    private static final class Texture implements Disposable {
 
-        private int handle;
+        private final int handle;
 
         Texture() {
             handle = Gdx.gl.glGenTexture();
@@ -98,7 +97,7 @@ public final class CameraPreview implements Closeable {
         }
 
         @Override
-        public void close() {
+        public void dispose() {
             Gdx.gl.glDeleteTexture(handle);
         }
 
@@ -114,7 +113,7 @@ public final class CameraPreview implements Closeable {
      *
      * Mesh class that knows how to generate its VBOs and indices to be drawn in OpenGL.
      */
-    private static final class Mesh implements Closeable {
+    private static final class Mesh implements Disposable {
 
         private static final float[] POSITIONS = { 1.0f, -1.0f, -1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f };
 
@@ -130,17 +129,17 @@ public final class CameraPreview implements Closeable {
 
         private static final int NUM_INDICES = INDICES.length;
 
-        private FloatBuffer positions;
+        private final FloatBuffer positions;
 
-        private FloatBuffer texCoords;
+        private final FloatBuffer texCoords;
 
-        private ShortBuffer indices;
+        private final ShortBuffer indices;
 
-        private int vertexBuffer;
+        private final int vertexBuffer;
 
-        private int texCoordBuffer;
+        private final int texCoordBuffer;
 
-        private int indexBuffer;
+        private final int indexBuffer;
 
         /**
          * Create a mesh.
@@ -194,7 +193,7 @@ public final class CameraPreview implements Closeable {
         }
 
         @Override
-        public void close() {
+        public void dispose() {
             Gdx.gl.glDeleteBuffer(vertexBuffer);
             Gdx.gl.glDeleteBuffer(texCoordBuffer);
             Gdx.gl.glDeleteBuffer(indexBuffer);

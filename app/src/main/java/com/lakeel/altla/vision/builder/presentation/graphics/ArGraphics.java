@@ -8,6 +8,7 @@ import com.google.atap.tangoservice.TangoPoseData;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.FPSLogger;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
@@ -131,6 +132,8 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
 
     private boolean debugTangoMeshesVisible;
 
+    private boolean debugCameraPreviewVisible = true;
+
     @Nullable
     private CursorBuildRequest cursorBuildRequest;
 
@@ -236,7 +239,7 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
 
         LOG.d("dispose");
 
-        cameraPreview.close();
+        cameraPreview.dispose();
         modelBatch.dispose();
         spriteBatch.dispose();
         picker.dispose();
@@ -393,6 +396,10 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
 
     public void setDebugTangoMeshesVisible(boolean debugTangoMeshesVisible) {
         this.debugTangoMeshesVisible = debugTangoMeshesVisible;
+    }
+
+    public void setDebugCameraPreviewVisible(boolean debugCameraPreviewVisible) {
+        this.debugCameraPreviewVisible = debugCameraPreviewVisible;
     }
 
     public void setImageAssetCursor(@NonNull ImageAsset asset, @NonNull File imageCache) {
@@ -620,13 +627,20 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
     private void renderScene() {
         sceneFrameBuffer.begin();
 
+        if (!debugCameraPreviewVisible) {
+            final Color color = Color.SKY;
+            Gdx.gl.glClearColor(color.r, color.g, color.b, color.a);
+        }
+
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         renderContext.setDepthMask(false);
         renderContext.setDepthTest(0);
 
         // Draw the camera preview.
-        cameraPreview.render();
+        if (debugCameraPreviewVisible) {
+            cameraPreview.render();
+        }
 
         if (debugTangoMeshesVisible) {
             tangoMeshRenderer.setPrimitiveType(GL20.GL_LINES);
@@ -722,7 +736,7 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
         void onActorObjectTouched(@Nullable Actor actor);
 
         void onCursorObjectTouched(@NonNull Asset asset, @NonNull AssetType assetType,
-                                   @NonNull Vector3 position, @NonNull Quaternion rotation, @NonNull Vector3 scale);
+                                   @NonNull Vector3 position, @NonNull Quaternion orientation, @NonNull Vector3 scale);
 
         void onActorChanged(@NonNull Actor actor);
     }

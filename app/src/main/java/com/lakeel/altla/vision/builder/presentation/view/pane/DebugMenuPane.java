@@ -28,6 +28,9 @@ public final class DebugMenuPane extends Pane {
     @BindView(R.id.button_set_tango_meshes_visible)
     Button buttonSetTangoMeshesVisible;
 
+    @BindView(R.id.button_set_camera_preview_visible)
+    Button buttonSetCameraPreviewVisible;
+
     private final PaneContext paneContext;
 
     public DebugMenuPane(@NonNull Activity activity) {
@@ -35,6 +38,7 @@ public final class DebugMenuPane extends Pane {
         paneContext = (PaneContext) activity;
         imageButtonEnpand.setSelected(false);
         viewGroupOptions.setVisibility(GONE);
+        buttonSetCameraPreviewVisible.setSelected(true);
     }
 
     @OnClick(R.id.image_button_expand)
@@ -66,10 +70,23 @@ public final class DebugMenuPane extends Pane {
         paneContext.setDebugTangoMeshesVisible(selected);
     }
 
+    @OnClick(R.id.button_set_camera_preview_visible)
+    void onClickSetCameraPreviewVisible() {
+        final boolean selected = !buttonSetCameraPreviewVisible.isSelected();
+        buttonSetCameraPreviewVisible.setSelected(selected);
+        final int resId = selected ?
+                R.string.button_set_camera_preview_visible_false :
+                R.string.button_set_camera_preview_visible_true;
+        buttonSetCameraPreviewVisible.setText(resId);
+        paneContext.setDebugCamerePreviewVisible(selected);
+    }
+
     public interface PaneContext {
 
         void setDebugFrameBuffersVisible(boolean visible);
 
         void setDebugTangoMeshesVisible(boolean visible);
+
+        void setDebugCamerePreviewVisible(boolean visible);
     }
 }

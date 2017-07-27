@@ -384,7 +384,7 @@ public final class ArActivity extends AndroidApplication
 
     @Override
     public void onCursorObjectTouched(@NonNull Asset asset, @NonNull AssetType assetType, @NonNull Vector3 position,
-                                      @NonNull Quaternion rotation, @NonNull Vector3 scale) {
+                                      @NonNull Quaternion orientation, @NonNull Vector3 scale) {
         runOnUiThread(() -> {
             // TODO: use ArModel.
             final Actor actor = new Actor();
@@ -398,10 +398,10 @@ public final class ArActivity extends AndroidApplication
             actor.setPositionX(position.x);
             actor.setPositionY(position.y);
             actor.setPositionZ(position.z);
-            actor.setOrientationX(rotation.x);
-            actor.setOrientationY(rotation.y);
-            actor.setOrientationZ(rotation.z);
-            actor.setOrientationW(rotation.w);
+            actor.setOrientationX(orientation.x);
+            actor.setOrientationY(orientation.y);
+            actor.setOrientationZ(orientation.z);
+            actor.setOrientationW(orientation.w);
             actor.setScaleX(scale.x);
             actor.setScaleY(scale.y);
             actor.setScaleZ(scale.z);
@@ -433,6 +433,13 @@ public final class ArActivity extends AndroidApplication
     public void setDebugTangoMeshesVisible(boolean visible) {
         Gdx.app.postRunnable(() -> {
             arGraphics.setDebugTangoMeshesVisible(visible);
+        });
+    }
+
+    @Override
+    public void setDebugCamerePreviewVisible(boolean visible) {
+        Gdx.app.postRunnable(() -> {
+            arGraphics.setDebugCameraPreviewVisible(visible);
         });
     }
 

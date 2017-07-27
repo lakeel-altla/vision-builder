@@ -104,5 +104,7 @@
     <string name="button_show_settings">Settings</string>
     <string name="button_switch_to_edit_mode">Edit</string>
     <string name="button_show_image_asset_list_pane">Image Actor</string>
+    <string name="button_set_camera_preview_visible_false">Hide Camera Preview</string>
+    <string name="button_set_camera_preview_visible_true">Show Camera Preview</string>
 
 </resources>

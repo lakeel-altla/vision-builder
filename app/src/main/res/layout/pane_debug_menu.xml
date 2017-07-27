@@ -15,6 +15,17 @@
                   android:layout_width="wrap_content"
                   android:layout_height="match_parent">
 
+        <Button android:id="@+id/button_set_camera_preview_visible"
+                android:text="@string/button_set_camera_preview_visible_true"
+                android:textAlignment="viewStart"
+                android:textColor="@drawable/button_text_color"
+                android:background="@drawable/button_background"
+                android:paddingStart="@dimen/content_horizontal_margin"
+                android:paddingEnd="@dimen/content_horizontal_margin"
+                android:layout_marginBottom="@dimen/content_vertical_margin"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
         <Button android:id="@+id/button_set_tango_meshes_visible"
                 android:text="@string/button_set_tango_meshes_visible_true"
                 android:textAlignment="viewStart"
