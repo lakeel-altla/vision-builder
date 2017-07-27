@@ -33,12 +33,19 @@
     <color name="foreground_overlay">#ffffff</color>
     <!-- white (25%)  -->
     <color name="foreground_overlay_disabled">#44ffffff</color>
+
     <!-- black (50%) -->
     <color name="background_overlay">#88000000</color>
     <!-- black (25%) -->
     <color name="background_overlay_disabled">#44000000</color>
     <!-- royalblue (75%) -->
     <color name="background_overlay_button_pressed">#cc4169e1</color>
+    <!-- royalblue (75%) -->
+    <color name="background_overlay_selected">#cc4169e1</color>
+    <!-- royalblue (75%) -->
+    <color name="background_overlay_pressed">#cc4169e1</color>
+    <!-- royalblue (75%) -->
+    <color name="background_overlay_focused">#cc4169e1</color>
     <!-- royalblue (75%) -->
     <color name="background_overlay_item_selected">#cc4169e1</color>
 
@@ -48,29 +55,9 @@
     <color name="tint_progress">#ccffffff</color>
 
     <!-- white -->
-    <color name="button_text_color_pressed">#ffffff</color>
-    <!-- royalblue (75%) -->
-    <color name="button_background_pressed">#cc4169e1</color>
-
+    <color name="text_color_overlay_pressed">#ffffff</color>
     <!-- white -->
-    <color name="button_text_color_focused">#ffffff</color>
-    <!-- royalblue (75%) -->
-    <color name="button_background_focused">#cc4169e1</color>
-
-    <!-- white -->
-    <color name="button_text_color_selected">#ffffff</color>
-    <!-- royalblue (75%) -->
-    <color name="button_background_selected">#cc4169e1</color>
-
-    <!-- white -->
-    <color name="button_text_color_default">#ffffff</color>
-    <!-- black (50%) -->
-    <!--<color name="button_background_default">#88000000</color>-->
-
-    <!-- white -->
-    <color name="debug_console_text_color">#ffffff</color>
-    <!-- black (50%) -->
-    <color name="debug_console_background">#88000000</color>
+    <color name="text_color_overlay_focused">#ffffff</color>
 
     <!-- red for test -->
     <color name="test_red">#ff0000</color>
