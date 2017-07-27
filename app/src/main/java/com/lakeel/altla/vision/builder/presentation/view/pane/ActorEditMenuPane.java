@@ -29,9 +29,6 @@ public final class ActorEditMenuPane extends Pane {
     @Inject
     ArModel arModel;
 
-    @BindViews({ R.id.image_button_show_actor_metadata_edit_view, R.id.image_button_delete })
-    ImageButton[] buttonsDisabledIfTranslateMenuSelected;
-
     private final PaneContext paneContext;
 
     private TransformMenu transformMenu;
@@ -113,10 +110,6 @@ public final class ActorEditMenuPane extends Pane {
             translateMenu.setVisible(selected);
             rotateMenu.setVisible(selected);
             scaleMenu.setVisible(selected);
-
-            for (final ImageButton button : buttonsDisabledIfTranslateMenuSelected) {
-                button.setEnabled(!selected);
-            }
 
             paneContext.setSelectedActorLocked(selected);
         }
