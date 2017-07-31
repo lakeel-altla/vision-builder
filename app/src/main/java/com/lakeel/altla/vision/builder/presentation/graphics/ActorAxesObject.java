@@ -11,7 +11,7 @@ public final class ActorAxesObject extends ModelInstance {
         super(model);
     }
 
-    public void update(@NonNull ActorObject actorObject) {
-        transform.set(actorObject.position, actorObject.orientation, actorObject.scale);
+    public void update(@NonNull MeshActorObject meshActorObject) {
+        transform.set(meshActorObject.position, meshActorObject.orientation, meshActorObject.scale);
     }
 }

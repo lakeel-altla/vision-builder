@@ -11,9 +11,9 @@ public final class CursorBuildRequest {
 
     public final AssetType assetType;
 
-    public final AssetModelBuilder builder;
+    public final MeshActorModelBuilder builder;
 
-    public CursorBuildRequest(@NonNull Asset asset, @NonNull AssetType assetType, @NonNull AssetModelBuilder builder) {
+    public CursorBuildRequest(@NonNull Asset asset, @NonNull AssetType assetType, @NonNull MeshActorModelBuilder builder) {
         this.asset = asset;
         this.assetType = assetType;
         this.builder = builder;

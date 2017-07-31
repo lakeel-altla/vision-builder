@@ -140,7 +140,7 @@ public final class AreaSettingsModel {
         visionService.getUserAreaSettingsApi()
                      .saveAreaSettings(areaSettings);
 
-        arModel.selectAreaSettings(areaSettings);
+        arModel.setAreaSettings(areaSettings);
     }
 
     public boolean canStart() {

@@ -41,8 +41,7 @@ import com.lakeel.altla.vision.model.AreaSettings;
 import com.lakeel.altla.vision.model.Asset;
 import com.lakeel.altla.vision.model.AssetType;
 import com.lakeel.altla.vision.model.ImageAsset;
-import com.lakeel.altla.vision.model.Layer;
-import com.lakeel.altla.vision.model.Scope;
+import com.lakeel.altla.vision.model.MeshActor;
 import com.projecttango.tangosupport.TangoSupport;
 
 import android.app.Activity;
@@ -123,7 +122,7 @@ public final class ArActivity extends AndroidApplication
 
     private boolean tangoSupportInitialized;
 
-    private TypedQuery<Actor> queryUserActors;
+    private TypedQuery<MeshActor> queryUserMeshActors;
 
     private boolean editMode;
 
@@ -255,9 +254,7 @@ public final class ArActivity extends AndroidApplication
                     }
 
                     tangoMesher = new TangoMesher(tango, tangoMeshes -> {
-                        Gdx.app.postRunnable(() -> {
-                            arGraphics.updateTangoMeshes(tangoMeshes);
-                        });
+                        Gdx.app.postRunnable(() -> arGraphics.updateTangoMeshes(tangoMeshes));
                     });
                     tangoMesher.start();
 
@@ -283,37 +280,36 @@ public final class ArActivity extends AndroidApplication
                     arGraphics.onTangoConnected(tango);
 
                     if (areaSettings != null) {
-                        if (areaSettings.getAreaId() == null) {
-                            throw new IllegalStateException("Unknown areaId: null");
-                        }
+                        // TODO: for public scope.
+                        // TODO: for other actor types.
+                        queryUserMeshActors = arModel.loadUserMeshActors();
+                        queryUserMeshActors.addTypedChildEventListener(
+                                new TypedQuery.TypedChildEventListener<MeshActor>() {
+                                    @Override
+                                    public void onChildAdded(@NonNull MeshActor actor,
+                                                             @Nullable String previousChildName) {
+                                        addMeshActor(actor);
+                                    }
 
-                        // TODO: for public scope
-                        queryUserActors = arModel.loadUserActors();
-                        queryUserActors.addTypedChildEventListener(new TypedQuery.TypedChildEventListener<Actor>() {
-                            @Override
-                            public void onChildAdded(@NonNull Actor actor, @Nullable String previousChildName) {
-                                addActor(actor);
-                            }
+                                    @Override
+                                    public void onChildChanged(@NonNull MeshActor actor, String previousChildName) {
+                                        // TODO
+                                    }
 
-                            @Override
-                            public void onChildChanged(@NonNull Actor actor, String previousChildName) {
-                                // TODO
-                            }
+                                    @Override
+                                    public void onChildRemoved(@NonNull MeshActor actor) {
+                                        Gdx.app.postRunnable(() -> arGraphics.removeActor(actor));
+                                    }
 
-                            @Override
-                            public void onChildRemoved(@NonNull Actor actor) {
-                                Gdx.app.postRunnable(() -> arGraphics.removeActor(actor));
-                            }
+                                    @Override
+                                    public void onChildMoved(@NonNull MeshActor actor, String previousChildName) {
+                                    }
 
-                            @Override
-                            public void onChildMoved(@NonNull Actor actor, String previousChildName) {
-                            }
-
-                            @Override
-                            public void onError(@NonNull Exception e) {
-                                LOG.e("Failed.", e);
-                            }
-                        });
+                                    @Override
+                                    public void onError(@NonNull Exception e) {
+                                        LOG.e("Failed.", e);
+                                    }
+                                });
                     }
                 } catch (TangoOutOfDateException e) {
                     LOG.e("Tango service outdated.", e);
@@ -387,13 +383,10 @@ public final class ArActivity extends AndroidApplication
                                       @NonNull Quaternion orientation, @NonNull Vector3 scale) {
         runOnUiThread(() -> {
             // TODO: use ArModel.
-            final Actor actor = new Actor();
+            final MeshActor actor = new MeshActor();
             actor.setUserId(CurrentUser.getInstance().getUserId());
-            actor.setScopeAsEnum(Scope.USER);
-            actor.setAreaId(arModel.getAreaSettings().getAreaId());
             actor.setAssetId(asset.getId());
             actor.setAssetTypeAsEnum(assetType);
-            actor.setLayerAsEnum(Layer.NONCOMMERCIAL);
             actor.setName(asset.getName());
             actor.setPositionX(position.x);
             actor.setPositionY(position.y);
@@ -408,39 +401,28 @@ public final class ArActivity extends AndroidApplication
 
             // Save the actor.
             visionService.getUserActorApi()
-                         .saveActor(actor);
+                         .saveActor(arModel.getRequiredAreaSettings().getRequiredAreaId(), actor);
         });
     }
 
     @Override
     public void onActorChanged(@NonNull Actor actor) {
-        runOnUiThread(() -> {
-            // TODO: use ArModel.
-            // Save the actor.
-            visionService.getUserActorApi()
-                         .saveActor(actor);
-        });
+        runOnUiThread(() -> arModel.saveActor(actor));
     }
 
     @Override
     public void setDebugFrameBuffersVisible(boolean visible) {
-        Gdx.app.postRunnable(() -> {
-            arGraphics.setDebugFrameBuffersVisible(visible);
-        });
+        Gdx.app.postRunnable(() -> arGraphics.setDebugFrameBuffersVisible(visible));
     }
 
     @Override
     public void setDebugTangoMeshesVisible(boolean visible) {
-        Gdx.app.postRunnable(() -> {
-            arGraphics.setDebugTangoMeshesVisible(visible);
-        });
+        Gdx.app.postRunnable(() -> arGraphics.setDebugTangoMeshesVisible(visible));
     }
 
     @Override
     public void setDebugCamerePreviewVisible(boolean visible) {
-        Gdx.app.postRunnable(() -> {
-            arGraphics.setDebugCameraPreviewVisible(visible);
-        });
+        Gdx.app.postRunnable(() -> arGraphics.setDebugCameraPreviewVisible(visible));
     }
 
     @Override
@@ -462,17 +444,11 @@ public final class ArActivity extends AndroidApplication
 
     @Override
     public void onImageAssetSelected(@Nullable ImageAsset asset) {
-        LOG.d("onImageAssetSelected");
-
         if (asset == null) {
-            Gdx.app.postRunnable(() -> {
-                arGraphics.removeCursor();
-            });
+            Gdx.app.postRunnable(() -> arGraphics.removeCursor());
         } else {
             visionService.getUserImageAssetApi().getCachedImageAssetFile(asset.getId(), file -> {
-                Gdx.app.postRunnable(() -> {
-                    arGraphics.setImageAssetCursor(asset, file);
-                });
+                Gdx.app.postRunnable(() -> arGraphics.setImageAssetCursor(asset, file));
             }, e -> {
                 LOG.e("Failed.", e);
             }, null);
@@ -535,26 +511,23 @@ public final class ArActivity extends AndroidApplication
 //    }
 
 
-    private void addActor(@NonNull Actor actor) {
-        LOG.v("Adding the actor: id = %s", actor.getId());
+    private void addMeshActor(@NonNull MeshActor actor) {
+        LOG.v("Adding a mesh actor: id = %s", actor.getId());
 
         switch (actor.getAssetTypeAsEnum()) {
             case IMAGE:
-                addImageActor(actor);
+                addImageMeshActor(actor);
                 break;
             default:
-                LOG.e("Unexpected asset type: actorId = %s, assetType = %s", actor.getId(), actor.getAssetTypeAsEnum());
+                LOG.e("An unexpected asset type: actorId = %s, assetType = %s",
+                      actor.getId(), actor.getAssetTypeAsEnum());
                 break;
         }
     }
 
-    private void addImageActor(@NonNull Actor actor) {
-        if (actor.getAssetId() == null) throw new IllegalArgumentException("actor.getAssetId() must be not null.");
-
-        visionService.getUserImageAssetApi().getCachedImageAssetFile(actor.getAssetId(), file -> {
-            Gdx.app.postRunnable(() -> {
-                arGraphics.addImageActor(actor, file);
-            });
+    private void addImageMeshActor(@NonNull MeshActor actor) {
+        visionService.getUserImageAssetApi().getCachedImageAssetFile(actor.getRequiredAssetId(), file -> {
+            Gdx.app.postRunnable(() -> arGraphics.addImageMeshActor(actor, file));
         }, e -> {
             LOG.e("Failed.", e);
         }, null);

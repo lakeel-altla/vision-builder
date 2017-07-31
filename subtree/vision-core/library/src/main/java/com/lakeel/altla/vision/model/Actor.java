@@ -1,25 +1,11 @@
 package com.lakeel.altla.vision.model;
 
-import com.google.firebase.database.Exclude;
-
 import org.parceler.Parcel;
-import org.parceler.Transient;
 
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 @Parcel(Parcel.Serialization.BEAN)
-public final class Actor extends BaseEntity {
-
-    private String scope = Scope.UNKNOWN.name();
-
-    private String areaId;
-
-    private String assetType = AssetType.UNKNOWN.name();
-
-    private String assetId;
-
-    private String layer = Layer.UNKNOWN.name();
+public class Actor extends BaseEntity {
 
     private String name;
 
@@ -43,82 +29,7 @@ public final class Actor extends BaseEntity {
 
     private double scaleZ = 1;
 
-    @NonNull
-    public String getScope() {
-        return scope;
-    }
-
-    public void setScope(@NonNull String scope) {
-        this.scope = scope;
-    }
-
-    @Exclude
-    @Transient
-    @NonNull
-    public Scope getScopeAsEnum() {
-        return Scope.valueOf(scope);
-    }
-
-    public void setScopeAsEnum(@NonNull Scope scope) {
-        this.scope = scope.name();
-    }
-
-    @Nullable
-    public String getAreaId() {
-        return areaId;
-    }
-
-    public void setAreaId(@Nullable String areaId) {
-        this.areaId = areaId;
-    }
-
-    @NonNull
-    public String getAssetType() {
-        return assetType;
-    }
-
-    public void setAssetType(@NonNull String assetType) {
-        this.assetType = assetType;
-    }
-
-    @Exclude
-    @Transient
-    @NonNull
-    public AssetType getAssetTypeAsEnum() {
-        return AssetType.valueOf(assetType);
-    }
-
-    public void setAssetTypeAsEnum(@NonNull AssetType assetType) {
-        this.assetType = assetType.name();
-    }
-
-    @Nullable
-    public String getAssetId() {
-        return assetId;
-    }
-
-    public void setAssetId(@Nullable String assetId) {
-        this.assetId = assetId;
-    }
-
-    @NonNull
-    public String getLayer() {
-        return layer;
-    }
-
-    public void setLayer(@NonNull String layer) {
-        this.layer = layer;
-    }
-
-    @Exclude
-    @Transient
-    @NonNull
-    public Layer getLayerAsEnum() {
-        return Layer.valueOf(layer);
-    }
-
-    public void setLayerAsEnum(@NonNull Layer layer) {
-        this.layer = layer.name();
+    protected Actor() {
     }
 
     @Nullable

@@ -6,6 +6,7 @@ import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.helper.TypedQuery;
 import com.lakeel.altla.vision.model.Actor;
 import com.lakeel.altla.vision.model.AreaSettings;
+import com.lakeel.altla.vision.model.MeshActor;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -32,8 +33,14 @@ public final class ArModel {
         return areaSettings;
     }
 
-    public synchronized void selectAreaSettings(@NonNull AreaSettings areaSettings) {
+    public synchronized void setAreaSettings(@Nullable AreaSettings areaSettings) {
         this.areaSettings = areaSettings;
+    }
+
+    @NonNull
+    public synchronized AreaSettings getRequiredAreaSettings() {
+        if (areaSettings == null) throw new IllegalStateException("'areaSettings' is null.");
+        return areaSettings;
     }
 
     public synchronized boolean canEdit() {
@@ -56,45 +63,29 @@ public final class ArModel {
     }
 
     @NonNull
-    public synchronized TypedQuery<Actor> loadUserActors() {
-        if (areaSettings == null) throw new IllegalStateException("'areaSettings' is null.");
+    public Actor getRequiredSelectedActor() {
+        if (selectedActor == null) throw new IllegalStateException("'selectedActor' is null.");
+        return selectedActor;
+    }
 
-        final String areaId = areaSettings.getAreaId();
-
-        if (areaId == null) throw new IllegalStateException("Unknown area id.");
-
+    @NonNull
+    public synchronized TypedQuery<MeshActor> loadUserMeshActors() {
         return visionService.getUserActorApi()
-                            .findActorByAreaId(areaId);
+                            .findMeshActorsByAreaId(getRequiredAreaSettings().getRequiredAreaId());
     }
 
     public void saveSelectedActor() {
-        if (selectedActor == null) throw new IllegalStateException("No actor is selected.");
-
-        switch (selectedActor.getScopeAsEnum()) {
-            case PUBLIC:
-                // TODO
-                break;
-            case USER:
-                visionService.getUserActorApi().saveActor(selectedActor);
-                break;
-            default:
-                throw new IllegalArgumentException("An unexpected scope of an actor.");
-        }
+        visionService.getUserActorApi()
+                     .saveActor(getRequiredAreaSettings().getRequiredAreaId(), getRequiredSelectedActor());
     }
 
     public void deleteSelectedActor() {
-        if (selectedActor == null) throw new IllegalStateException("No actor is selected.");
+        visionService.getUserActorApi()
+                     .deleteActor(getRequiredAreaSettings().getRequiredAreaId(), getRequiredSelectedActor());
+    }
 
-        switch (selectedActor.getScopeAsEnum()) {
-            case PUBLIC:
-                // TODO
-                break;
-            case USER:
-                visionService.getUserActorApi().deleteActor(selectedActor.getId());
-                selectedActor = null;
-                break;
-            default:
-                throw new IllegalArgumentException("An unexpected scope of an actor.");
-        }
+    public void saveActor(@NonNull Actor actor) {
+        visionService.getUserActorApi()
+                     .saveActor(getRequiredAreaSettings().getRequiredAreaId(), actor);
     }
 }

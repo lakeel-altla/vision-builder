@@ -20,16 +20,16 @@ import static com.badlogic.gdx.graphics.VertexAttributes.Usage.Normal;
 import static com.badlogic.gdx.graphics.VertexAttributes.Usage.Position;
 import static com.badlogic.gdx.graphics.VertexAttributes.Usage.TextureCoordinates;
 
-public final class ImageAssetModelBuilder implements AssetModelBuilder {
+public final class ImageMeshActorModelBuilder implements MeshActorModelBuilder {
 
-    private static final Log LOG = LogFactory.getLog(ImageAssetModelBuilder.class);
+    private static final Log LOG = LogFactory.getLog(ImageMeshActorModelBuilder.class);
 
     // The texture scalling factor: 512 pixels = 1 meter.
     private static final float SCALING_FACTOR = 1f / 512f;
 
     public final File imageCache;
 
-    public ImageAssetModelBuilder(@NonNull File imageCache) {
+    public ImageMeshActorModelBuilder(@NonNull File imageCache) {
         this.imageCache = imageCache;
     }
 

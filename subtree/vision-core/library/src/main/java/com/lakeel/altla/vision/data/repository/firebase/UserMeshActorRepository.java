@@ -5,62 +5,59 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 
 import com.lakeel.altla.vision.helper.TypedQuery;
-import com.lakeel.altla.vision.model.Actor;
+import com.lakeel.altla.vision.model.MeshActor;
 
 import android.support.annotation.NonNull;
 
-public final class UserActorRepository extends BaseDatabaseRepository {
+public final class UserMeshActorRepository extends BaseDatabaseRepository {
 
-    private static final String BASE_PATH = "userActors";
+    private static final String BASE_PATH = "userMeshActors";
 
-    private static final String FIELD_AREA_ID = "areaId";
-
-    public UserActorRepository(@NonNull FirebaseDatabase database) {
+    public UserMeshActorRepository(@NonNull FirebaseDatabase database) {
         super(database);
     }
 
-    public void save(@NonNull Actor actor) {
-        if (actor.getUserId() == null) throw new IllegalArgumentException("actor.getUserId() must be not null.");
-        if (actor.getAreaId() == null) throw new IllegalArgumentException("actor.getSceneId() must be not null.");
-
+    public void save(@NonNull String areaId, @NonNull MeshActor actor) {
         actor.setUpdatedAtAsLong(-1);
 
         getDatabase().getReference()
                      .child(BASE_PATH)
-                     .child(actor.getUserId())
+                     .child(actor.getRequiredUserId())
+                     .child(areaId)
                      .child(actor.getId())
                      .setValue(actor, (error, reference) -> {
                          if (error != null) {
-                             getLog().e(String.format("Failed to saveActor: reference = %s", reference),
+                             getLog().e(String.format("Failed to save: reference = %s", reference),
                                         error.toException());
                          }
                      });
     }
 
     @NonNull
-    public TypedQuery<Actor> find(@NonNull String userId, @NonNull String actorId) {
+    public TypedQuery<MeshActor> find(@NonNull String userId, @NonNull String areaId, @NonNull String actorId) {
         final DatabaseReference reference = getDatabase().getReference()
                                                          .child(BASE_PATH)
                                                          .child(userId)
+                                                         .child(areaId)
                                                          .child(actorId);
-        return new TypedQuery<>(reference, Actor.class);
+        return new TypedQuery<>(reference, MeshActor.class);
     }
 
     @NonNull
-    public TypedQuery<Actor> findByAreaId(@NonNull String userId, @NonNull String areaId) {
+    public TypedQuery<MeshActor> findByAreaId(@NonNull String userId, @NonNull String areaId) {
         final Query query = getDatabase().getReference()
                                          .child(BASE_PATH)
                                          .child(userId)
-                                         .orderByChild(FIELD_AREA_ID)
-                                         .equalTo(areaId);
-        return new TypedQuery<>(query, Actor.class);
+                                         .child(areaId);
+        return new TypedQuery<>(query, MeshActor.class);
     }
 
-    public void delete(@NonNull String userId, @NonNull String actorId) {
+    public void delete(@NonNull String areaId, @NonNull MeshActor actor) {
         getDatabase().getReference()
                      .child(BASE_PATH)
-                     .child(userId)
-                     .child(actorId)
+                     .child(actor.getRequiredUserId())
+                     .child(areaId)
+                     .child(actor.getId())
                      .removeValue((error, reference) -> {
                          if (error != null) {
                              getLog().e(String.format("Failed to remove: reference = %s", reference),

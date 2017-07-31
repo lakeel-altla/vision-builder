@@ -50,6 +50,14 @@ public class BaseEntity {
         this.userId = userId;
     }
 
+    @Exclude
+    @Transient
+    @NonNull
+    public String getRequiredUserId() {
+        if (userId == null) throw new IllegalStateException("'userId' is null.");
+        return userId;
+    }
+
     @Nullable
     public String getGroupId() {
         return groupId;

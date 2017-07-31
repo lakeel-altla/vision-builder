@@ -50,6 +50,14 @@ public final class AreaSettings extends BaseEntity {
         this.areaId = areaId;
     }
 
+    @Exclude
+    @Transient
+    @NonNull
+    public String getRequiredAreaId() {
+        if (areaId == null) throw new IllegalStateException("'areaId' is null.");
+        return areaId;
+    }
+
     @Nullable
     public String getAreaName() {
         return areaName;
