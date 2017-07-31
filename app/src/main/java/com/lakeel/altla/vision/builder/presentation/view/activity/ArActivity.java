@@ -17,7 +17,6 @@ import com.badlogic.gdx.math.Vector3;
 import com.lakeel.altla.android.log.Log;
 import com.lakeel.altla.android.log.LogFactory;
 import com.lakeel.altla.vision.api.CurrentUser;
-import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.app.MyApplication;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
@@ -88,9 +87,6 @@ public final class ArActivity extends AndroidApplication
         COORDINATE_FRAME_PAIRS.add(new TangoCoordinateFramePair(TangoPoseData.COORDINATE_FRAME_AREA_DESCRIPTION,
                                                                 TangoPoseData.COORDINATE_FRAME_START_OF_SERVICE));
     }
-
-    @Inject
-    VisionService visionService;
 
     @Inject
     ArModel arModel;
@@ -400,8 +396,7 @@ public final class ArActivity extends AndroidApplication
             actor.setScaleZ(scale.z);
 
             // Save the actor.
-            visionService.getUserActorApi()
-                         .saveActor(arModel.getRequiredAreaSettings().getRequiredAreaId(), actor);
+            arModel.saveActor(actor);
         });
     }
 
@@ -447,7 +442,7 @@ public final class ArActivity extends AndroidApplication
         if (asset == null) {
             Gdx.app.postRunnable(() -> arGraphics.removeCursor());
         } else {
-            visionService.getUserImageAssetApi().getCachedImageAssetFile(asset.getId(), file -> {
+            arModel.getCachedImageAssetFile(asset.getId(), file -> {
                 Gdx.app.postRunnable(() -> arGraphics.setImageAssetCursor(asset, file));
             }, e -> {
                 LOG.e("Failed.", e);
@@ -526,7 +521,7 @@ public final class ArActivity extends AndroidApplication
     }
 
     private void addImageMeshActor(@NonNull MeshActor actor) {
-        visionService.getUserImageAssetApi().getCachedImageAssetFile(actor.getRequiredAssetId(), file -> {
+        arModel.getCachedImageAssetFile(actor.getRequiredAssetId(), file -> {
             Gdx.app.postRunnable(() -> arGraphics.addImageMeshActor(actor, file));
         }, e -> {
             LOG.e("Failed.", e);

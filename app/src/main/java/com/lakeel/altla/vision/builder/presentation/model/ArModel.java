@@ -3,6 +3,9 @@ package com.lakeel.altla.vision.builder.presentation.model;
 import com.lakeel.altla.android.log.Log;
 import com.lakeel.altla.android.log.LogFactory;
 import com.lakeel.altla.vision.api.VisionService;
+import com.lakeel.altla.vision.helper.OnFailureListener;
+import com.lakeel.altla.vision.helper.OnProgressListener;
+import com.lakeel.altla.vision.helper.OnSuccessListener;
 import com.lakeel.altla.vision.helper.TypedQuery;
 import com.lakeel.altla.vision.model.Actor;
 import com.lakeel.altla.vision.model.AreaSettings;
@@ -10,6 +13,8 @@ import com.lakeel.altla.vision.model.MeshActor;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+
+import java.io.File;
 
 public final class ArModel {
 
@@ -87,5 +92,13 @@ public final class ArModel {
     public void saveActor(@NonNull Actor actor) {
         visionService.getUserActorApi()
                      .saveActor(getRequiredAreaSettings().getRequiredAreaId(), actor);
+    }
+
+    public void getCachedImageAssetFile(@NonNull String assetId,
+                                        @Nullable OnSuccessListener<File> onSuccessListener,
+                                        @Nullable OnFailureListener onFailureListener,
+                                        @Nullable OnProgressListener onProgressListener) {
+        visionService.getUserImageAssetApi()
+                     .getCachedImageAssetFile(assetId, onSuccessListener, onFailureListener, onProgressListener);
     }
 }
