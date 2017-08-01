@@ -7,6 +7,10 @@ public final class ImageAsset extends Asset {
 
     private boolean fileUploaded;
 
+    public ImageAsset() {
+        super(AssetType.IMAGE);
+    }
+
     public boolean isFileUploaded() {
         return fileUploaded;
     }

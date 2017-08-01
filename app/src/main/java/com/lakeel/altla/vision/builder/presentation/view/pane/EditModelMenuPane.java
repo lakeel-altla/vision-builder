@@ -49,10 +49,17 @@ public final class EditModelMenuPane extends Pane {
         paneContext.showImageAssetListPane();
     }
 
+    @OnClick(R.id.button_show_trigger_list_pane)
+    void onClickShowTriggerListPane() {
+        paneContext.showTriggerListPane();
+    }
+
     public interface PaneContext {
 
         void showViewModeMenuPane();
 
         void showImageAssetListPane();
+
+        void showTriggerListPane();
     }
 }

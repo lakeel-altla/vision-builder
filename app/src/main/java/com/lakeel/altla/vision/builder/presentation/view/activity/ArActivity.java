@@ -16,7 +16,6 @@ import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
 import com.lakeel.altla.android.log.Log;
 import com.lakeel.altla.android.log.LogFactory;
-import com.lakeel.altla.vision.api.CurrentUser;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.app.MyApplication;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
@@ -33,14 +32,16 @@ import com.lakeel.altla.vision.builder.presentation.view.pane.EditModelMenuPane;
 import com.lakeel.altla.vision.builder.presentation.view.pane.ImageAssetListPane;
 import com.lakeel.altla.vision.builder.presentation.view.pane.PaneGroup;
 import com.lakeel.altla.vision.builder.presentation.view.pane.PaneLifecycle;
+import com.lakeel.altla.vision.builder.presentation.view.pane.TriggerShapeListPane;
 import com.lakeel.altla.vision.builder.presentation.view.pane.ViewModeMenuPane;
 import com.lakeel.altla.vision.helper.TypedQuery;
 import com.lakeel.altla.vision.model.Actor;
 import com.lakeel.altla.vision.model.AreaSettings;
 import com.lakeel.altla.vision.model.Asset;
-import com.lakeel.altla.vision.model.AssetType;
 import com.lakeel.altla.vision.model.ImageAsset;
 import com.lakeel.altla.vision.model.MeshActor;
+import com.lakeel.altla.vision.model.TriggerActor;
+import com.lakeel.altla.vision.model.TriggerShape;
 import com.projecttango.tangosupport.TangoSupport;
 
 import android.app.Activity;
@@ -69,6 +70,7 @@ public final class ArActivity extends AndroidApplication
                    ViewModeMenuPane.PaneContext,
                    EditModelMenuPane.PaneContext,
                    ImageAssetListPane.PaneContext,
+                   TriggerShapeListPane.PaneContext,
                    ActorEditMenuPane.PaneContext {
 
     private static final Log LOG = LogFactory.getLog(ArActivity.class);
@@ -106,6 +108,8 @@ public final class ArActivity extends AndroidApplication
 
     private ImageAssetListPane imageAssetListPane;
 
+    private TriggerShapeListPane triggerShapeListPane;
+
     private ActorEditMenuPane actorEditMenuPane;
 
     private ActorMetadataPane actorMetadataPane;
@@ -119,6 +123,8 @@ public final class ArActivity extends AndroidApplication
     private boolean tangoSupportInitialized;
 
     private TypedQuery<MeshActor> queryUserMeshActors;
+
+    private TypedQuery<TriggerActor> queryUserTriggerActors;
 
     private boolean editMode;
 
@@ -168,6 +174,7 @@ public final class ArActivity extends AndroidApplication
         viewModeMenuPane = new ViewModeMenuPane(this);
         editModelMenuPane = new EditModelMenuPane(this);
         imageAssetListPane = new ImageAssetListPane(this);
+        triggerShapeListPane = new TriggerShapeListPane(this);
         actorEditMenuPane = new ActorEditMenuPane(this);
         actorMetadataPane = new ActorMetadataPane(this);
 
@@ -175,12 +182,14 @@ public final class ArActivity extends AndroidApplication
         paneLifecycle.add(viewModeMenuPane);
         paneLifecycle.add(editModelMenuPane);
         paneLifecycle.add(imageAssetListPane);
+        paneLifecycle.add(triggerShapeListPane);
         paneLifecycle.add(actorEditMenuPane);
         paneLifecycle.add(actorMetadataPane);
 
         paneGroup.add(viewModeMenuPane);
         paneGroup.add(editModelMenuPane);
         paneGroup.add(imageAssetListPane);
+        paneGroup.add(triggerShapeListPane);
         paneGroup.add(actorEditMenuPane);
 
         viewModeMenuPane.setOnVisibleChangedListener(visible -> {
@@ -306,6 +315,34 @@ public final class ArActivity extends AndroidApplication
                                         LOG.e("Failed.", e);
                                     }
                                 });
+                        queryUserTriggerActors = arModel.loadUserTriggerActors();
+                        queryUserTriggerActors.addTypedChildEventListener(
+                                new TypedQuery.TypedChildEventListener<TriggerActor>() {
+                                    @Override
+                                    public void onChildAdded(@NonNull TriggerActor actor,
+                                                             @Nullable String previousChildName) {
+                                        addTriggerActor(actor);
+                                    }
+
+                                    @Override
+                                    public void onChildChanged(@NonNull TriggerActor actor, String previousChildName) {
+                                        // TODO
+                                    }
+
+                                    @Override
+                                    public void onChildRemoved(@NonNull TriggerActor actor) {
+                                        Gdx.app.postRunnable(() -> arGraphics.removeActor(actor));
+                                    }
+
+                                    @Override
+                                    public void onChildMoved(@NonNull TriggerActor actor, String previousChildName) {
+                                    }
+
+                                    @Override
+                                    public void onError(@NonNull Exception e) {
+                                        LOG.e("Failed.", e);
+                                    }
+                                });
                     }
                 } catch (TangoOutOfDateException e) {
                     LOG.e("Tango service outdated.", e);
@@ -375,29 +412,15 @@ public final class ArActivity extends AndroidApplication
     }
 
     @Override
-    public void onCursorObjectTouched(@NonNull Asset asset, @NonNull AssetType assetType, @NonNull Vector3 position,
-                                      @NonNull Quaternion orientation, @NonNull Vector3 scale) {
-        runOnUiThread(() -> {
-            // TODO: use ArModel.
-            final MeshActor actor = new MeshActor();
-            actor.setUserId(CurrentUser.getInstance().getUserId());
-            actor.setAssetId(asset.getId());
-            actor.setAssetTypeAsEnum(assetType);
-            actor.setName(asset.getName());
-            actor.setPositionX(position.x);
-            actor.setPositionY(position.y);
-            actor.setPositionZ(position.z);
-            actor.setOrientationX(orientation.x);
-            actor.setOrientationY(orientation.y);
-            actor.setOrientationZ(orientation.z);
-            actor.setOrientationW(orientation.w);
-            actor.setScaleX(scale.x);
-            actor.setScaleY(scale.y);
-            actor.setScaleZ(scale.z);
+    public void onMeshActorCursorObjectTouched(@NonNull Asset asset, @NonNull Vector3 position,
+                                               @NonNull Quaternion orientation, @NonNull Vector3 scale) {
+        runOnUiThread(() -> arModel.saveMeshActor(asset, position, orientation, scale));
+    }
 
-            // Save the actor.
-            arModel.saveActor(actor);
-        });
+    @Override
+    public void onTriggerActorCursorObjectTouched(@NonNull TriggerShape triggerShape, @NonNull Vector3 position,
+                                                  @NonNull Quaternion orientation, @NonNull Vector3 scale) {
+        runOnUiThread(() -> arModel.saveTriggerActor(triggerShape, position, orientation, scale));
     }
 
     @Override
@@ -438,15 +461,29 @@ public final class ArActivity extends AndroidApplication
     }
 
     @Override
+    public void showTriggerListPane() {
+        paneGroup.show(R.id.pane_trigger_shape_list);
+    }
+
+    @Override
     public void onImageAssetSelected(@Nullable ImageAsset asset) {
         if (asset == null) {
-            Gdx.app.postRunnable(() -> arGraphics.removeCursor());
+            Gdx.app.postRunnable(() -> arGraphics.removeMeshActorCursor());
         } else {
             arModel.getCachedImageAssetFile(asset.getId(), file -> {
-                Gdx.app.postRunnable(() -> arGraphics.setImageAssetCursor(asset, file));
+                Gdx.app.postRunnable(() -> arGraphics.addMeshActorCursor(asset, file));
             }, e -> {
                 LOG.e("Failed.", e);
             }, null);
+        }
+    }
+
+    @Override
+    public void onTriggerShapeSelected(@Nullable TriggerShape triggerShape) {
+        if (triggerShape == null) {
+            Gdx.app.postRunnable(() -> arGraphics.removeTriggerActorCursor());
+        } else {
+            Gdx.app.postRunnable(() -> arGraphics.addTriggerActorCursor(triggerShape));
         }
     }
 
@@ -522,9 +559,15 @@ public final class ArActivity extends AndroidApplication
 
     private void addImageMeshActor(@NonNull MeshActor actor) {
         arModel.getCachedImageAssetFile(actor.getRequiredAssetId(), file -> {
-            Gdx.app.postRunnable(() -> arGraphics.addImageMeshActor(actor, file));
+            Gdx.app.postRunnable(() -> arGraphics.addMeshActor(actor, file));
         }, e -> {
             LOG.e("Failed.", e);
         }, null);
+    }
+
+    private void addTriggerActor(@NonNull TriggerActor actor) {
+        LOG.v("Adding a trigger actor: id = %s", actor.getId());
+
+        Gdx.app.postRunnable(() -> arGraphics.addTriggerActor(actor));
     }
 }

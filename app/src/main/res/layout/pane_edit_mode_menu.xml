@@ -41,6 +41,17 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
 
+        <Button android:id="@+id/button_show_trigger_list_pane"
+                android:text="@string/button_show_trigger_list_pane"
+                android:textAlignment="viewStart"
+                android:textColor="@color/foreground_button"
+                android:background="@drawable/overlay_button_background"
+                android:paddingStart="@dimen/content_horizontal_margin"
+                android:paddingEnd="@dimen/content_horizontal_margin"
+                android:layout_marginTop="@dimen/content_vertical_margin"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
     </LinearLayout>
 
 </RelativeLayout>

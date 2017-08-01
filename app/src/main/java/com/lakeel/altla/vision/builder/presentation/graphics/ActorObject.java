@@ -5,17 +5,17 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
 import com.lakeel.altla.vision.builder.presentation.model.Axis;
-import com.lakeel.altla.vision.model.MeshActor;
+import com.lakeel.altla.vision.model.Actor;
 
 import android.support.annotation.NonNull;
 
-public final class MeshActorObject extends ModelInstance {
+public final class ActorObject extends ModelInstance {
 
     private static final float MAX_SCALE_RATIO = 1.2f;
 
     private static final float MIN_SCALE_RATIO = 0.8f;
 
-    public final MeshActor actor;
+    public final Actor actor;
 
     public final Vector3 position = new Vector3();
 
@@ -31,7 +31,7 @@ public final class MeshActorObject extends ModelInstance {
     // A temp vector.
     private final Quaternion tempOrientation = new Quaternion();
 
-    public MeshActorObject(@NonNull Model model, @NonNull MeshActor actor) {
+    public ActorObject(@NonNull Model model, @NonNull Actor actor) {
         super(model);
         this.actor = actor;
 

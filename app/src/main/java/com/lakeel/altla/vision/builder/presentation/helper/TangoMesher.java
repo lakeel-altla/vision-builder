@@ -51,7 +51,7 @@ public final class TangoMesher {
         // Default is false.
         config.putBoolean(Tango3dReconstructionConfig.USE_SPACE_CLEARING, true);
         // Default is 1.
-        config.putInt("min_num_vertices", 4);
+//        config.putInt("min_num_vertices", 4);
         tango3dReconstruction = new Tango3dReconstruction(config);
         tango3dReconstruction.setColorCameraCalibration(
                 tango.getCameraIntrinsics(TangoCameraIntrinsics.TANGO_CAMERA_COLOR));

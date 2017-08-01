@@ -5,16 +5,10 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
-import com.lakeel.altla.vision.model.Asset;
-import com.lakeel.altla.vision.model.AssetType;
 
 import android.support.annotation.NonNull;
 
-public final class CursorObject extends ModelInstance {
-
-    public final Asset asset;
-
-    public final AssetType assetType;
+public class ActorCursorObject extends ModelInstance {
 
     public final Vector3 position = new Vector3();
 
@@ -26,13 +20,11 @@ public final class CursorObject extends ModelInstance {
 
     public final Matrix4 view = new Matrix4();
 
-    public CursorObject(@NonNull Model model, @NonNull Asset asset, @NonNull AssetType assetType) {
+    public ActorCursorObject(@NonNull Model model) {
         super(model);
-        this.asset = asset;
-        this.assetType = assetType;
     }
 
-    public void update(@NonNull Vector3 cameraPosition, @NonNull Quaternion cameraOrientation) {
+    public final void update(@NonNull Vector3 cameraPosition, @NonNull Quaternion cameraOrientation) {
         // Calculate the view matrix.
         direction.set(cameraPosition.x, cameraPosition.y, cameraPosition.z - 1);
         up.set(0, 1, 0);
