@@ -537,7 +537,7 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
                 }
             }
         } catch (TangoException e) {
-            LOG.e("Tango API call error within the OpenGL render thread.", e);
+            LOG.e("Tango API call error within the OpenGL renderDepth thread.", e);
         }
 
         if (meshActorCursorObject != null) {
@@ -570,7 +570,7 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
 
         renderContext.begin();
 
-        renderTangoMeshes();
+        renderTangoMeshesDepth();
 
         // Draw the scene.
         renderScene();
@@ -596,7 +596,7 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
         }
     }
 
-    private void renderTangoMeshes() {
+    private void renderTangoMeshesDepth() {
         tangoMeshesFrameBuffer.begin();
 
         Gdx.gl.glClearColor(1, 1, 1, 1);
@@ -605,8 +605,7 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
         renderContext.setDepthMask(true);
         renderContext.setDepthTest(GL20.GL_LEQUAL);
 
-        tangoMeshRenderer.setPrimitiveType(GL20.GL_TRIANGLES);
-        tangoMeshRenderer.render(camera);
+        tangoMeshRenderer.renderDepth(camera);
 
         tangoMeshesFrameBuffer.end();
     }
@@ -630,8 +629,7 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
         }
 
         if (debugTangoMeshesVisible) {
-            tangoMeshRenderer.setPrimitiveType(GL20.GL_LINES);
-            tangoMeshRenderer.render(camera);
+            tangoMeshRenderer.renderWireframe(camera);
         }
 
         // TODO: Do frustum culling.

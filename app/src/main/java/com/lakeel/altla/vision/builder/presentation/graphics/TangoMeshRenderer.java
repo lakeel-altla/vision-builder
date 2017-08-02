@@ -4,6 +4,7 @@ import com.google.atap.tango.mesh.TangoMesh;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Matrix4;
@@ -30,7 +31,9 @@ public final class TangoMeshRenderer implements Disposable {
 
     private final Matrix4 mvp = new Matrix4();
 
-    private final Material material = new Material();
+    private final DepthMaterial depthMaterial = new DepthMaterial();
+
+    private final ColorMaterial colorMaterial = new ColorMaterial();
 
     private final MeshList meshList = new MeshList();
 
@@ -42,12 +45,8 @@ public final class TangoMeshRenderer implements Disposable {
 
     @Override
     public void dispose() {
-        material.dispose();
+        depthMaterial.dispose();
         meshList.dispose();
-    }
-
-    public void setPrimitiveType(int primitiveType) {
-        this.primitiveType = primitiveType;
     }
 
     public void update(@NonNull List<TangoMesh> tangoMeshes) {
@@ -62,21 +61,39 @@ public final class TangoMeshRenderer implements Disposable {
         mesh.update(tangoMesh);
     }
 
-    public void render(@NonNull Camera camera) {
+    public void renderDepth(@NonNull Camera camera) {
         mvp.set(camera.combined).mul(worldTransform);
 
-        material.shaderProgram.begin();
+        depthMaterial.shaderProgram.begin();
+        depthMaterial.bindMvp(mvp);
 
         for (int i = 0; i < meshList.meshMap.size(); i++) {
-            meshList.meshMap.valueAt(i).render(mvp);
+            meshList.meshMap.valueAt(i).render(depthMaterial);
         }
 
-        material.shaderProgram.end();
+        depthMaterial.shaderProgram.end();
+    }
+
+    public void renderWireframe(@NonNull Camera camera) {
+        mvp.set(camera.combined).mul(worldTransform);
+
+        colorMaterial.shaderProgram.begin();
+        colorMaterial.bindMvp(mvp);
+        colorMaterial.bindColor(Color.GREEN);
+
+        primitiveType = GL20.GL_LINES;
+
+        for (int i = 0; i < meshList.meshMap.size(); i++) {
+            meshList.meshMap.valueAt(i).render(colorMaterial);
+        }
+
+        primitiveType = GL20.GL_TRIANGLES;
+
+        colorMaterial.shaderProgram.end();
     }
 
     private static class VertexBuffer implements Disposable {
 
-        // The service will always pass four-byte floats.
         static final int SIZE_OF_FLOAT = 4;
 
         final int handle;
@@ -110,7 +127,6 @@ public final class TangoMeshRenderer implements Disposable {
 
     private static class IndexBuffer implements Disposable {
 
-        // The service will always pass four-byte integers.
         static final int SIZE_OF_INT = 4;
 
         int handle;
@@ -143,11 +159,15 @@ public final class TangoMeshRenderer implements Disposable {
         }
     }
 
-    private static class Material implements Disposable {
+    private interface Material {
+
+        void bindAttributes();
+    }
+
+    private static class DepthMaterial implements Material, Disposable {
 
         static final String VERTEX_SHADER_SOURCE =
                 "attribute vec4 a_Position;\n" +
-                "\n" +
                 "uniform mat4 u_MVP;\n" +
                 "varying vec4 v_Position;\n" +
                 "void main() {\n" +
@@ -158,7 +178,6 @@ public final class TangoMeshRenderer implements Disposable {
         static final String FRAGMENT_SHADER_SOURCE =
                 "precision mediump float;\n" +
                 "varying vec4 v_Position;\n" +
-                "\n" +
                 "void main() {\n" +
                 "  float depth = v_Position.z/v_Position.w;\n" +
                 "  gl_FragColor = vec4(depth,depth,depth,1);\n" +
@@ -170,7 +189,7 @@ public final class TangoMeshRenderer implements Disposable {
 
         final int mvpHandle;
 
-        Material() {
+        DepthMaterial() {
             shaderProgram = new ShaderProgram(VERTEX_SHADER_SOURCE, FRAGMENT_SHADER_SOURCE);
             positionHandle = shaderProgram.getAttributeLocation("a_Position");
             mvpHandle = shaderProgram.getUniformLocation("u_MVP");
@@ -181,10 +200,65 @@ public final class TangoMeshRenderer implements Disposable {
             shaderProgram.dispose();
         }
 
-        public void bindVariables(@NonNull final Matrix4 mvp) {
+        @Override
+        public void bindAttributes() {
             shaderProgram.enableVertexAttribute(positionHandle);
             shaderProgram.setVertexAttribute(positionHandle, NUM_VERTEX_COORD, GL20.GL_FLOAT, false, 0, 0);
+        }
+
+        void bindMvp(@NonNull Matrix4 mvp) {
             shaderProgram.setUniformMatrix(mvpHandle, mvp);
+        }
+    }
+
+    private static class ColorMaterial implements Material, Disposable {
+
+        static final String VERTEX_SHADER_SOURCE =
+                "attribute vec4 a_Position;\n" +
+                "uniform mat4 u_MVP;\n" +
+                "void main() {\n" +
+                "  gl_Position = u_MVP * a_Position;\n" +
+                "}\n";
+
+        static final String FRAGMENT_SHADER_SOURCE =
+                "precision mediump float;\n" +
+                "uniform vec4 u_Color;\n" +
+                "void main() {\n" +
+                "  gl_FragColor = u_Color;\n" +
+                "}\n";
+
+        final ShaderProgram shaderProgram;
+
+        final int positionHandle;
+
+        final int mvpHandle;
+
+        final int colorHandle;
+
+        ColorMaterial() {
+            shaderProgram = new ShaderProgram(VERTEX_SHADER_SOURCE, FRAGMENT_SHADER_SOURCE);
+            positionHandle = shaderProgram.getAttributeLocation("a_Position");
+            mvpHandle = shaderProgram.getUniformLocation("u_MVP");
+            colorHandle = shaderProgram.getUniformLocation("u_Color");
+        }
+
+        @Override
+        public void dispose() {
+            shaderProgram.dispose();
+        }
+
+        @Override
+        public void bindAttributes() {
+            shaderProgram.enableVertexAttribute(positionHandle);
+            shaderProgram.setVertexAttribute(positionHandle, NUM_VERTEX_COORD, GL20.GL_FLOAT, false, 0, 0);
+        }
+
+        void bindMvp(@NonNull Matrix4 mvp) {
+            shaderProgram.setUniformMatrix(mvpHandle, mvp);
+        }
+
+        void bindColor(@NonNull Color color) {
+            shaderProgram.setUniformf(colorHandle, color.r, color.g, color.b, color.a);
         }
     }
 
@@ -202,17 +276,17 @@ public final class TangoMeshRenderer implements Disposable {
             indexBuffer.dispose();
         }
 
-        void update(@NonNull final TangoMesh tangoMesh) {
+        void update(@NonNull TangoMesh tangoMesh) {
             vertexBuffer.update(tangoMesh.vertices);
             indexBuffer.update(tangoMesh.faces);
             numFaces = tangoMesh.numFaces;
         }
 
-        void render(@NonNull final Matrix4 mvp) {
+        void render(@NonNull Material material) {
             vertexBuffer.bind();
             indexBuffer.bind();
 
-            material.bindVariables(mvp);
+            material.bindAttributes();
             Gdx.gl.glDrawElements(primitiveType, numFaces * 3, GL20.GL_UNSIGNED_INT, 0);
 
             vertexBuffer.unbind();
