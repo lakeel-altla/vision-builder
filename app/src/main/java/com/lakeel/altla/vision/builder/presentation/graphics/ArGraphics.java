@@ -11,7 +11,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.FPSLogger;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -93,9 +92,7 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
 
     private int displayRotation;
 
-    private PerspectiveCamera camera = new PerspectiveCamera();
-
-    private final Quaternion tangoPoseRotation = new Quaternion();
+    private TangoCamera camera = new TangoCamera();
 
     private RenderContext renderContext;
 
@@ -172,7 +169,7 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
         environment = new Environment();
         // TODO: Make lights managed in each area.
         environment.add(new DirectionalLight().set(1, 1, 1, 0, -1, 0));
-//        environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1));
+//        environment.setTangoPoseData(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1));
 
         renderContext = new RenderContext(new DefaultTextureBinder(DefaultTextureBinder.WEIGHTED, 1));
 
@@ -492,16 +489,8 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
                     // Update settings of the scene camera.
                     final TangoCameraIntrinsics intrinsics = TangoSupport.getCameraIntrinsicsBasedOnDisplayRotation(
                             TangoCameraIntrinsics.TANGO_CAMERA_COLOR, displayRotation);
-                    camera.fieldOfView = MathHelper.verticalFieldOfView(intrinsics);
-                    camera.viewportWidth = Gdx.graphics.getWidth();
-                    camera.viewportHeight = Gdx.graphics.getHeight();
-
-                    LOG.d("Camera parameters: fieldOfView = %f, viewportWidth = %f, viewportHeight = %f",
-                          camera.fieldOfView, camera.viewportWidth, camera.viewportHeight);
-
-                    // Initialize the pose of the scene camera.
-                    camera.direction.set(0, 0, -1);
-                    camera.up.set(0, 1, 0);
+                    camera.setTangoCameraIntrinsics(intrinsics);
+                    camera.resetTransform();
                     camera.update();
 
                     // Connect a new texture id for the camera preview to the tango.
@@ -537,16 +526,7 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
                             TangoSupport.TANGO_SUPPORT_ENGINE_OPENGL,
                             displayRotation);
                     if (poseData.statusCode == TangoPoseData.POSE_VALID) {
-                        camera.position.set((float) poseData.translation[0],
-                                            (float) poseData.translation[1],
-                                            (float) poseData.translation[2]);
-                        tangoPoseRotation.set((float) poseData.rotation[0],
-                                              (float) poseData.rotation[1],
-                                              (float) poseData.rotation[2],
-                                              (float) poseData.rotation[3]);
-                        camera.direction.set(0, 0, -1);
-                        camera.up.set(0, 1, 0);
-                        camera.rotate(tangoPoseRotation);
+                        camera.setTangoPoseData(poseData);
                         camera.update();
                     } else if (poseData.statusCode == TangoPoseData.POSE_INVALID) {
                         LOG.d("The tango pose is invalid:  cameraColorTimestamp = %f, displayRotation = %d",
@@ -561,11 +541,11 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
         }
 
         if (meshActorCursorObject != null) {
-            meshActorCursorObject.update(camera.position, tangoPoseRotation);
+            meshActorCursorObject.update(camera);
         }
 
         if (triggerActorCursorObject != null) {
-            triggerActorCursorObject.update(camera.position, tangoPoseRotation);
+            triggerActorCursorObject.update(camera);
         }
 
         if (actorAxesObjectVisible && touchedActorObject != null) {
@@ -724,7 +704,7 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
             final ModelInstance instance = picker.pick(pickableInstances, Gdx.input.getX(), Gdx.input.getY());
 
             if (instance == null) {
-                if (meshActorCursorObject == null) {
+                if (meshActorCursorObject == null && triggerActorCursorObject == null) {
                     if (!touchedActorObjectLocked) {
                         touchedActorObject = null;
                         listener.onActorObjectTouched(null);

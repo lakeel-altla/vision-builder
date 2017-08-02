@@ -61,7 +61,7 @@ public final class ActorObject extends ModelInstance {
         // Calculate a translaton along the specified axis.
         tempAxisVector.scl(distance);
 
-        // Calculate and set a new position of this actor.
+        // Calculate and setTangoPoseData a new position of this actor.
         position.add(tempAxisVector);
 
         transformDirty = true;
