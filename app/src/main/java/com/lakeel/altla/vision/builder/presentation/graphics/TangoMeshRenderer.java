@@ -2,7 +2,6 @@ package com.lakeel.altla.vision.builder.presentation.graphics;
 
 import com.google.atap.tango.mesh.TangoMesh;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -20,6 +19,8 @@ import android.util.LruCache;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.List;
+
+import static com.badlogic.gdx.Gdx.gl;
 
 public final class TangoMeshRenderer implements Disposable {
 
@@ -62,9 +63,7 @@ public final class TangoMeshRenderer implements Disposable {
         depthShader.program.begin();
         depthShader.bindMvp(mvp);
 
-        for (int i = 0; i < meshList.meshMap.size(); i++) {
-            meshList.meshMap.valueAt(i).render(depthShader, GL20.GL_TRIANGLES);
-        }
+        meshList.render(depthShader, GL20.GL_TRIANGLES);
 
         depthShader.program.end();
     }
@@ -76,9 +75,7 @@ public final class TangoMeshRenderer implements Disposable {
         colorShader.bindMvp(mvp);
         colorShader.bindColor(Color.GREEN);
 
-        for (int i = 0; i < meshList.meshMap.size(); i++) {
-            meshList.meshMap.valueAt(i).render(colorShader, GL20.GL_LINES);
-        }
+        meshList.render(colorShader, GL20.GL_LINES);
 
         colorShader.program.end();
     }
@@ -90,28 +87,25 @@ public final class TangoMeshRenderer implements Disposable {
         final int handle;
 
         VertexBuffer() {
-            handle = Gdx.gl.glGenBuffer();
+            handle = gl.glGenBuffer();
         }
 
         @Override
         public void dispose() {
-            Gdx.gl.glDeleteBuffer(handle);
+            gl.glDeleteBuffer(handle);
         }
 
         void bind() {
-            Gdx.gl.glBindBuffer(GL20.GL_ARRAY_BUFFER, handle);
+            gl.glBindBuffer(GL20.GL_ARRAY_BUFFER, handle);
         }
 
         void unbind() {
-            Gdx.gl.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
+            gl.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
         }
 
         void update(@NonNull FloatBuffer vertices) {
             bind();
-            Gdx.gl.glBufferData(GL20.GL_ARRAY_BUFFER,
-                                vertices.capacity() * SIZE_OF_FLOAT,
-                                vertices,
-                                GL20.GL_DYNAMIC_DRAW);
+            gl.glBufferData(GL20.GL_ARRAY_BUFFER, vertices.capacity() * SIZE_OF_FLOAT, vertices, GL20.GL_DYNAMIC_DRAW);
             unbind();
         }
     }
@@ -120,32 +114,29 @@ public final class TangoMeshRenderer implements Disposable {
 
         static final int SIZE_OF_INT = 4;
 
-        int handle;
+        final int handle;
 
         IndexBuffer() {
-            handle = Gdx.gl.glGenBuffer();
+            handle = gl.glGenBuffer();
         }
 
         @Override
         public void dispose() {
-            Gdx.gl.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
-            Gdx.gl.glDeleteBuffer(handle);
+            gl.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
+            gl.glDeleteBuffer(handle);
         }
 
         void bind() {
-            Gdx.gl.glBindBuffer(GL20.GL_ELEMENT_ARRAY_BUFFER, handle);
+            gl.glBindBuffer(GL20.GL_ELEMENT_ARRAY_BUFFER, handle);
         }
 
         void unbind() {
-            Gdx.gl.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
+            gl.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
         }
 
         void update(@NonNull IntBuffer faces) {
             bind();
-            Gdx.gl.glBufferData(GL20.GL_ELEMENT_ARRAY_BUFFER,
-                                faces.capacity() * SIZE_OF_INT,
-                                faces,
-                                GL20.GL_DYNAMIC_DRAW);
+            gl.glBufferData(GL20.GL_ELEMENT_ARRAY_BUFFER, faces.capacity() * SIZE_OF_INT, faces, GL20.GL_DYNAMIC_DRAW);
             unbind();
         }
     }
@@ -269,7 +260,7 @@ public final class TangoMeshRenderer implements Disposable {
 
             shader.bindAttributes();
 
-            Gdx.gl.glDrawElements(primitiveType, numFaces * 3, GL20.GL_UNSIGNED_INT, 0);
+            gl.glDrawElements(primitiveType, numFaces * 3, GL20.GL_UNSIGNED_INT, 0);
 
             vertexBuffer.unbind();
             indexBuffer.unbind();
@@ -298,6 +289,12 @@ public final class TangoMeshRenderer implements Disposable {
         @Override
         public void dispose() {
             cache.evictAll();
+        }
+
+        void render(@NonNull Shader shader, int primitiveType) {
+            for (int i = 0; i < meshMap.size(); i++) {
+                meshMap.valueAt(i).render(shader, primitiveType);
+            }
         }
 
         private final class MeshCache extends LruCache<GridIndex, Mesh> {
