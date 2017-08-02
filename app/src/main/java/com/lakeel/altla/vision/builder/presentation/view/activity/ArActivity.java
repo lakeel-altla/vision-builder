@@ -390,6 +390,8 @@ public final class ArActivity extends AndroidApplication
 
     @Override
     public void onActorObjectTouched(@Nullable Actor actor) {
+        LOG.d("onActorObjectTouched");
+
         runOnUiThread(() -> {
             arModel.setSelectedActor(actor);
             if (editMode) {

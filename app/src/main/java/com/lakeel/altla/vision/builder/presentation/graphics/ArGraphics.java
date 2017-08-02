@@ -128,6 +128,8 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
 
     private boolean debugCameraPreviewVisible = true;
 
+    private OutlineShader outlineShader = new OutlineShader();
+
     @Nullable
     private MeshActorCursorObject meshActorCursorObject;
 
@@ -176,6 +178,8 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
         modelBatch = new ModelBatch(renderContext);
 
         picker = new ColorObjectPicker();
+
+        outlineShader.init();
 
         actorAxesModel = new ModelBuilder().createXYZCoordinates(0.25f, new Material(), Position | ColorPacked);
         actorAxesObject = new ActorAxesObject(actorAxesModel);
@@ -233,6 +237,7 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
         modelBatch.dispose();
         spriteBatch.dispose();
         picker.dispose();
+        outlineShader.dispose();
 
         assetModelLoader.dispose();
 
@@ -636,11 +641,17 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
         visibleInstances.clear();
         // Mesh actors.
         for (int i = 0; i < meshActorObjectMap.size(); i++) {
-            visibleInstances.add(meshActorObjectMap.valueAt(i));
+            final ActorObject object = meshActorObjectMap.valueAt(i);
+            if (touchedActorObject == null || touchedActorObject != object) {
+                visibleInstances.add(object);
+            }
         }
         // Triggers actors.
         for (int i = 0; i < triggerActorObjectMap.size(); i++) {
-            visibleInstances.add(triggerActorObjectMap.valueAt(i));
+            final ActorObject object = triggerActorObjectMap.valueAt(i);
+            if (touchedActorObject == null || touchedActorObject != object) {
+                visibleInstances.add(triggerActorObjectMap.valueAt(i));
+            }
         }
 
         renderContext.setDepthMask(true);
@@ -649,6 +660,10 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
         // Draw models.
         modelBatch.begin(camera);
         modelBatch.render(visibleInstances, environment);
+        if (touchedActorObject != null) {
+//            modelBatch.render(touchedActorObject, environment, outlineShader);
+            modelBatch.render(touchedActorObject, environment);
+        }
         modelBatch.end();
 
         if (meshActorCursorObject != null) {
@@ -690,7 +705,7 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
             }
             // Trigger actors.
             for (int i = 0; i < triggerActorObjectMap.size(); i++) {
-                visibleInstances.add(triggerActorObjectMap.valueAt(i));
+                pickableInstances.add(triggerActorObjectMap.valueAt(i));
             }
         }
 
