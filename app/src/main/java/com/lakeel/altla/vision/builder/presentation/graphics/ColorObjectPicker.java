@@ -31,17 +31,9 @@ import java.nio.ByteOrder;
 
 public final class ColorObjectPicker implements Disposable {
 
-    private static final String FRAGMENT_SHADER_SOURCE =
-            "#ifdef GL_ES\n" +
-            "precision mediump float;\n" +
-            "#endif\n" +
-            "uniform vec4 u_Color;\n" +
-            "void main()\n" +
-            "{\n" +
-            "    gl_FragColor = u_Color;\n" +
-            "}";
-
     private static final Attributes ATTRIBUTES = new Attributes();
+
+    private static String fragmentShaderSource;
 
     private final Color color = new Color();
 
@@ -84,10 +76,17 @@ public final class ColorObjectPicker implements Disposable {
 
         shader = new DefaultShader(renderable, new DefaultShader.Config() {
             {
-                this.fragmentShader = FRAGMENT_SHADER_SOURCE;
+                fragmentShader = getFragmentShaderSource();
             }
         });
         shader.init();
+    }
+
+    private static String getFragmentShaderSource() {
+        if (fragmentShaderSource == null) {
+            fragmentShaderSource = Gdx.files.internal("shaders/single_color.fragment.glsl").readString();
+        }
+        return fragmentShaderSource;
     }
 
     @Override
@@ -127,7 +126,7 @@ public final class ColorObjectPicker implements Disposable {
 
         for (int i = 0; i < instances.size; i++) {
             Color.rgba8888ToColor(color, i);
-            shader.program.setUniformf("u_Color", color.r, color.g, color.b, color.a);
+            shader.program.setUniformf("u_color", color);
 
             final int offset = renderables.size;
             final ModelInstance instance = instances.get(i);
