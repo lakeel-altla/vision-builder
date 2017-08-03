@@ -3,7 +3,6 @@ package com.lakeel.altla.vision.builder.presentation.graphics.shader;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.Shader;
 import com.badlogic.gdx.graphics.g3d.utils.RenderContext;
@@ -67,8 +66,6 @@ public final class SingleColorShader implements Shader {
     @Override
     public void begin(Camera camera, RenderContext context) {
         this.camera = camera;
-
-        context.setCullFace(GL20.GL_FRONT);
 
         program.begin();
         program.setUniformf(uColor, color);

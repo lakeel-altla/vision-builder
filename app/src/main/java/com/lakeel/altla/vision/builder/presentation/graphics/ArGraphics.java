@@ -147,6 +147,8 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
     @Nullable
     private ActorObject touchedActorObject;
 
+    private final Vector3 originalTouchedActorObjectScale = new Vector3();
+
     private boolean touchedActorObjectLocked;
 
     private boolean actorAxesObjectVisible;
@@ -670,21 +672,17 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
         modelBatch.begin(camera);
         modelBatch.render(visibleInstances, environment);
         if (touchedActorObject != null) {
-            // TODO
-            Vector3 originalScale = new Vector3(touchedActorObject.scale);
-
+            originalTouchedActorObjectScale.set(touchedActorObject.scale);
             touchedActorObject.scaleByExtent(0.1f);
             touchedActorObject.update();
 
-//            renderContext.setCullFace(GL20.GL_FRONT);
             renderContext.setDepthMask(false);
             modelBatch.render(touchedActorObject, environment, singleColorShader);
 
-            touchedActorObject.scale.set(originalScale);
+            touchedActorObject.scale.set(originalTouchedActorObjectScale);
             touchedActorObject.transformDirty = true;
             touchedActorObject.update();
 
-//            renderContext.setCullFace(GL20.GL_BACK);
             renderContext.setDepthMask(true);
             modelBatch.render(touchedActorObject, environment);
         }
