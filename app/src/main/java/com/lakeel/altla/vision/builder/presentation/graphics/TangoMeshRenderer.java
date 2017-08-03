@@ -2,6 +2,7 @@ package com.lakeel.altla.vision.builder.presentation.graphics;
 
 import com.google.atap.tango.mesh.TangoMesh;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -9,6 +10,7 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Disposable;
+import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.lakeel.altla.vision.builder.presentation.helper.GridIndex;
 
 import android.opengl.GLES20;
@@ -24,24 +26,23 @@ import static com.badlogic.gdx.Gdx.gl;
 
 public final class TangoMeshRenderer implements Disposable {
 
-    private final Matrix4 worldTransform = new Matrix4();
-
-    private final Matrix4 mvp = new Matrix4();
-
     private final DepthShader depthShader = new DepthShader();
 
-    private final ColorShader colorShader = new ColorShader();
+    private final WireframeShader wireframeShader = new WireframeShader();
 
     private final MeshList meshList = new MeshList();
 
     public TangoMeshRenderer() {
+        final Matrix4 worldTransform = new Matrix4();
         worldTransform.rotate(Vector3.X, -90);
+        depthShader.worldTransform.set(worldTransform);
+        wireframeShader.worldTransform.set(worldTransform);
     }
 
     @Override
     public void dispose() {
         depthShader.dispose();
-        colorShader.dispose();
+        wireframeShader.dispose();
         meshList.dispose();
     }
 
@@ -58,26 +59,19 @@ public final class TangoMeshRenderer implements Disposable {
     }
 
     public void renderDepth(@NonNull Camera camera) {
-        mvp.set(camera.combined).mul(worldTransform);
-
-        depthShader.program.begin();
-        depthShader.bindMvp(mvp);
+        depthShader.begin(camera);
 
         meshList.render(depthShader, GL20.GL_TRIANGLES);
 
-        depthShader.program.end();
+        depthShader.end();
     }
 
     public void renderWireframe(@NonNull Camera camera) {
-        mvp.set(camera.combined).mul(worldTransform);
+        wireframeShader.begin(camera);
 
-        colorShader.program.begin();
-        colorShader.bindMvp(mvp);
-        colorShader.bindColor(Color.GREEN);
+        meshList.render(wireframeShader, GL20.GL_LINES);
 
-        meshList.render(colorShader, GL20.GL_LINES);
-
-        colorShader.program.end();
+        wireframeShader.end();
     }
 
     private static final class VertexBuffer implements Disposable {
@@ -144,31 +138,46 @@ public final class TangoMeshRenderer implements Disposable {
     private interface Shader {
 
         void bindAttributes();
+
+        void unbindAttributes();
     }
 
     private static final class DepthShader implements Shader, Disposable {
 
-        static final String VERTEX_SHADER_SOURCE =
-                "attribute vec4 a_Position;\n" +
-                "uniform mat4 u_MVP;\n" +
-                "varying vec4 v_Position;\n" +
-                "void main() {\n" +
-                "  gl_Position = u_MVP * a_Position;\n" +
-                "  v_Position = a_Position;\n" +
-                "}\n";
+        static String vertexShaderSource;
 
-        static final String FRAGMENT_SHADER_SOURCE =
-                "precision mediump float;\n" +
-                "varying vec4 v_Position;\n" +
-                "void main() {\n" +
-                "  float depth = v_Position.z/v_Position.w;\n" +
-                "  gl_FragColor = vec4(depth,depth,depth,1);\n" +
-                "}\n";
+        static String fragmentShaderSource;
 
         final ShaderProgram program;
 
+        final int aPosition;
+
+        final int uProjViewWorldTrans;
+
+        final Matrix4 worldTransform = new Matrix4();
+
+        final Matrix4 projViewWorld = new Matrix4();
+
         DepthShader() {
-            program = new ShaderProgram(VERTEX_SHADER_SOURCE, FRAGMENT_SHADER_SOURCE);
+            program = new ShaderProgram(getVertexShaderSource(), getFragmentShaderSource());
+            if (!program.isCompiled()) throw new GdxRuntimeException(program.getLog());
+
+            aPosition = program.getAttributeLocation("a_position");
+            uProjViewWorldTrans = program.getUniformLocation("u_projViewWorldTrans");
+        }
+
+        static String getVertexShaderSource() {
+            if (vertexShaderSource == null) {
+                vertexShaderSource = Gdx.files.internal("shaders/depth.vertex.glsl").readString();
+            }
+            return vertexShaderSource;
+        }
+
+        static String getFragmentShaderSource() {
+            if (fragmentShaderSource == null) {
+                fragmentShaderSource = Gdx.files.internal("shaders/depth.fragment.glsl").readString();
+            }
+            return fragmentShaderSource;
         }
 
         @Override
@@ -178,37 +187,68 @@ public final class TangoMeshRenderer implements Disposable {
 
         @Override
         public void bindAttributes() {
-            final int location = program.getAttributeLocation("a_Position");
-            program.enableVertexAttribute(location);
-            program.setVertexAttribute(location, 3, GL20.GL_FLOAT, false, 0, 0);
+            program.enableVertexAttribute(aPosition);
+            program.setVertexAttribute(aPosition, 3, GL20.GL_FLOAT, false, 0, 0);
         }
 
-        void bindMvp(@NonNull Matrix4 mvp) {
-            final int location = program.getUniformLocation("u_MVP");
-            program.setUniformMatrix(location, mvp);
+        @Override
+        public void unbindAttributes() {
+            program.disableVertexAttribute(aPosition);
+        }
+
+        void begin(@NonNull Camera camera) {
+            program.begin();
+
+            projViewWorld.set(camera.combined).mul(worldTransform);
+            program.setUniformMatrix(uProjViewWorldTrans, projViewWorld);
+        }
+
+        void end() {
+            program.end();
         }
     }
 
-    private static final class ColorShader implements Shader, Disposable {
+    private static final class WireframeShader implements Shader, Disposable {
 
-        static final String VERTEX_SHADER_SOURCE =
-                "attribute vec4 a_Position;\n" +
-                "uniform mat4 u_MVP;\n" +
-                "void main() {\n" +
-                "  gl_Position = u_MVP * a_Position;\n" +
-                "}\n";
+        static String vertexShaderSource;
 
-        static final String FRAGMENT_SHADER_SOURCE =
-                "precision mediump float;\n" +
-                "uniform vec4 u_Color;\n" +
-                "void main() {\n" +
-                "  gl_FragColor = u_Color;\n" +
-                "}\n";
+        static String fragmentShaderSource;
 
         final ShaderProgram program;
 
-        ColorShader() {
-            program = new ShaderProgram(VERTEX_SHADER_SOURCE, FRAGMENT_SHADER_SOURCE);
+        final int aPosition;
+
+        final int uProjViewWorldTrans;
+
+        final int uColor;
+
+        final Matrix4 worldTransform = new Matrix4();
+
+        final Matrix4 projViewWorld = new Matrix4();
+
+        final Color color = Color.GREEN;
+
+        WireframeShader() {
+            program = new ShaderProgram(getVertexShaderSource(), getFragmentShaderSource());
+            if (!program.isCompiled()) throw new GdxRuntimeException(program.getLog());
+
+            aPosition = program.getAttributeLocation("a_position");
+            uProjViewWorldTrans = program.getUniformLocation("u_projViewWorldTrans");
+            uColor = program.getUniformLocation("u_color");
+        }
+
+        static String getVertexShaderSource() {
+            if (vertexShaderSource == null) {
+                vertexShaderSource = Gdx.files.internal("shaders/single_color.vertex.glsl").readString();
+            }
+            return vertexShaderSource;
+        }
+
+        static String getFragmentShaderSource() {
+            if (fragmentShaderSource == null) {
+                fragmentShaderSource = Gdx.files.internal("shaders/single_color.fragment.glsl").readString();
+            }
+            return fragmentShaderSource;
         }
 
         @Override
@@ -218,19 +258,25 @@ public final class TangoMeshRenderer implements Disposable {
 
         @Override
         public void bindAttributes() {
-            final int location = program.getAttributeLocation("a_Position");
-            program.enableVertexAttribute(location);
-            program.setVertexAttribute(location, 3, GL20.GL_FLOAT, false, 0, 0);
+            program.enableVertexAttribute(aPosition);
+            program.setVertexAttribute(aPosition, 3, GL20.GL_FLOAT, false, 0, 0);
         }
 
-        void bindMvp(@NonNull Matrix4 mvp) {
-            final int location = program.getUniformLocation("u_MVP");
-            program.setUniformMatrix(location, mvp);
+        @Override
+        public void unbindAttributes() {
+            program.disableVertexAttribute(aPosition);
         }
 
-        void bindColor(@NonNull Color color) {
-            final int location = program.getUniformLocation("u_Color");
-            program.setUniformf(location, color.r, color.g, color.b, color.a);
+        void begin(@NonNull Camera camera) {
+            program.begin();
+
+            projViewWorld.set(camera.combined).mul(worldTransform);
+            program.setUniformMatrix(uProjViewWorldTrans, projViewWorld);
+            program.setUniformf(uColor, color);
+        }
+
+        void end() {
+            program.end();
         }
     }
 
@@ -261,6 +307,8 @@ public final class TangoMeshRenderer implements Disposable {
             shader.bindAttributes();
 
             gl.glDrawElements(primitiveType, numFaces * 3, GL20.GL_UNSIGNED_INT, 0);
+
+            shader.unbindAttributes();
 
             vertexBuffer.unbind();
             indexBuffer.unbind();
