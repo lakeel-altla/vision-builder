@@ -661,8 +661,8 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
         modelBatch.begin(camera);
         modelBatch.render(visibleInstances, environment);
         if (touchedActorObject != null) {
-//            modelBatch.render(touchedActorObject, environment, outlineShader);
-            modelBatch.render(touchedActorObject, environment);
+            modelBatch.render(touchedActorObject, environment, outlineShader);
+//            modelBatch.render(touchedActorObject, environment);
         }
         modelBatch.end();
 
