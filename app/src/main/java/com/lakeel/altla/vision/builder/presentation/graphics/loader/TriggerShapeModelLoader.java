@@ -1,4 +1,4 @@
-package com.lakeel.altla.vision.builder.presentation.graphics;
+package com.lakeel.altla.vision.builder.presentation.graphics.loader;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;

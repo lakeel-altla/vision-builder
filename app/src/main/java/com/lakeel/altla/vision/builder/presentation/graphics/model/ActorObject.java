@@ -1,4 +1,4 @@
-package com.lakeel.altla.vision.builder.presentation.graphics;
+package com.lakeel.altla.vision.builder.presentation.graphics.model;
 
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;

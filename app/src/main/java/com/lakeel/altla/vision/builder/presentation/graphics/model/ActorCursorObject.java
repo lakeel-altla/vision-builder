@@ -1,9 +1,10 @@
-package com.lakeel.altla.vision.builder.presentation.graphics;
+package com.lakeel.altla.vision.builder.presentation.graphics.model;
 
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
+import com.lakeel.altla.vision.builder.presentation.graphics.TangoCamera;
 
 import android.support.annotation.NonNull;
 
