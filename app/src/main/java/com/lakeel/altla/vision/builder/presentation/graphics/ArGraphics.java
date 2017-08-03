@@ -31,6 +31,8 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.lakeel.altla.android.log.Log;
 import com.lakeel.altla.android.log.LogFactory;
+import com.lakeel.altla.vision.builder.presentation.graphics.shader.OutlineShader;
+import com.lakeel.altla.vision.builder.presentation.graphics.shader.SingleColorShader;
 import com.lakeel.altla.vision.builder.presentation.model.Axis;
 import com.lakeel.altla.vision.model.Actor;
 import com.lakeel.altla.vision.model.Asset;
@@ -128,7 +130,9 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
 
     private boolean debugCameraPreviewVisible = true;
 
-    private OutlineShader outlineShader = new OutlineShader();
+    private final SingleColorShader singleColorShader = new SingleColorShader();
+
+    private final OutlineShader outlineShader = new OutlineShader();
 
     @Nullable
     private MeshActorCursorObject meshActorCursorObject;
@@ -178,6 +182,11 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
         modelBatch = new ModelBatch(renderContext);
 
         picker = new ColorObjectPicker();
+
+        singleColorShader.init();
+        // ORANGE: 0xffa500ff
+        // Transparent 50%: 0xffa50088
+        singleColorShader.color.set(0xffa50088);
 
         outlineShader.init();
 
@@ -324,7 +333,7 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
             } else if (scaleEnabled) {
                 float delta = (Math.abs(deltaY) <= Math.abs(deltaX)) ? deltaX : -deltaY;
                 delta *= SCALING_COEFF;
-                touchedActorObject.scale(delta);
+                touchedActorObject.scaleByExtent(delta);
             }
         }
         return false;
@@ -335,13 +344,13 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
         LOG.d("panStop: x = %f, y = %f, pointer = %d, button = %d");
         if (touchedActorObject != null) {
             if (translationEnabled && transformAxis != null) {
-                touchedActorObject.stopTranslate();
+                touchedActorObject.savePositionToActor();
                 listener.onActorChanged(touchedActorObject.actor);
             } else if (rotationEnabled && transformAxis != null) {
-                touchedActorObject.stopRotate();
+                touchedActorObject.saveOrientationToActor();
                 listener.onActorChanged(touchedActorObject.actor);
             } else if (scaleEnabled) {
-                touchedActorObject.stopScale();
+                touchedActorObject.saveScaleToActor();
                 listener.onActorChanged(touchedActorObject.actor);
             }
         }
@@ -661,8 +670,23 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
         modelBatch.begin(camera);
         modelBatch.render(visibleInstances, environment);
         if (touchedActorObject != null) {
-            modelBatch.render(touchedActorObject, environment, outlineShader);
-//            modelBatch.render(touchedActorObject, environment);
+            // TODO
+            Vector3 originalScale = new Vector3(touchedActorObject.scale);
+
+            touchedActorObject.scaleByExtent(0.1f);
+            touchedActorObject.update();
+
+//            renderContext.setCullFace(GL20.GL_FRONT);
+            renderContext.setDepthMask(false);
+            modelBatch.render(touchedActorObject, environment, singleColorShader);
+
+            touchedActorObject.scale.set(originalScale);
+            touchedActorObject.transformDirty = true;
+            touchedActorObject.update();
+
+//            renderContext.setCullFace(GL20.GL_BACK);
+            renderContext.setDepthMask(true);
+            modelBatch.render(touchedActorObject, environment);
         }
         modelBatch.end();
 

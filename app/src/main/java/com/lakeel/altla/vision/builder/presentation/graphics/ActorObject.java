@@ -67,10 +67,6 @@ public final class ActorObject extends ModelInstance {
         transformDirty = true;
     }
 
-    public void stopTranslate() {
-        actor.setPosition(position.x, position.y, position.z);
-    }
-
     public void rotate(@NonNull Axis axis, float degrees) {
         axis.toVector3(tempAxisVector);
         tempOrientation.setFromAxis(tempAxisVector, degrees);
@@ -79,18 +75,22 @@ public final class ActorObject extends ModelInstance {
         transformDirty = true;
     }
 
-    public void stopRotate() {
-        actor.setOrientation(orientation.x, orientation.y, orientation.z, orientation.w);
-    }
-
-    public void scale(float delta) {
-        final float ratio = Math.min(Math.max(1 + delta, MIN_SCALE_RATIO), MAX_SCALE_RATIO);
+    public void scaleByExtent(float extent) {
+        final float ratio = Math.min(Math.max(1 + extent, MIN_SCALE_RATIO), MAX_SCALE_RATIO);
         scale.scl(ratio);
 
         transformDirty = true;
     }
 
-    public void stopScale() {
+    public void savePositionToActor() {
+        actor.setPosition(position.x, position.y, position.z);
+    }
+
+    public void saveOrientationToActor() {
+        actor.setOrientation(orientation.x, orientation.y, orientation.z, orientation.w);
+    }
+
+    public void saveScaleToActor() {
         actor.setScale(scale.x, scale.y, scale.z);
     }
 }

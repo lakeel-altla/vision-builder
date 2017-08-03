@@ -1,4 +1,4 @@
-package com.lakeel.altla.vision.builder.presentation.graphics;
+package com.lakeel.altla.vision.builder.presentation.graphics.shader;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
