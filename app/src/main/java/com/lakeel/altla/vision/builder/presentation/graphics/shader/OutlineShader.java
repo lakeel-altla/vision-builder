@@ -9,7 +9,6 @@ import com.badlogic.gdx.graphics.g3d.utils.RenderContext;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Matrix3;
 import com.badlogic.gdx.math.Matrix4;
-import com.badlogic.gdx.utils.GdxRuntimeException;
 
 import android.support.annotation.NonNull;
 
@@ -43,11 +42,7 @@ public final class OutlineShader implements Shader {
 
     @Override
     public void init() {
-        if (program == null) {
-            program = new ShaderProgram(ShaderSources.getVertexShaderSource(ShaderNames.OUTLINE),
-                                        ShaderSources.getFragmentShaderSource(ShaderNames.OUTLINE));
-            if (!program.isCompiled()) throw new GdxRuntimeException(program.getLog());
-        }
+        program = ShaderProgramFactory.create(ShaderNames.OUTLINE);
 
         uViewWorldTrans = program.getUniformLocation("u_viewWorldTrans");
         uProjViewWorldTrans = program.getUniformLocation("u_projViewWorldTrans");

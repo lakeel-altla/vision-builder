@@ -9,9 +9,8 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Disposable;
-import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.lakeel.altla.vision.builder.presentation.graphics.shader.ShaderNames;
-import com.lakeel.altla.vision.builder.presentation.graphics.shader.ShaderSources;
+import com.lakeel.altla.vision.builder.presentation.graphics.shader.ShaderProgramFactory;
 import com.lakeel.altla.vision.builder.presentation.helper.GridIndex;
 
 import android.opengl.GLES20;
@@ -156,9 +155,7 @@ public final class TangoMeshRenderer implements Disposable {
         final Matrix4 projViewWorld = new Matrix4();
 
         DepthShader() {
-            program = new ShaderProgram(ShaderSources.getVertexShaderSource(ShaderNames.DEPTH),
-                                        ShaderSources.getFragmentShaderSource(ShaderNames.DEPTH));
-            if (!program.isCompiled()) throw new GdxRuntimeException(program.getLog());
+            program = ShaderProgramFactory.create(ShaderNames.DEPTH);
 
             aPosition = program.getAttributeLocation("a_position");
             uProjViewWorldTrans = program.getUniformLocation("u_projViewWorldTrans");
@@ -209,9 +206,7 @@ public final class TangoMeshRenderer implements Disposable {
         final Color color = Color.GREEN;
 
         WireframeShader() {
-            program = new ShaderProgram(ShaderSources.getVertexShaderSource(ShaderNames.FILL_COLOR),
-                                        ShaderSources.getFragmentShaderSource(ShaderNames.FILL_COLOR));
-            if (!program.isCompiled()) throw new GdxRuntimeException(program.getLog());
+            program = ShaderProgramFactory.create(ShaderNames.FILL_COLOR);
 
             aPosition = program.getAttributeLocation("a_position");
             uProjViewWorldTrans = program.getUniformLocation("u_projViewWorldTrans");

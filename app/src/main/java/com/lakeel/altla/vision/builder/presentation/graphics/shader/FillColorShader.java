@@ -7,7 +7,6 @@ import com.badlogic.gdx.graphics.g3d.Shader;
 import com.badlogic.gdx.graphics.g3d.utils.RenderContext;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Matrix4;
-import com.badlogic.gdx.utils.GdxRuntimeException;
 
 public final class FillColorShader implements Shader {
 
@@ -25,11 +24,7 @@ public final class FillColorShader implements Shader {
 
     @Override
     public void init() {
-        if (program == null) {
-            program = new ShaderProgram(ShaderSources.getVertexShaderSource(ShaderNames.FILL_COLOR),
-                                        ShaderSources.getFragmentShaderSource(ShaderNames.FILL_COLOR));
-            if (!program.isCompiled()) throw new GdxRuntimeException(program.getLog());
-        }
+        program = ShaderProgramFactory.create(ShaderNames.FILL_COLOR);
 
         uProjViewWorldTrans = program.getUniformLocation("u_projViewWorldTrans");
         uColor = program.getUniformLocation("u_color");
