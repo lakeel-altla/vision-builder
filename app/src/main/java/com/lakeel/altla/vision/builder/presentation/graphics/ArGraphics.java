@@ -37,7 +37,6 @@ import com.lakeel.altla.vision.builder.presentation.graphics.model.ActorAxesObje
 import com.lakeel.altla.vision.builder.presentation.graphics.model.ActorObject;
 import com.lakeel.altla.vision.builder.presentation.graphics.model.MeshActorCursorObject;
 import com.lakeel.altla.vision.builder.presentation.graphics.model.TriggerActorCursorObject;
-import com.lakeel.altla.vision.builder.presentation.graphics.shader.OutlineShader;
 import com.lakeel.altla.vision.builder.presentation.graphics.shader.SingleColorShader;
 import com.lakeel.altla.vision.builder.presentation.model.Axis;
 import com.lakeel.altla.vision.model.Actor;
@@ -138,8 +137,6 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
 
     private final SingleColorShader singleColorShader = new SingleColorShader();
 
-    private final OutlineShader outlineShader = new OutlineShader();
-
     @Nullable
     private MeshActorCursorObject meshActorCursorObject;
 
@@ -195,8 +192,6 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
         // ORANGE: 0xffa500ff
         // Transparent 50%: 0xffa50088
         singleColorShader.color.set(0xffa50088);
-
-        outlineShader.init();
 
         actorAxesModel = new ModelBuilder().createXYZCoordinates(0.25f, new Material(), Position | ColorPacked);
         actorAxesObject = new ActorAxesObject(actorAxesModel);
@@ -254,7 +249,6 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
         modelBatch.dispose();
         spriteBatch.dispose();
         picker.dispose();
-        outlineShader.dispose();
 
         assetModelLoader.dispose();
 
