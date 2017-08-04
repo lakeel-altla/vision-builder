@@ -9,7 +9,7 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 
-public final class SingleColorShader implements Shader {
+public final class FillColorShader implements Shader {
 
     public final Color color = Color.ORANGE;
 
@@ -26,8 +26,8 @@ public final class SingleColorShader implements Shader {
     @Override
     public void init() {
         if (program == null) {
-            program = new ShaderProgram(ShaderSources.getVertexShaderSource(ShaderSources.Names.SINGLE_COLOR),
-                                        ShaderSources.getFragmentShaderSource(ShaderSources.Names.SINGLE_COLOR));
+            program = new ShaderProgram(ShaderSources.getVertexShaderSource(ShaderSources.Names.FILL_COLOR),
+                                        ShaderSources.getFragmentShaderSource(ShaderSources.Names.FILL_COLOR));
             if (!program.isCompiled()) throw new GdxRuntimeException(program.getLog());
         }
 

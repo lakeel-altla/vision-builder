@@ -208,8 +208,8 @@ public final class TangoMeshRenderer implements Disposable {
         final Color color = Color.GREEN;
 
         WireframeShader() {
-            program = new ShaderProgram(ShaderSources.getVertexShaderSource(ShaderSources.Names.SINGLE_COLOR),
-                                        ShaderSources.getFragmentShaderSource(ShaderSources.Names.SINGLE_COLOR));
+            program = new ShaderProgram(ShaderSources.getVertexShaderSource(ShaderSources.Names.FILL_COLOR),
+                                        ShaderSources.getFragmentShaderSource(ShaderSources.Names.FILL_COLOR));
             if (!program.isCompiled()) throw new GdxRuntimeException(program.getLog());
 
             aPosition = program.getAttributeLocation("a_position");

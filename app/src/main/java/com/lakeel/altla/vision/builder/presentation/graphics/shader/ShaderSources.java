@@ -55,7 +55,7 @@ public final class ShaderSources {
 
     public static final class Names {
 
-        public static final String SINGLE_COLOR = "single_color";
+        public static final String FILL_COLOR = "fill_color";
 
         public static final String DEPTH = "depth";
 

@@ -75,7 +75,7 @@ public final class ColorObjectPicker implements Disposable {
 
         shader = new DefaultShader(renderable, new DefaultShader.Config() {
             {
-                fragmentShader = ShaderSources.getFragmentShaderSource(ShaderSources.Names.SINGLE_COLOR);
+                fragmentShader = ShaderSources.getFragmentShaderSource(ShaderSources.Names.FILL_COLOR);
             }
         });
         shader.init();

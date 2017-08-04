@@ -37,7 +37,7 @@ import com.lakeel.altla.vision.builder.presentation.graphics.model.ActorAxesObje
 import com.lakeel.altla.vision.builder.presentation.graphics.model.ActorObject;
 import com.lakeel.altla.vision.builder.presentation.graphics.model.MeshActorCursorObject;
 import com.lakeel.altla.vision.builder.presentation.graphics.model.TriggerActorCursorObject;
-import com.lakeel.altla.vision.builder.presentation.graphics.shader.SingleColorShader;
+import com.lakeel.altla.vision.builder.presentation.graphics.shader.FillColorShader;
 import com.lakeel.altla.vision.builder.presentation.model.Axis;
 import com.lakeel.altla.vision.model.Actor;
 import com.lakeel.altla.vision.model.Asset;
@@ -135,7 +135,7 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
 
     private boolean debugCameraPreviewVisible = true;
 
-    private final SingleColorShader singleColorShader = new SingleColorShader();
+    private final FillColorShader fillColorShader = new FillColorShader();
 
     @Nullable
     private MeshActorCursorObject meshActorCursorObject;
@@ -188,10 +188,10 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
 
         picker = new ColorObjectPicker();
 
-        singleColorShader.init();
+        fillColorShader.init();
         // ORANGE: 0xffa500ff
         // Transparent 50%: 0xffa50088
-        singleColorShader.color.set(0xffa50088);
+        fillColorShader.color.set(0xffa50088);
 
         actorAxesModel = new ModelBuilder().createXYZCoordinates(0.25f, new Material(), Position | ColorPacked);
         actorAxesObject = new ActorAxesObject(actorAxesModel);
@@ -677,7 +677,7 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
             touchedActorObject.update();
 
             renderContext.setDepthMask(false);
-            modelBatch.render(touchedActorObject, environment, singleColorShader);
+            modelBatch.render(touchedActorObject, environment, fillColorShader);
 
             touchedActorObject.scale.set(originalTouchedActorObjectScale);
             touchedActorObject.transformDirty = true;
