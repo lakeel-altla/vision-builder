@@ -22,6 +22,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.FlushablePool;
 import com.badlogic.gdx.utils.Pool;
+import com.lakeel.altla.vision.builder.presentation.graphics.shader.ShaderNames;
 import com.lakeel.altla.vision.builder.presentation.graphics.shader.ShaderSources;
 
 import android.support.annotation.NonNull;
@@ -75,7 +76,7 @@ public final class ColorObjectPicker implements Disposable {
 
         shader = new DefaultShader(renderable, new DefaultShader.Config() {
             {
-                fragmentShader = ShaderSources.getFragmentShaderSource(ShaderSources.Names.FILL_COLOR);
+                fragmentShader = ShaderSources.getFragmentShaderSource(ShaderNames.FILL_COLOR);
             }
         });
         shader.init();

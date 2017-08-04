@@ -26,8 +26,8 @@ public final class FillColorShader implements Shader {
     @Override
     public void init() {
         if (program == null) {
-            program = new ShaderProgram(ShaderSources.getVertexShaderSource(ShaderSources.Names.FILL_COLOR),
-                                        ShaderSources.getFragmentShaderSource(ShaderSources.Names.FILL_COLOR));
+            program = new ShaderProgram(ShaderSources.getVertexShaderSource(ShaderNames.FILL_COLOR),
+                                        ShaderSources.getFragmentShaderSource(ShaderNames.FILL_COLOR));
             if (!program.isCompiled()) throw new GdxRuntimeException(program.getLog());
         }
 

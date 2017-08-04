@@ -44,8 +44,8 @@ public final class OutlineShader implements Shader {
     @Override
     public void init() {
         if (program == null) {
-            program = new ShaderProgram(ShaderSources.getVertexShaderSource(ShaderSources.Names.OUTLINE),
-                                        ShaderSources.getFragmentShaderSource(ShaderSources.Names.OUTLINE));
+            program = new ShaderProgram(ShaderSources.getVertexShaderSource(ShaderNames.OUTLINE),
+                                        ShaderSources.getFragmentShaderSource(ShaderNames.OUTLINE));
             if (!program.isCompiled()) throw new GdxRuntimeException(program.getLog());
         }
 

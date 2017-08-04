@@ -10,6 +10,7 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.GdxRuntimeException;
+import com.lakeel.altla.vision.builder.presentation.graphics.shader.ShaderNames;
 import com.lakeel.altla.vision.builder.presentation.graphics.shader.ShaderSources;
 import com.lakeel.altla.vision.builder.presentation.helper.GridIndex;
 
@@ -155,8 +156,8 @@ public final class TangoMeshRenderer implements Disposable {
         final Matrix4 projViewWorld = new Matrix4();
 
         DepthShader() {
-            program = new ShaderProgram(ShaderSources.getVertexShaderSource(ShaderSources.Names.DEPTH),
-                                        ShaderSources.getFragmentShaderSource(ShaderSources.Names.DEPTH));
+            program = new ShaderProgram(ShaderSources.getVertexShaderSource(ShaderNames.DEPTH),
+                                        ShaderSources.getFragmentShaderSource(ShaderNames.DEPTH));
             if (!program.isCompiled()) throw new GdxRuntimeException(program.getLog());
 
             aPosition = program.getAttributeLocation("a_position");
@@ -208,8 +209,8 @@ public final class TangoMeshRenderer implements Disposable {
         final Color color = Color.GREEN;
 
         WireframeShader() {
-            program = new ShaderProgram(ShaderSources.getVertexShaderSource(ShaderSources.Names.FILL_COLOR),
-                                        ShaderSources.getFragmentShaderSource(ShaderSources.Names.FILL_COLOR));
+            program = new ShaderProgram(ShaderSources.getVertexShaderSource(ShaderNames.FILL_COLOR),
+                                        ShaderSources.getFragmentShaderSource(ShaderNames.FILL_COLOR));
             if (!program.isCompiled()) throw new GdxRuntimeException(program.getLog());
 
             aPosition = program.getAttributeLocation("a_position");

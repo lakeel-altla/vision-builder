@@ -52,16 +52,4 @@ public final class ShaderSources {
     private static String resolveFragmentShaderSourceFilename(@NonNull String name) {
         return name + FRAGMENT_SHADER_SOURCE_FILE_SUFFIX;
     }
-
-    public static final class Names {
-
-        public static final String FILL_COLOR = "fill_color";
-
-        public static final String DEPTH = "depth";
-
-        public static final String OUTLINE = "outline";
-
-        private Names() {
-        }
-    }
 }
