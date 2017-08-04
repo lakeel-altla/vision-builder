@@ -1,6 +1,5 @@
 package com.lakeel.altla.vision.builder.presentation.graphics.shader;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
@@ -11,10 +10,6 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 
 public final class SingleColorShader implements Shader {
-
-    private static String vertexShaderSource;
-
-    private static String fragmentShaderSource;
 
     public final Color color = Color.ORANGE;
 
@@ -28,24 +23,11 @@ public final class SingleColorShader implements Shader {
 
     private Camera camera;
 
-    private static String getVertexShaderSource() {
-        if (vertexShaderSource == null) {
-            vertexShaderSource = Gdx.files.internal("shaders/single_color.vertex.glsl").readString();
-        }
-        return vertexShaderSource;
-    }
-
-    private static String getFragmentShaderSource() {
-        if (fragmentShaderSource == null) {
-            fragmentShaderSource = Gdx.files.internal("shaders/single_color.fragment.glsl").readString();
-        }
-        return fragmentShaderSource;
-    }
-
     @Override
     public void init() {
         if (program == null) {
-            program = new ShaderProgram(getVertexShaderSource(), getFragmentShaderSource());
+            program = new ShaderProgram(ShaderSources.getVertexShaderSource(ShaderSources.Names.SINGLE_COLOR),
+                                        ShaderSources.getFragmentShaderSource(ShaderSources.Names.SINGLE_COLOR));
             if (!program.isCompiled()) throw new GdxRuntimeException(program.getLog());
         }
 

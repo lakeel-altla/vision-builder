@@ -22,6 +22,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.FlushablePool;
 import com.badlogic.gdx.utils.Pool;
+import com.lakeel.altla.vision.builder.presentation.graphics.shader.ShaderSources;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -32,8 +33,6 @@ import java.nio.ByteOrder;
 public final class ColorObjectPicker implements Disposable {
 
     private static final Attributes ATTRIBUTES = new Attributes();
-
-    private static String fragmentShaderSource;
 
     private final Color color = new Color();
 
@@ -76,17 +75,10 @@ public final class ColorObjectPicker implements Disposable {
 
         shader = new DefaultShader(renderable, new DefaultShader.Config() {
             {
-                fragmentShader = getFragmentShaderSource();
+                fragmentShader = ShaderSources.getFragmentShaderSource(ShaderSources.Names.SINGLE_COLOR);
             }
         });
         shader.init();
-    }
-
-    private static String getFragmentShaderSource() {
-        if (fragmentShaderSource == null) {
-            fragmentShaderSource = Gdx.files.internal("shaders/single_color.fragment.glsl").readString();
-        }
-        return fragmentShaderSource;
     }
 
     @Override

@@ -2,7 +2,6 @@ package com.lakeel.altla.vision.builder.presentation.graphics;
 
 import com.google.atap.tango.mesh.TangoMesh;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -11,6 +10,7 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.GdxRuntimeException;
+import com.lakeel.altla.vision.builder.presentation.graphics.shader.ShaderSources;
 import com.lakeel.altla.vision.builder.presentation.helper.GridIndex;
 
 import android.opengl.GLES20;
@@ -144,10 +144,6 @@ public final class TangoMeshRenderer implements Disposable {
 
     private static final class DepthShader implements Shader, Disposable {
 
-        static String vertexShaderSource;
-
-        static String fragmentShaderSource;
-
         final ShaderProgram program;
 
         final int aPosition;
@@ -159,25 +155,12 @@ public final class TangoMeshRenderer implements Disposable {
         final Matrix4 projViewWorld = new Matrix4();
 
         DepthShader() {
-            program = new ShaderProgram(getVertexShaderSource(), getFragmentShaderSource());
+            program = new ShaderProgram(ShaderSources.getVertexShaderSource(ShaderSources.Names.DEPTH),
+                                        ShaderSources.getFragmentShaderSource(ShaderSources.Names.DEPTH));
             if (!program.isCompiled()) throw new GdxRuntimeException(program.getLog());
 
             aPosition = program.getAttributeLocation("a_position");
             uProjViewWorldTrans = program.getUniformLocation("u_projViewWorldTrans");
-        }
-
-        static String getVertexShaderSource() {
-            if (vertexShaderSource == null) {
-                vertexShaderSource = Gdx.files.internal("shaders/depth.vertex.glsl").readString();
-            }
-            return vertexShaderSource;
-        }
-
-        static String getFragmentShaderSource() {
-            if (fragmentShaderSource == null) {
-                fragmentShaderSource = Gdx.files.internal("shaders/depth.fragment.glsl").readString();
-            }
-            return fragmentShaderSource;
         }
 
         @Override
@@ -210,10 +193,6 @@ public final class TangoMeshRenderer implements Disposable {
 
     private static final class WireframeShader implements Shader, Disposable {
 
-        static String vertexShaderSource;
-
-        static String fragmentShaderSource;
-
         final ShaderProgram program;
 
         final int aPosition;
@@ -229,26 +208,13 @@ public final class TangoMeshRenderer implements Disposable {
         final Color color = Color.GREEN;
 
         WireframeShader() {
-            program = new ShaderProgram(getVertexShaderSource(), getFragmentShaderSource());
+            program = new ShaderProgram(ShaderSources.getVertexShaderSource(ShaderSources.Names.SINGLE_COLOR),
+                                        ShaderSources.getFragmentShaderSource(ShaderSources.Names.SINGLE_COLOR));
             if (!program.isCompiled()) throw new GdxRuntimeException(program.getLog());
 
             aPosition = program.getAttributeLocation("a_position");
             uProjViewWorldTrans = program.getUniformLocation("u_projViewWorldTrans");
             uColor = program.getUniformLocation("u_color");
-        }
-
-        static String getVertexShaderSource() {
-            if (vertexShaderSource == null) {
-                vertexShaderSource = Gdx.files.internal("shaders/single_color.vertex.glsl").readString();
-            }
-            return vertexShaderSource;
-        }
-
-        static String getFragmentShaderSource() {
-            if (fragmentShaderSource == null) {
-                fragmentShaderSource = Gdx.files.internal("shaders/single_color.fragment.glsl").readString();
-            }
-            return fragmentShaderSource;
         }
 
         @Override
