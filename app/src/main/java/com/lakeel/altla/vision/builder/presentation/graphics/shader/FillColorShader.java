@@ -45,13 +45,13 @@ public final class FillColorShader implements Shader {
         this.camera = camera;
 
         program.begin();
-        program.setUniformf(uColor, color);
     }
 
     @Override
     public void render(Renderable renderable) {
         projViewWorld.set(camera.combined).mul(renderable.worldTransform);
         program.setUniformMatrix(uProjViewWorldTrans, projViewWorld);
+        program.setUniformf(uColor, color);
 
         renderable.meshPart.render(program, true);
     }

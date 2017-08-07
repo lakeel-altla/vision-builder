@@ -189,9 +189,6 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
         picker = new ColorObjectPicker();
 
         fillColorShader.init();
-        // ORANGE: 0xffa500ff
-        // Transparent 50%: 0xffa50088
-        fillColorShader.color.set(0xffa50088);
 
         actorAxesModel = new ModelBuilder().createXYZCoordinates(0.25f, new Material(), Position | ColorPacked);
         actorAxesObject = new ActorAxesObject(actorAxesModel);
@@ -679,6 +676,10 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
             touchedActorObject.update();
 
             renderContext.setDepthMask(false);
+            renderContext.setBlending(true, GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+            // ORANGE: 0xffa500ff
+            // Transparent 50%: 0xffa50088
+            fillColorShader.color.set(0xffa50088);
             modelBatch.render(touchedActorObject, environment, fillColorShader);
 
             touchedActorObject.scale.set(originalTouchedActorObjectScale);

@@ -4,17 +4,11 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.VertexAttribute;
-import com.badlogic.gdx.graphics.g3d.Attributes;
-import com.badlogic.gdx.graphics.g3d.Environment;
-import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.attributes.IntAttribute;
-import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
 import com.badlogic.gdx.graphics.g3d.utils.RenderContext;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.utils.Array;
@@ -22,8 +16,7 @@ import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.FlushablePool;
 import com.lakeel.altla.android.log.Log;
 import com.lakeel.altla.android.log.LogFactory;
-import com.lakeel.altla.vision.builder.presentation.graphics.shader.ShaderNames;
-import com.lakeel.altla.vision.builder.presentation.graphics.shader.ShaderSources;
+import com.lakeel.altla.vision.builder.presentation.graphics.shader.FillColorShader;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -34,8 +27,6 @@ import java.nio.ByteOrder;
 public final class ColorObjectPicker implements Disposable {
 
     private static final Log LOG = LogFactory.getLog(ColorObjectPicker.class);
-
-    private final Attributes attributes = new Attributes();
 
     private final Color color = new Color();
 
@@ -61,7 +52,7 @@ public final class ColorObjectPicker implements Disposable {
 
     private final ByteBuffer byteBuffer;
 
-    private DefaultShader shader;
+    private FillColorShader shader = new FillColorShader();
 
     private Camera camera;
 
@@ -71,17 +62,6 @@ public final class ColorObjectPicker implements Disposable {
 
     public ColorObjectPicker() {
         byteBuffer = ByteBuffer.allocateDirect(4).order(ByteOrder.nativeOrder());
-
-        final Renderable renderable = new Renderable();
-        renderable.environment = new Environment();
-        renderable.material = new Material();
-        renderable.meshPart.mesh = new Mesh(true, 4, 4, VertexAttribute.Position());
-
-        shader = new DefaultShader(renderable, new DefaultShader.Config() {
-            {
-                fragmentShader = ShaderSources.getFragmentShaderSource(ShaderNames.FILL_COLOR);
-            }
-        });
         shader.init();
     }
 
@@ -120,9 +100,12 @@ public final class ColorObjectPicker implements Disposable {
 
         shader.begin(camera, renderContext);
 
+        // Disable the blending.
+        renderContext.setBlending(false, 0, 0);
+
         for (int i = 0; i < instances.size; i++) {
             Color.rgba8888ToColor(color, i);
-            shader.program.setUniformf("u_color", color);
+            shader.color.set(color);
 
             final int offset = renderables.size;
             final ModelInstance instance = instances.get(i);
@@ -131,16 +114,13 @@ public final class ColorObjectPicker implements Disposable {
             for (int j = offset; j < renderables.size; j++) {
                 final Renderable renderable = renderables.get(j);
 
-                // Render meshes with custom attributes ignoring a material of models.
+                // Set the culling mode if needed.
                 final IntAttribute cullFace = (IntAttribute) renderable.material.get(IntAttribute.CullFace);
                 if (cullFace != null) {
-                    attributes.set(cullFace);
+                    renderContext.setCullFace(cullFace.value);
                 }
 
-                renderable.shader = shader;
-                shader.render(renderable, attributes);
-
-                attributes.clear();
+                shader.render(renderable);
             }
         }
 
