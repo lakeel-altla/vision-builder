@@ -122,6 +122,8 @@ public final class ArActivity extends AndroidApplication
 
     private boolean tangoSupportInitialized;
 
+    private TypedQuery<Actor> queryUserActors;
+
     private TypedQuery<MeshActor> queryUserMeshActors;
 
     private TypedQuery<TriggerActor> queryUserTriggerActors;
@@ -287,27 +289,30 @@ public final class ArActivity extends AndroidApplication
                     if (areaSettings != null) {
                         // TODO: for public scope.
                         // TODO: for other actor types.
-                        queryUserMeshActors = arModel.loadUserMeshActors();
-                        queryUserMeshActors.addTypedChildEventListener(
-                                new TypedQuery.TypedChildEventListener<MeshActor>() {
+                        queryUserActors = arModel.loadUserActors();
+                        queryUserActors.addTypedChildEventListener(
+                                new TypedQuery.TypedChildEventListener<Actor>() {
                                     @Override
-                                    public void onChildAdded(@NonNull MeshActor actor,
-                                                             @Nullable String previousChildName) {
-                                        addMeshActor(actor);
+                                    public void onChildAdded(@NonNull Actor actor, @Nullable String previousChildName) {
+                                        if (actor instanceof MeshActor) {
+                                            addMeshActor((MeshActor) actor);
+                                        } else if (actor instanceof TriggerActor) {
+                                            addTriggerActor((TriggerActor) actor);
+                                        }
                                     }
 
                                     @Override
-                                    public void onChildChanged(@NonNull MeshActor actor, String previousChildName) {
+                                    public void onChildChanged(@NonNull Actor actor, String previousChildName) {
                                         // TODO
                                     }
 
                                     @Override
-                                    public void onChildRemoved(@NonNull MeshActor actor) {
+                                    public void onChildRemoved(@NonNull Actor actor) {
                                         Gdx.app.postRunnable(() -> arGraphics.removeActor(actor));
                                     }
 
                                     @Override
-                                    public void onChildMoved(@NonNull MeshActor actor, String previousChildName) {
+                                    public void onChildMoved(@NonNull Actor actor, String previousChildName) {
                                     }
 
                                     @Override
@@ -315,34 +320,62 @@ public final class ArActivity extends AndroidApplication
                                         LOG.e("Failed.", e);
                                     }
                                 });
-                        queryUserTriggerActors = arModel.loadUserTriggerActors();
-                        queryUserTriggerActors.addTypedChildEventListener(
-                                new TypedQuery.TypedChildEventListener<TriggerActor>() {
-                                    @Override
-                                    public void onChildAdded(@NonNull TriggerActor actor,
-                                                             @Nullable String previousChildName) {
-                                        addTriggerActor(actor);
-                                    }
-
-                                    @Override
-                                    public void onChildChanged(@NonNull TriggerActor actor, String previousChildName) {
-                                        // TODO
-                                    }
-
-                                    @Override
-                                    public void onChildRemoved(@NonNull TriggerActor actor) {
-                                        Gdx.app.postRunnable(() -> arGraphics.removeActor(actor));
-                                    }
-
-                                    @Override
-                                    public void onChildMoved(@NonNull TriggerActor actor, String previousChildName) {
-                                    }
-
-                                    @Override
-                                    public void onError(@NonNull Exception e) {
-                                        LOG.e("Failed.", e);
-                                    }
-                                });
+//                        queryUserMeshActors = arModel.loadUserMeshActors();
+//                        queryUserMeshActors.addTypedChildEventListener(
+//                                new TypedQuery.TypedChildEventListener<MeshActor>() {
+//                                    @Override
+//                                    public void onChildAdded(@NonNull MeshActor actor,
+//                                                             @Nullable String previousChildName) {
+//                                        addMeshActor(actor);
+//                                    }
+//
+//                                    @Override
+//                                    public void onChildChanged(@NonNull MeshActor actor, String previousChildName) {
+//                                        // TODO
+//                                    }
+//
+//                                    @Override
+//                                    public void onChildRemoved(@NonNull MeshActor actor) {
+//                                        Gdx.app.postRunnable(() -> arGraphics.removeActor(actor));
+//                                    }
+//
+//                                    @Override
+//                                    public void onChildMoved(@NonNull MeshActor actor, String previousChildName) {
+//                                    }
+//
+//                                    @Override
+//                                    public void onError(@NonNull Exception e) {
+//                                        LOG.e("Failed.", e);
+//                                    }
+//                                });
+//                        queryUserTriggerActors = arModel.loadUserTriggerActors();
+//                        queryUserTriggerActors.addTypedChildEventListener(
+//                                new TypedQuery.TypedChildEventListener<TriggerActor>() {
+//                                    @Override
+//                                    public void onChildAdded(@NonNull TriggerActor actor,
+//                                                             @Nullable String previousChildName) {
+//                                        addTriggerActor(actor);
+//                                    }
+//
+//                                    @Override
+//                                    public void onChildChanged(@NonNull TriggerActor actor, String previousChildName) {
+//                                        // TODO
+//                                    }
+//
+//                                    @Override
+//                                    public void onChildRemoved(@NonNull TriggerActor actor) {
+//                                        Gdx.app.postRunnable(() -> arGraphics.removeActor(actor));
+//                                    }
+//
+//                                    @Override
+//                                    public void onChildMoved(@NonNull TriggerActor actor, String previousChildName) {
+//                                    }
+//
+//                                    @Override
+//                                    public void onError(@NonNull Exception e) {
+//                                        LOG.e("Failed.", e);
+//                                    }
+//                                });
                     }
                 } catch (TangoOutOfDateException e) {
                     LOG.e("Tango service outdated.", e);

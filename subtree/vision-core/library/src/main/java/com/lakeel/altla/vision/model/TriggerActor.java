@@ -10,25 +10,29 @@ import android.support.annotation.NonNull;
 @Parcel(Parcel.Serialization.BEAN)
 public final class TriggerActor extends Actor {
 
-    private String triggerShape = TriggerShape.UNKNOWN.name();
+    private String shape = TriggerShape.UNKNOWN.name();
 
-    @NonNull
-    public String getTriggerShape() {
-        return triggerShape;
+    public TriggerActor() {
+        super(ActorType.TRIGGER);
     }
 
-    public void setTriggerShape(@NonNull String triggerShape) {
-        this.triggerShape = triggerShape;
+    @NonNull
+    public String getShape() {
+        return shape;
+    }
+
+    public void setShape(@NonNull String shape) {
+        this.shape = shape;
     }
 
     @Exclude
     @Transient
     @NonNull
-    public TriggerShape getTriggerShapeAsEnum() {
-        return TriggerShape.valueOf(triggerShape);
+    public TriggerShape getShapeAsEnum() {
+        return TriggerShape.valueOf(shape);
     }
 
-    public void setTriggerShapeAsEnum(@NonNull TriggerShape triggerShape) {
-        this.triggerShape = triggerShape.name();
+    public void setShapeAsEnum(@NonNull TriggerShape shape) {
+        this.shape = shape.name();
     }
 }

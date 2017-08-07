@@ -452,7 +452,7 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
     }
 
     public void addTriggerActor(@NonNull TriggerActor actor) {
-        final Model model = triggerShapeModelLoader.load(actor.getTriggerShapeAsEnum());
+        final Model model = triggerShapeModelLoader.load(actor.getShapeAsEnum());
         addTriggerActorObject(model, actor);
     }
 

@@ -15,6 +15,10 @@ public final class MeshActor extends Actor {
 
     private String assetId;
 
+    public MeshActor() {
+        super(ActorType.MESH);
+    }
+
     @NonNull
     public String getAssetType() {
         return assetType;

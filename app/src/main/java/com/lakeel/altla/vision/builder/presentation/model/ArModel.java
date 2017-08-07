@@ -80,15 +80,9 @@ public final class ArModel {
     }
 
     @NonNull
-    public synchronized TypedQuery<MeshActor> loadUserMeshActors() {
+    public synchronized TypedQuery<Actor> loadUserActors() {
         return visionService.getUserActorApi()
-                            .findMeshActorsByAreaId(getRequiredAreaSettings().getRequiredAreaId());
-    }
-
-    @NonNull
-    public synchronized TypedQuery<TriggerActor> loadUserTriggerActors() {
-        return visionService.getUserActorApi()
-                            .findTriggerActorsByAreaId(getRequiredAreaSettings().getRequiredAreaId());
+                            .findActorsByAreaId(getRequiredAreaSettings().getRequiredAreaId());
     }
 
     public void saveSelectedActor() {
@@ -133,7 +127,7 @@ public final class ArModel {
         final TriggerActor actor = new TriggerActor();
 
         actor.setUserId(CurrentUser.getInstance().getUserId());
-        actor.setTriggerShapeAsEnum(triggerShape);
+        actor.setShapeAsEnum(triggerShape);
         actor.setName(triggerShape.name());
         actor.setPositionX(position.x);
         actor.setPositionY(position.y);

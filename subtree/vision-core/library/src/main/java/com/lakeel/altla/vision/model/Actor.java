@@ -1,11 +1,15 @@
 package com.lakeel.altla.vision.model;
 
-import org.parceler.Parcel;
+import com.google.firebase.database.Exclude;
 
+import org.parceler.Transient;
+
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-@Parcel(Parcel.Serialization.BEAN)
 public class Actor extends BaseEntity {
+
+    private String type;
 
     private String name;
 
@@ -30,6 +34,31 @@ public class Actor extends BaseEntity {
     private double scaleZ = 1;
 
     protected Actor() {
+        this(ActorType.UNKNOWN);
+    }
+
+    protected Actor(@NonNull ActorType type) {
+        this.type = type.name();
+    }
+
+    @NonNull
+    public String getType() {
+        return type;
+    }
+
+    public void setType(@NonNull String type) {
+        this.type = type;
+    }
+
+    @Exclude
+    @Transient
+    @NonNull
+    public ActorType getTypeAsEnum() {
+        return ActorType.valueOf(type);
+    }
+
+    public void setTypeAsEnum(@NonNull ActorType type) {
+        this.type = type.name();
     }
 
     @Nullable

@@ -1,23 +1,28 @@
 package com.lakeel.altla.vision.data.repository.firebase;
 
+import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 
 import com.lakeel.altla.vision.helper.TypedQuery;
-import com.lakeel.altla.vision.model.MeshActor;
+import com.lakeel.altla.vision.model.Actor;
+import com.lakeel.altla.vision.model.ActorType;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
-public final class UserMeshActorRepository extends BaseDatabaseRepository {
+public final class UserActorRepository extends BaseDatabaseRepository {
 
-    private static final String BASE_PATH = "userMeshActors";
+    private static final String BASE_PATH = "userActors";
 
-    public UserMeshActorRepository(@NonNull FirebaseDatabase database) {
+    private static final String FIELD_TYPE = "type";
+
+    public UserActorRepository(@NonNull FirebaseDatabase database) {
         super(database);
     }
 
-    public void save(@NonNull String areaId, @NonNull MeshActor actor) {
+    public void save(@NonNull String areaId, @NonNull Actor actor) {
         actor.setUpdatedAtAsLong(-1);
 
         getDatabase().getReference()
@@ -34,25 +39,25 @@ public final class UserMeshActorRepository extends BaseDatabaseRepository {
     }
 
     @NonNull
-    public TypedQuery<MeshActor> find(@NonNull String userId, @NonNull String areaId, @NonNull String actorId) {
+    public TypedQuery<Actor> find(@NonNull String userId, @NonNull String areaId, @NonNull String actorId) {
         final DatabaseReference reference = getDatabase().getReference()
                                                          .child(BASE_PATH)
                                                          .child(userId)
                                                          .child(areaId)
                                                          .child(actorId);
-        return new TypedQuery<>(reference, MeshActor.class);
+        return new TypedQuery<>(reference, this::convert);
     }
 
     @NonNull
-    public TypedQuery<MeshActor> findByAreaId(@NonNull String userId, @NonNull String areaId) {
+    public TypedQuery<Actor> findByAreaId(@NonNull String userId, @NonNull String areaId) {
         final Query query = getDatabase().getReference()
                                          .child(BASE_PATH)
                                          .child(userId)
                                          .child(areaId);
-        return new TypedQuery<>(query, MeshActor.class);
+        return new TypedQuery<>(query, this::convert);
     }
 
-    public void delete(@NonNull String areaId, @NonNull MeshActor actor) {
+    public void delete(@NonNull String areaId, @NonNull Actor actor) {
         getDatabase().getReference()
                      .child(BASE_PATH)
                      .child(actor.getRequiredUserId())
@@ -64,5 +69,16 @@ public final class UserMeshActorRepository extends BaseDatabaseRepository {
                                         error.toException());
                          }
                      });
+    }
+
+    @Nullable
+    private Actor convert(@NonNull DataSnapshot snapshot) {
+        final String actorTypeString = (String) snapshot.child(FIELD_TYPE).getValue();
+        if (actorTypeString == null) {
+            return null;
+        } else {
+            final ActorType actorType = ActorType.valueOf(actorTypeString);
+            return snapshot.getValue(actorType.actorClass);
+        }
     }
 }
