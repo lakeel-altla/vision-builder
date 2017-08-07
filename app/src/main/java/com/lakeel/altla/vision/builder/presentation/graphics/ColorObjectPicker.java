@@ -8,7 +8,6 @@ import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.VertexAttribute;
-import com.badlogic.gdx.graphics.g3d.Attribute;
 import com.badlogic.gdx.graphics.g3d.Attributes;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.Material;
@@ -21,7 +20,8 @@ import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.FlushablePool;
-import com.badlogic.gdx.utils.Pool;
+import com.lakeel.altla.android.log.Log;
+import com.lakeel.altla.android.log.LogFactory;
 import com.lakeel.altla.vision.builder.presentation.graphics.shader.ShaderNames;
 import com.lakeel.altla.vision.builder.presentation.graphics.shader.ShaderSources;
 
@@ -33,15 +33,18 @@ import java.nio.ByteOrder;
 
 public final class ColorObjectPicker implements Disposable {
 
-    private static final Attributes ATTRIBUTES = new Attributes();
+    private static final Log LOG = LogFactory.getLog(ColorObjectPicker.class);
+
+    private final Attributes attributes = new Attributes();
 
     private final Color color = new Color();
 
     private final Array<Renderable> renderables = new Array<>();
 
-    private final Pool<Renderable> renderablePool = new FlushablePool<Renderable>() {
+    private final FlushablePool<Renderable> renderablePool = new FlushablePool<Renderable>() {
         @Override
         protected Renderable newObject() {
+            LOG.d("newObject");
             return new Renderable();
         }
 
@@ -127,23 +130,23 @@ public final class ColorObjectPicker implements Disposable {
 
             for (int j = offset; j < renderables.size; j++) {
                 final Renderable renderable = renderables.get(j);
-                renderable.shader = shader;
 
                 // Render meshes with custom attributes ignoring a material of models.
-                final Attribute attribute = renderable.material.get(IntAttribute.CullFace);
-                if (attribute != null) {
-                    ATTRIBUTES.set(attribute);
+                final IntAttribute cullFace = (IntAttribute) renderable.material.get(IntAttribute.CullFace);
+                if (cullFace != null) {
+                    attributes.set(cullFace);
                 }
 
-                shader.render(renderable, ATTRIBUTES);
+                renderable.shader = shader;
+                shader.render(renderable, attributes);
 
-                ATTRIBUTES.clear();
+                attributes.clear();
             }
         }
 
         shader.end();
 
-        renderablePool.clear();
+        renderablePool.flush();
         renderables.clear();
     }
 
