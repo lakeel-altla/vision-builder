@@ -443,7 +443,7 @@ public final class ArActivity extends AndroidApplication
         if (asset == null) {
             Gdx.app.postRunnable(() -> arGraphics.removeMeshActorCursor());
         } else {
-            arModel.getCachedImageAssetFile(asset.getId(), file -> {
+            arModel.getCachedAssetFile(asset.getId(), asset.getType(), file -> {
                 Gdx.app.postRunnable(() -> arGraphics.addMeshActorCursor(asset, file));
             }, e -> {
                 LOG.e("Failed.", e);
@@ -520,11 +520,12 @@ public final class ArActivity extends AndroidApplication
     }
 
     private void addMeshComponent(@NonNull Actor actor, @NonNull MeshComponent component) {
+        final String assetId = component.getRequiredAssetId();
         final String assetType = component.getRequiredAssetType();
 
         if (ImageAsset.TYPE.equals(assetType)) {
             // TODO: Using something like a loader class.
-            arModel.getCachedImageAssetFile(component.getRequiredAssetId(), file -> {
+            arModel.getCachedAssetFile(assetId, assetType, file -> {
                 Gdx.app.postRunnable(() -> arGraphics.addGeometryObject(actor, component, file));
             }, e -> {
                 LOG.e("Failed.", e);

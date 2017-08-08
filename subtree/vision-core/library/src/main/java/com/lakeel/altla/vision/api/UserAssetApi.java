@@ -1,13 +1,18 @@
 package com.lakeel.altla.vision.api;
 
 import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.storage.FileDownloadTask;
 
 import com.lakeel.altla.vision.data.repository.android.AssetCacheRepository;
 import com.lakeel.altla.vision.data.repository.android.DocumentRepository;
 import com.lakeel.altla.vision.data.repository.firebase.UserImageAssetFileRepository;
 import com.lakeel.altla.vision.data.repository.firebase.UserImageAssetFileUploadTaskRepository;
 import com.lakeel.altla.vision.data.repository.firebase.UserImageAssetRepository;
+import com.lakeel.altla.vision.helper.OnFailureListener;
+import com.lakeel.altla.vision.helper.OnProgressListener;
+import com.lakeel.altla.vision.helper.OnSuccessListener;
 import com.lakeel.altla.vision.helper.TypedQuery;
+import com.lakeel.altla.vision.model.ImageAsset;
 import com.lakeel.altla.vision.model.ImageAssetFileUploadTask;
 
 import android.net.Uri;
@@ -62,5 +67,41 @@ public final class UserAssetApi extends BaseVisionApi {
     @NonNull
     public File findOrCreateAssetCacheFile(@NonNull String assetId) throws IOException {
         return assetCacheRepository.findOrCreate(assetId);
+    }
+
+    public void getCachedAssetFile(@NonNull String assetId, @NonNull String assetType,
+                                   @Nullable OnSuccessListener<File> onSuccessListener,
+                                   @Nullable OnFailureListener onFailureListener,
+                                   @Nullable OnProgressListener onProgressListener) {
+        final File file = assetCacheRepository.find(assetId);
+        if (file == null) {
+            // Download the file if it is not cached.
+            try {
+                final File destination = assetCacheRepository.findOrCreate(assetId);
+                final FileDownloadTask downloadTask;
+                if (ImageAsset.TYPE.equals(assetType)) {
+                    downloadTask = userImageAssetFileRepository.download(
+                            CurrentUser.getInstance().getUserId(), assetId, destination);
+                } else {
+                    throw new IllegalArgumentException("An unexpected value of 'assetType': " + assetType);
+                }
+
+                downloadTask.addOnSuccessListener(aVoid -> {
+                    if (onSuccessListener != null) onSuccessListener.onSuccess(destination);
+                });
+                if (onFailureListener != null) {
+                    downloadTask.addOnFailureListener(onFailureListener::onFailure);
+                }
+                if (onProgressListener != null) {
+                    downloadTask.addOnProgressListener(snapshot -> {
+                        onProgressListener.onProgress(snapshot.getTotalByteCount(), snapshot.getBytesTransferred());
+                    });
+                }
+            } catch (IOException e) {
+                if (onFailureListener != null) onFailureListener.onFailure(e);
+            }
+        } else {
+            if (onSuccessListener != null) onSuccessListener.onSuccess(file);
+        }
     }
 }

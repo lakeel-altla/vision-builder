@@ -144,11 +144,12 @@ public final class ArModel {
         }
     }
 
-    public void getCachedImageAssetFile(@NonNull String assetId,
-                                        @Nullable OnSuccessListener<File> onSuccessListener,
-                                        @Nullable OnFailureListener onFailureListener,
-                                        @Nullable OnProgressListener onProgressListener) {
-        visionService.getUserImageAssetApi()
-                     .getCachedImageAssetFile(assetId, onSuccessListener, onFailureListener, onProgressListener);
+    public void getCachedAssetFile(@NonNull String assetId, @NonNull String assetType,
+                                   @Nullable OnSuccessListener<File> onSuccessListener,
+                                   @Nullable OnFailureListener onFailureListener,
+                                   @Nullable OnProgressListener onProgressListener) {
+        visionService.getUserAssetApi()
+                     .getCachedAssetFile(assetId, assetType,
+                                         onSuccessListener, onFailureListener, onProgressListener);
     }
 }

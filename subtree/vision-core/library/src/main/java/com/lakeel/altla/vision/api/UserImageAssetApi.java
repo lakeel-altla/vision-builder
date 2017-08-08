@@ -1,6 +1,5 @@
 package com.lakeel.altla.vision.api;
 
-import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.UploadTask;
 
 import com.lakeel.altla.vision.data.repository.android.AssetCacheRepository;
@@ -124,36 +123,5 @@ public final class UserImageAssetApi extends BaseVisionApi {
                         if (onFailureListener != null) onFailureListener.onFailure(e);
                     }
                 });
-    }
-
-    public void getCachedImageAssetFile(@NonNull String assetId,
-                                        @Nullable OnSuccessListener<File> onSuccessListener,
-                                        @Nullable OnFailureListener onFailureListener,
-                                        @Nullable OnProgressListener onProgressListener) {
-        final File file = assetCacheRepository.find(assetId);
-        if (file == null) {
-            // Download the file if it is not cached.
-            try {
-                final File destination = assetCacheRepository.findOrCreate(assetId);
-                final FileDownloadTask downloadTask = userImageAssetFileRepository
-                        .download(CurrentUser.getInstance().getUserId(), assetId, destination);
-
-                downloadTask.addOnSuccessListener(aVoid -> {
-                    if (onSuccessListener != null) onSuccessListener.onSuccess(destination);
-                });
-                if (onFailureListener != null) {
-                    downloadTask.addOnFailureListener(onFailureListener::onFailure);
-                }
-                if (onProgressListener != null) {
-                    downloadTask.addOnProgressListener(snapshot -> {
-                        onProgressListener.onProgress(snapshot.getTotalByteCount(), snapshot.getBytesTransferred());
-                    });
-                }
-            } catch (IOException e) {
-                if (onFailureListener != null) onFailureListener.onFailure(e);
-            }
-        } else {
-            if (onSuccessListener != null) onSuccessListener.onSuccess(file);
-        }
     }
 }
