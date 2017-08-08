@@ -22,6 +22,7 @@ import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.di.component.ActivityComponent;
 import com.lakeel.altla.vision.builder.presentation.di.module.ActivityModule;
 import com.lakeel.altla.vision.builder.presentation.graphics.ArGraphics;
+import com.lakeel.altla.vision.builder.presentation.graphics.loader.AssetCacheLoader;
 import com.lakeel.altla.vision.builder.presentation.helper.TangoMesher;
 import com.lakeel.altla.vision.builder.presentation.model.ArModel;
 import com.lakeel.altla.vision.builder.presentation.model.Axis;
@@ -34,6 +35,9 @@ import com.lakeel.altla.vision.builder.presentation.view.pane.PaneGroup;
 import com.lakeel.altla.vision.builder.presentation.view.pane.PaneLifecycle;
 import com.lakeel.altla.vision.builder.presentation.view.pane.TriggerShapeListPane;
 import com.lakeel.altla.vision.builder.presentation.view.pane.ViewModeMenuPane;
+import com.lakeel.altla.vision.helper.OnFailureListener;
+import com.lakeel.altla.vision.helper.OnProgressListener;
+import com.lakeel.altla.vision.helper.OnSuccessListener;
 import com.lakeel.altla.vision.helper.TypedQuery;
 import com.lakeel.altla.vision.model.Actor;
 import com.lakeel.altla.vision.model.AreaSettings;
@@ -41,7 +45,6 @@ import com.lakeel.altla.vision.model.Asset;
 import com.lakeel.altla.vision.model.Component;
 import com.lakeel.altla.vision.model.GeometryComponent;
 import com.lakeel.altla.vision.model.ImageAsset;
-import com.lakeel.altla.vision.model.MeshComponent;
 import com.lakeel.altla.vision.model.ShapeComponent;
 import com.projecttango.tangosupport.TangoSupport;
 
@@ -56,6 +59,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toast;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -67,6 +71,7 @@ import butterknife.ButterKnife;
 public final class ArActivity extends AndroidApplication
         implements ActivityScopeContext,
                    ArGraphics.Listener,
+                   AssetCacheLoader,
                    DebugMenuPane.PaneContext,
                    ViewModeMenuPane.PaneContext,
                    EditModelMenuPane.PaneContext,
@@ -163,7 +168,7 @@ public final class ArActivity extends AndroidApplication
         //
         // Add the OpenGL view provided by libGDX.
         //
-        arGraphics = new ArGraphics(getWindowManager().getDefaultDisplay(), this);
+        arGraphics = new ArGraphics(getWindowManager().getDefaultDisplay(), this, this);
         final AndroidApplicationConfiguration configuration = new AndroidApplicationConfiguration();
         final View view = initializeForView(arGraphics, configuration);
         viewTop.addView(view, 0);
@@ -402,6 +407,29 @@ public final class ArActivity extends AndroidApplication
     }
 
     @Override
+    public void loadUserAssetCache(@NonNull String assetId, @NonNull String assetType,
+                                   @Nullable OnSuccessListener<File> onSuccessListener,
+                                   @Nullable OnFailureListener onFailureListener,
+                                   @Nullable OnProgressListener onProgressListener) {
+        // This method will be invoked by the graphics thread.
+        arModel.getCachedAssetFile(
+                assetId, assetType,
+                file -> {
+                    if (onSuccessListener != null) {
+                        Gdx.app.postRunnable(() -> onSuccessListener.onSuccess(file));
+                    }
+                }, e -> {
+                    if (onFailureListener != null) {
+                        Gdx.app.postRunnable(() -> onFailureListener.onFailure(e));
+                    }
+                }, (totalBytes, bytesTransferred) -> {
+                    if (onProgressListener != null) {
+                        Gdx.app.postRunnable(() -> onProgressListener.onProgress(totalBytes, bytesTransferred));
+                    }
+                });
+    }
+
+    @Override
     public void setDebugFrameBuffersVisible(boolean visible) {
         Gdx.app.postRunnable(() -> arGraphics.setDebugFrameBuffersVisible(visible));
     }
@@ -440,15 +468,13 @@ public final class ArActivity extends AndroidApplication
 
     @Override
     public void onImageAssetSelected(@Nullable ImageAsset asset) {
-        if (asset == null) {
-            Gdx.app.postRunnable(() -> arGraphics.removeMeshActorCursor());
-        } else {
-            arModel.getCachedAssetFile(asset.getId(), asset.getType(), file -> {
-                Gdx.app.postRunnable(() -> arGraphics.addMeshActorCursor(asset, file));
-            }, e -> {
-                LOG.e("Failed.", e);
-            }, null);
-        }
+        Gdx.app.postRunnable(() -> {
+            if (asset == null) {
+                arGraphics.removeMeshActorCursor();
+            } else {
+                arGraphics.addMeshActorCursor(asset);
+            }
+        });
     }
 
     @Override
@@ -475,30 +501,22 @@ public final class ArActivity extends AndroidApplication
 
     @Override
     public void setSelectedActorLocked(boolean locked) {
-        Gdx.app.postRunnable(() -> {
-            arGraphics.setTouchedActorObjectLocked(locked);
-        });
+        Gdx.app.postRunnable(() -> arGraphics.setTouchedActorObjectLocked(locked));
     }
 
     @Override
     public void setTranslationEnabled(boolean enabled, @Nullable Axis axis) {
-        Gdx.app.postRunnable(() -> {
-            arGraphics.setTranslationEnabled(enabled, axis);
-        });
+        Gdx.app.postRunnable(() -> arGraphics.setTranslationEnabled(enabled, axis));
     }
 
     @Override
     public void setRotationEnabled(boolean enabled, @Nullable Axis axis) {
-        Gdx.app.postRunnable(() -> {
-            arGraphics.setRotationEnabled(enabled, axis);
-        });
+        Gdx.app.postRunnable(() -> arGraphics.setRotationEnabled(enabled, axis));
     }
 
     @Override
     public void setScaleEnabled(boolean enabled) {
-        Gdx.app.postRunnable(() -> {
-            arGraphics.setScaleEnabled(enabled);
-        });
+        Gdx.app.postRunnable(() -> arGraphics.setScaleEnabled(enabled));
     }
 
     private void addActor(@NonNull Actor actor) {
@@ -506,36 +524,8 @@ public final class ArActivity extends AndroidApplication
 
         for (final Component component : actor.getComponents()) {
             if (component instanceof GeometryComponent) {
-                addGeometryComponent(actor, (GeometryComponent) component);
+                Gdx.app.postRunnable(() -> arGraphics.addGeometryObject(actor, (GeometryComponent) component));
             }
         }
-    }
-
-    private void addGeometryComponent(@NonNull Actor actor, @NonNull GeometryComponent component) {
-        if (component instanceof MeshComponent) {
-            addMeshComponent(actor, (MeshComponent) component);
-        } else if (component instanceof ShapeComponent) {
-            addShapeComponent(actor, (ShapeComponent) component);
-        }
-    }
-
-    private void addMeshComponent(@NonNull Actor actor, @NonNull MeshComponent component) {
-        final String assetId = component.getRequiredAssetId();
-        final String assetType = component.getRequiredAssetType();
-
-        if (ImageAsset.TYPE.equals(assetType)) {
-            // TODO: Using something like a loader class.
-            arModel.getCachedAssetFile(assetId, assetType, file -> {
-                Gdx.app.postRunnable(() -> arGraphics.addGeometryObject(actor, component, file));
-            }, e -> {
-                LOG.e("Failed.", e);
-            }, null);
-        } else {
-            throw new IllegalStateException("An unexpected asset type: " + assetType);
-        }
-    }
-
-    private void addShapeComponent(@NonNull Actor actor, @NonNull ShapeComponent component) {
-        Gdx.app.postRunnable(() -> arGraphics.addGeometryObject(actor, component));
     }
 }

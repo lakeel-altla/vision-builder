@@ -21,8 +21,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.util.SimpleArrayMap;
 
-import java.io.File;
-
 import static com.badlogic.gdx.graphics.VertexAttributes.Usage.Normal;
 import static com.badlogic.gdx.graphics.VertexAttributes.Usage.Position;
 import static com.badlogic.gdx.graphics.VertexAttributes.Usage.TextureCoordinates;
@@ -38,9 +36,12 @@ public final class AssetModelLoader implements Disposable {
 
     private final Queue<Task> taskQueue = new Queue<>();
 
+    private final AssetCacheLoader assetCacheLoader;
+
     private boolean loading;
 
-    public AssetModelLoader() {
+    public AssetModelLoader(@NonNull AssetCacheLoader assetCacheLoader) {
+        this.assetCacheLoader = assetCacheLoader;
         loaderMap.put(ImageAsset.TYPE, new ImageAssetModelLoader());
     }
 
@@ -64,11 +65,10 @@ public final class AssetModelLoader implements Disposable {
         }
     }
 
-    public void addTask(@NonNull String assetId, @NonNull String assetType, @NonNull File assetFile,
+    public void addTask(@NonNull String assetId, @NonNull String assetType,
                         @Nullable OnSuccessListener<Model> onSuccessListener,
                         @Nullable OnFailureListener onFailureListener) {
-        final FileHandle assetFileHandle = Gdx.files.absolute(assetFile.getPath());
-        taskQueue.addLast(new Task(assetId, assetType, assetFileHandle, onSuccessListener, onFailureListener));
+        taskQueue.addLast(new Task(assetId, assetType, onSuccessListener, onFailureListener));
     }
 
     private final class Task {
@@ -79,21 +79,16 @@ public final class AssetModelLoader implements Disposable {
         @NonNull
         final String assetType;
 
-        @NonNull
-        final FileHandle assetFileHandle;
-
         @Nullable
         final OnSuccessListener<Model> onSuccessListener;
 
         @Nullable
         final OnFailureListener onFailureListener;
 
-        Task(@NonNull String assetId, @NonNull String assetType, @NonNull FileHandle assetFileHandle,
-             @Nullable OnSuccessListener<Model> onSuccessListener,
-             @Nullable OnFailureListener onFailureListener) {
+        Task(@NonNull String assetId, @NonNull String assetType,
+             @Nullable OnSuccessListener<Model> onSuccessListener, @Nullable OnFailureListener onFailureListener) {
             this.assetId = assetId;
             this.assetType = assetType;
-            this.assetFileHandle = assetFileHandle;
             this.onSuccessListener = onSuccessListener;
             this.onFailureListener = onFailureListener;
         }
@@ -106,17 +101,27 @@ public final class AssetModelLoader implements Disposable {
                 loading = false;
                 if (onSuccessListener != null) onSuccessListener.onSuccess(model);
             } else {
-                final Loader loader = loaderMap.get(assetType);
-                if (loader == null) {
-                    throw new IllegalStateException("An asset type is not supported: assetType = " + assetType);
-                }
+                // TODO: public assets?
+                assetCacheLoader.loadUserAssetCache(assetId, assetType, file -> {
+                    final FileHandle fileHandle = Gdx.files.absolute(file.getPath());
+                    final Loader loader = loaderMap.get(assetType);
+                    if (loader == null) {
+                        throw new IllegalStateException("An asset type is not supported: assetType = " + assetType);
+                    }
 
-                loader.load(assetFileHandle, m -> {
-                    LOG.d("An asset model is loaded: assetId = %s, assetType = %s", assetId, assetType);
-                    modelMap.put(assetId, m);
+                    loader.load(fileHandle, m -> {
+                        LOG.d("An asset model is loaded: assetId = %s, assetType = %s", assetId, assetType);
+                        modelMap.put(assetId, m);
+                        loading = false;
+                        if (onSuccessListener != null) onSuccessListener.onSuccess(m);
+                    }, e -> {
+                        loading = false;
+                        if (onFailureListener != null) onFailureListener.onFailure(e);
+                    });
+                }, e -> {
                     loading = false;
-                    if (onSuccessListener != null) onSuccessListener.onSuccess(m);
-                }, onFailureListener);
+                    if (onFailureListener != null) onFailureListener.onFailure(e);
+                }, null);
             }
         }
     }
