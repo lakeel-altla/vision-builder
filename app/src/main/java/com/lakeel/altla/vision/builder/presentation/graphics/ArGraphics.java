@@ -247,6 +247,7 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
         fillColorShader.dispose();
 
         assetModelLoader.dispose();
+        shapeModelLoader.dispose();
 
         if (sceneFrameBuffer != null) {
             sceneFrameBuffer.dispose();
