@@ -38,10 +38,11 @@ import com.lakeel.altla.vision.helper.TypedQuery;
 import com.lakeel.altla.vision.model.Actor;
 import com.lakeel.altla.vision.model.AreaSettings;
 import com.lakeel.altla.vision.model.Asset;
+import com.lakeel.altla.vision.model.Component;
+import com.lakeel.altla.vision.model.GeometryComponent;
 import com.lakeel.altla.vision.model.ImageAsset;
-import com.lakeel.altla.vision.model.MeshActor;
-import com.lakeel.altla.vision.model.TriggerActor;
-import com.lakeel.altla.vision.model.TriggerShape;
+import com.lakeel.altla.vision.model.MeshComponent;
+import com.lakeel.altla.vision.model.ShapeComponent;
 import com.projecttango.tangosupport.TangoSupport;
 
 import android.app.Activity;
@@ -123,10 +124,6 @@ public final class ArActivity extends AndroidApplication
     private boolean tangoSupportInitialized;
 
     private TypedQuery<Actor> queryUserActors;
-
-    private TypedQuery<MeshActor> queryUserMeshActors;
-
-    private TypedQuery<TriggerActor> queryUserTriggerActors;
 
     private boolean editMode;
 
@@ -294,11 +291,7 @@ public final class ArActivity extends AndroidApplication
                                 new TypedQuery.TypedChildEventListener<Actor>() {
                                     @Override
                                     public void onChildAdded(@NonNull Actor actor, @Nullable String previousChildName) {
-                                        if (actor instanceof MeshActor) {
-                                            addMeshActor((MeshActor) actor);
-                                        } else if (actor instanceof TriggerActor) {
-                                            addTriggerActor((TriggerActor) actor);
-                                        }
+                                        addActor(actor);
                                     }
 
                                     @Override
@@ -308,7 +301,7 @@ public final class ArActivity extends AndroidApplication
 
                                     @Override
                                     public void onChildRemoved(@NonNull Actor actor) {
-                                        Gdx.app.postRunnable(() -> arGraphics.removeActor(actor));
+                                        Gdx.app.postRunnable(() -> arGraphics.removeGeometryObjectsByActor(actor));
                                     }
 
                                     @Override
@@ -320,62 +313,6 @@ public final class ArActivity extends AndroidApplication
                                         LOG.e("Failed.", e);
                                     }
                                 });
-//                        queryUserMeshActors = arModel.loadUserMeshActors();
-//                        queryUserMeshActors.addTypedChildEventListener(
-//                                new TypedQuery.TypedChildEventListener<MeshActor>() {
-//                                    @Override
-//                                    public void onChildAdded(@NonNull MeshActor actor,
-//                                                             @Nullable String previousChildName) {
-//                                        addMeshActor(actor);
-//                                    }
-//
-//                                    @Override
-//                                    public void onChildChanged(@NonNull MeshActor actor, String previousChildName) {
-//                                        // TODO
-//                                    }
-//
-//                                    @Override
-//                                    public void onChildRemoved(@NonNull MeshActor actor) {
-//                                        Gdx.app.postRunnable(() -> arGraphics.removeActor(actor));
-//                                    }
-//
-//                                    @Override
-//                                    public void onChildMoved(@NonNull MeshActor actor, String previousChildName) {
-//                                    }
-//
-//                                    @Override
-//                                    public void onError(@NonNull Exception e) {
-//                                        LOG.e("Failed.", e);
-//                                    }
-//                                });
-//                        queryUserTriggerActors = arModel.loadUserTriggerActors();
-//                        queryUserTriggerActors.addTypedChildEventListener(
-//                                new TypedQuery.TypedChildEventListener<TriggerActor>() {
-//                                    @Override
-//                                    public void onChildAdded(@NonNull TriggerActor actor,
-//                                                             @Nullable String previousChildName) {
-//                                        addTriggerActor(actor);
-//                                    }
-//
-//                                    @Override
-//                                    public void onChildChanged(@NonNull TriggerActor actor, String previousChildName) {
-//                                        // TODO
-//                                    }
-//
-//                                    @Override
-//                                    public void onChildRemoved(@NonNull TriggerActor actor) {
-//                                        Gdx.app.postRunnable(() -> arGraphics.removeActor(actor));
-//                                    }
-//
-//                                    @Override
-//                                    public void onChildMoved(@NonNull TriggerActor actor, String previousChildName) {
-//                                    }
-//
-//                                    @Override
-//                                    public void onError(@NonNull Exception e) {
-//                                        LOG.e("Failed.", e);
-//                                    }
-//                                });
                     }
                 } catch (TangoOutOfDateException e) {
                     LOG.e("Tango service outdated.", e);
@@ -453,9 +390,10 @@ public final class ArActivity extends AndroidApplication
     }
 
     @Override
-    public void onTriggerActorCursorObjectTouched(@NonNull TriggerShape triggerShape, @NonNull Vector3 position,
-                                                  @NonNull Quaternion orientation, @NonNull Vector3 scale) {
-        runOnUiThread(() -> arModel.saveTriggerActor(triggerShape, position, orientation, scale));
+    public void onTriggerActorCursorObjectTouched(@NonNull Class<? extends ShapeComponent> clazz,
+                                                  @NonNull Vector3 position, @NonNull Quaternion orientation,
+                                                  @NonNull Vector3 scale) {
+        runOnUiThread(() -> arModel.saveTriggerActor(clazz, position, orientation, scale));
     }
 
     @Override
@@ -514,12 +452,14 @@ public final class ArActivity extends AndroidApplication
     }
 
     @Override
-    public void onTriggerShapeSelected(@Nullable TriggerShape triggerShape) {
-        if (triggerShape == null) {
-            Gdx.app.postRunnable(() -> arGraphics.removeTriggerActorCursor());
-        } else {
-            Gdx.app.postRunnable(() -> arGraphics.addTriggerActorCursor(triggerShape));
-        }
+    public void onTriggerShapeSelected(@Nullable Class<? extends ShapeComponent> clazz) {
+        Gdx.app.postRunnable(() -> {
+            if (clazz == null) {
+                arGraphics.removeTriggerActorCursor();
+            } else {
+                arGraphics.addTriggerActorCursor(clazz);
+            }
+        });
     }
 
     @Override
@@ -561,48 +501,40 @@ public final class ArActivity extends AndroidApplication
         });
     }
 
-    //
-    // NOTE:
-    //
-    // To keep a button pressed, call setPressed(true) and return true in onTouch event handlers
-    // instead of an onClick ones.
-    //
+    private void addActor(@NonNull Actor actor) {
+        LOG.v("Adding an actor: id = %s", actor.getId());
 
-//    @OnTouch(R.id.button_translate)
-//    boolean onTouchButtonTranslate(MotionEvent event) {
-//        if (event.getAction() == MotionEvent.ACTION_DOWN) {
-//            buttonTranslate.setPressed(true);
-//            presenter.onTouchButtonTranslate();
-//        }
-//        return true;
-//    }
-
-
-    private void addMeshActor(@NonNull MeshActor actor) {
-        LOG.v("Adding a mesh actor: id = %s", actor.getId());
-
-        switch (actor.getAssetTypeAsEnum()) {
-            case IMAGE:
-                addImageMeshActor(actor);
-                break;
-            default:
-                LOG.e("An unexpected asset type: actorId = %s, assetType = %s",
-                      actor.getId(), actor.getAssetTypeAsEnum());
-                break;
+        for (final Component component : actor.getComponents()) {
+            if (component instanceof GeometryComponent) {
+                addGeometryComponent(actor, (GeometryComponent) component);
+            }
         }
     }
 
-    private void addImageMeshActor(@NonNull MeshActor actor) {
-        arModel.getCachedImageAssetFile(actor.getRequiredAssetId(), file -> {
-            Gdx.app.postRunnable(() -> arGraphics.addMeshActor(actor, file));
-        }, e -> {
-            LOG.e("Failed.", e);
-        }, null);
+    private void addGeometryComponent(@NonNull Actor actor, @NonNull GeometryComponent component) {
+        if (component instanceof MeshComponent) {
+            addMeshComponent(actor, (MeshComponent) component);
+        } else if (component instanceof ShapeComponent) {
+            addShapeComponent(actor, (ShapeComponent) component);
+        }
     }
 
-    private void addTriggerActor(@NonNull TriggerActor actor) {
-        LOG.v("Adding a trigger actor: id = %s", actor.getId());
+    private void addMeshComponent(@NonNull Actor actor, @NonNull MeshComponent component) {
+        final String assetType = component.getRequiredAssetType();
 
-        Gdx.app.postRunnable(() -> arGraphics.addTriggerActor(actor));
+        if (ImageAsset.TYPE.equals(assetType)) {
+            // TODO: Using something like a loader class.
+            arModel.getCachedImageAssetFile(component.getRequiredAssetId(), file -> {
+                Gdx.app.postRunnable(() -> arGraphics.addGeometryObject(actor, component, file));
+            }, e -> {
+                LOG.e("Failed.", e);
+            }, null);
+        } else {
+            throw new IllegalStateException("An unexpected asset type: " + assetType);
+        }
+    }
+
+    private void addShapeComponent(@NonNull Actor actor, @NonNull ShapeComponent component) {
+        Gdx.app.postRunnable(() -> arGraphics.addGeometryObject(actor, component));
     }
 }

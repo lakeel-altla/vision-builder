@@ -10,7 +10,9 @@ import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Disposable;
-import com.lakeel.altla.vision.model.TriggerShape;
+import com.lakeel.altla.vision.model.BoxComponent;
+import com.lakeel.altla.vision.model.ShapeComponent;
+import com.lakeel.altla.vision.model.SphereComponent;
 
 import android.support.annotation.NonNull;
 import android.support.v4.util.SimpleArrayMap;
@@ -18,15 +20,15 @@ import android.support.v4.util.SimpleArrayMap;
 import static com.badlogic.gdx.graphics.VertexAttributes.Usage.Normal;
 import static com.badlogic.gdx.graphics.VertexAttributes.Usage.Position;
 
-public final class TriggerShapeModelLoader implements Disposable {
+public final class ShapeModelLoader implements Disposable {
 
-    private final SimpleArrayMap<TriggerShape, Loader> loaderMap = new SimpleArrayMap<>();
+    private final SimpleArrayMap<Class<? extends ShapeComponent>, Loader> loaderMap = new SimpleArrayMap<>();
 
-    private final SimpleArrayMap<TriggerShape, Model> modelMap = new SimpleArrayMap<>();
+    private final SimpleArrayMap<Class<? extends ShapeComponent>, Model> modelMap = new SimpleArrayMap<>();
 
-    public TriggerShapeModelLoader() {
-        loaderMap.put(TriggerShape.BOX, new BoxModelLoader());
-        loaderMap.put(TriggerShape.SPHERE, new SphereModelLoader());
+    public ShapeModelLoader() {
+        loaderMap.put(BoxComponent.class, new BoxModelLoader());
+        loaderMap.put(SphereComponent.class, new SphereModelLoader());
     }
 
     @Override
@@ -38,14 +40,14 @@ public final class TriggerShapeModelLoader implements Disposable {
     }
 
     @NonNull
-    public Model load(@NonNull TriggerShape triggerShape) {
-        Model model = modelMap.get(triggerShape);
+    public Model load(@NonNull Class<? extends ShapeComponent> clazz) {
+        Model model = modelMap.get(clazz);
         if (model == null) {
-            final Loader loader = loaderMap.get(triggerShape);
-            if (loader == null) throw new IllegalArgumentException("An unexpected trigger shape: " + triggerShape);
+            final Loader loader = loaderMap.get(clazz);
+            if (loader == null) throw new IllegalArgumentException("An unexpected shape component: " + clazz);
 
             model = loader.load();
-            modelMap.put(triggerShape, model);
+            modelMap.put(clazz, model);
         }
         return model;
     }

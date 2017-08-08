@@ -13,9 +13,8 @@ import com.lakeel.altla.vision.helper.TypedQuery;
 import com.lakeel.altla.vision.model.Actor;
 import com.lakeel.altla.vision.model.AreaSettings;
 import com.lakeel.altla.vision.model.Asset;
-import com.lakeel.altla.vision.model.MeshActor;
-import com.lakeel.altla.vision.model.TriggerActor;
-import com.lakeel.altla.vision.model.TriggerShape;
+import com.lakeel.altla.vision.model.MeshComponent;
+import com.lakeel.altla.vision.model.ShapeComponent;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -102,45 +101,47 @@ public final class ArModel {
 
     public void saveMeshActor(@NonNull Asset asset, @NonNull Vector3 position, @NonNull Quaternion orientation,
                               @NonNull Vector3 scale) {
-        final MeshActor actor = new MeshActor();
+        final Actor actor = new Actor();
 
         actor.setUserId(CurrentUser.getInstance().getUserId());
-        actor.setAssetId(asset.getId());
-        actor.setAssetTypeAsEnum(asset.getType());
         actor.setName(asset.getName());
-        actor.setPositionX(position.x);
-        actor.setPositionY(position.y);
-        actor.setPositionZ(position.z);
-        actor.setOrientationX(orientation.x);
-        actor.setOrientationY(orientation.y);
-        actor.setOrientationZ(orientation.z);
-        actor.setOrientationW(orientation.w);
-        actor.setScaleX(scale.x);
-        actor.setScaleY(scale.y);
-        actor.setScaleZ(scale.z);
+
+        final MeshComponent meshComponent = new MeshComponent();
+        actor.addComponent(meshComponent);
+
+        meshComponent.setAssetId(asset.getId());
+        meshComponent.setAssetType(asset.getType());
+        meshComponent.setPosition(position.x, position.y, position.z);
+        meshComponent.setOrientation(orientation.x, orientation.y, orientation.z, orientation.w);
+        meshComponent.setScale(scale.x, scale.y, scale.z);
+        meshComponent.setVisible(true);
+        meshComponent.setVisibleAtRuntime(true);
 
         saveActor(actor);
     }
 
-    public void saveTriggerActor(@NonNull TriggerShape triggerShape,
+    public void saveTriggerActor(@NonNull Class<? extends ShapeComponent> clazz,
                                  @NonNull Vector3 position, @NonNull Quaternion orientation, @NonNull Vector3 scale) {
-        final TriggerActor actor = new TriggerActor();
+        final Actor actor = new Actor();
 
         actor.setUserId(CurrentUser.getInstance().getUserId());
-        actor.setShapeAsEnum(triggerShape);
-        actor.setName(triggerShape.name());
-        actor.setPositionX(position.x);
-        actor.setPositionY(position.y);
-        actor.setPositionZ(position.z);
-        actor.setOrientationX(orientation.x);
-        actor.setOrientationY(orientation.y);
-        actor.setOrientationZ(orientation.z);
-        actor.setOrientationW(orientation.w);
-        actor.setScaleX(scale.x);
-        actor.setScaleY(scale.y);
-        actor.setScaleZ(scale.z);
+        // TODO
+        actor.setName(clazz.getSimpleName());
 
-        saveActor(actor);
+        try {
+            final ShapeComponent shapeComponent = clazz.newInstance();
+            actor.addComponent(shapeComponent);
+
+            shapeComponent.setPosition(position.x, position.y, position.z);
+            shapeComponent.setOrientation(orientation.x, orientation.y, orientation.z, orientation.w);
+            shapeComponent.setScale(scale.x, scale.y, scale.z);
+            shapeComponent.setVisible(true);
+            shapeComponent.setVisibleAtRuntime(false);
+
+            saveActor(actor);
+        } catch (InstantiationException | IllegalAccessException e) {
+            throw new RuntimeException("Failed to instantiate a ShapeComponent.", e);
+        }
     }
 
     public void getCachedImageAssetFile(@NonNull String assetId,

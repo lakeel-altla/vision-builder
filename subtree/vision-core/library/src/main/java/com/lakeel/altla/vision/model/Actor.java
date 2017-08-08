@@ -1,65 +1,20 @@
 package com.lakeel.altla.vision.model;
 
-import com.google.firebase.database.Exclude;
-
-import org.parceler.Transient;
-
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-public class Actor extends BaseEntity {
+import java.util.ArrayList;
+import java.util.List;
 
-    private String type;
+public final class Actor extends BaseEntity {
+
+    public static final String FIELD_NAME = "name";
+
+    public static final String FIELD_COMPONENTS = "components";
 
     private String name;
 
-    private double positionX;
-
-    private double positionY;
-
-    private double positionZ;
-
-    private double orientationX;
-
-    private double orientationY;
-
-    private double orientationZ;
-
-    private double orientationW;
-
-    private double scaleX = 1;
-
-    private double scaleY = 1;
-
-    private double scaleZ = 1;
-
-    protected Actor() {
-        this(ActorType.UNKNOWN);
-    }
-
-    protected Actor(@NonNull ActorType type) {
-        this.type = type.name();
-    }
-
-    @NonNull
-    public String getType() {
-        return type;
-    }
-
-    public void setType(@NonNull String type) {
-        this.type = type;
-    }
-
-    @Exclude
-    @Transient
-    @NonNull
-    public ActorType getTypeAsEnum() {
-        return ActorType.valueOf(type);
-    }
-
-    public void setTypeAsEnum(@NonNull ActorType type) {
-        this.type = type.name();
-    }
+    private List<Component> components;
 
     @Nullable
     public String getName() {
@@ -70,102 +25,51 @@ public class Actor extends BaseEntity {
         this.name = name;
     }
 
-    public double getPositionX() {
-        return positionX;
+    @NonNull
+    public List<Component> getComponents() {
+        if (components == null) components = new ArrayList<>();
+        return components;
     }
 
-    public void setPositionX(double positionX) {
-        this.positionX = positionX;
+    public void setComponents(@Nullable List<Component> components) {
+        this.components = components;
     }
 
-    public double getPositionY() {
-        return positionY;
+    @SuppressWarnings("unchecked")
+    @Nullable
+    public <T extends Component> T getComponent(@NonNull Class<T> clazz) {
+        if (components == null) return null;
+
+        for (final Component component : components) {
+            if (clazz.isAssignableFrom(clazz)) {
+                return (T) component;
+            }
+        }
+        return null;
     }
 
-    public void setPositionY(double positionY) {
-        this.positionY = positionY;
+    @NonNull
+    public <T extends Component> T getRequiredComponent(@NonNull Class<T> clazz) {
+        final T component = getComponent(clazz);
+        if (component == null) throw new IllegalStateException("The component could not be found: " + clazz);
+        return component;
     }
 
-    public double getPositionZ() {
-        return positionZ;
+    public void addComponent(@NonNull Component component) {
+        getComponents().add(component);
     }
 
-    public void setPositionZ(double positionZ) {
-        this.positionZ = positionZ;
+    public void removeComponent(@NonNull Component component) {
+        if (components != null) {
+            components.remove(component);
+            if (components.size() == 0) components = null;
+        }
     }
 
-    public void setPosition(double x, double y, double z) {
-        positionX = x;
-        positionY = y;
-        positionZ = z;
-    }
-
-    public double getOrientationX() {
-        return orientationX;
-    }
-
-    public void setOrientationX(double orientationX) {
-        this.orientationX = orientationX;
-    }
-
-    public double getOrientationY() {
-        return orientationY;
-    }
-
-    public void setOrientationY(double orientationY) {
-        this.orientationY = orientationY;
-    }
-
-    public double getOrientationZ() {
-        return orientationZ;
-    }
-
-    public void setOrientationZ(double orientationZ) {
-        this.orientationZ = orientationZ;
-    }
-
-    public double getOrientationW() {
-        return orientationW;
-    }
-
-    public void setOrientationW(double orientationW) {
-        this.orientationW = orientationW;
-    }
-
-    public void setOrientation(double x, double y, double z, double w) {
-        orientationX = x;
-        orientationY = y;
-        orientationZ = z;
-        orientationW = w;
-    }
-
-    public double getScaleX() {
-        return scaleX;
-    }
-
-    public void setScaleX(double scaleX) {
-        this.scaleX = scaleX;
-    }
-
-    public double getScaleY() {
-        return scaleY;
-    }
-
-    public void setScaleY(double scaleY) {
-        this.scaleY = scaleY;
-    }
-
-    public double getScaleZ() {
-        return scaleZ;
-    }
-
-    public void setScaleZ(double scaleZ) {
-        this.scaleZ = scaleZ;
-    }
-
-    public void setScale(double x, double y, double z) {
-        scaleX = x;
-        scaleY = y;
-        scaleZ = z;
+    public void clearComponents() {
+        if (components != null) {
+            components.clear();
+            components = null;
+        }
     }
 }

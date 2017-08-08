@@ -1,5 +1,8 @@
 package com.lakeel.altla.vision.builder.presentation.model;
 
+import com.lakeel.altla.vision.model.BoxComponent;
+import com.lakeel.altla.vision.model.ShapeComponent;
+import com.lakeel.altla.vision.model.SphereComponent;
 import com.lakeel.altla.vision.model.TriggerShape;
 
 import android.support.annotation.NonNull;
@@ -10,16 +13,13 @@ import java.util.List;
 
 public final class TriggerShapeListModel {
 
-    private final List<TriggerShape> items = new ArrayList<>(TriggerShape.values().length - 1);
+    private final List<Class<? extends ShapeComponent>> items = new ArrayList<>(TriggerShape.values().length - 1);
 
     private int selectedPosition;
 
     public TriggerShapeListModel() {
-        for (final TriggerShape triggerShape : TriggerShape.values()) {
-            if (triggerShape != TriggerShape.UNKNOWN) {
-                items.add(triggerShape);
-            }
-        }
+        items.add(BoxComponent.class);
+        items.add(SphereComponent.class);
     }
 
     public int getItemCount() {
@@ -27,7 +27,7 @@ public final class TriggerShapeListModel {
     }
 
     @NonNull
-    public TriggerShape getItem(int position) {
+    public Class<? extends ShapeComponent> getItem(int position) {
         return items.get(position);
     }
 
@@ -40,7 +40,7 @@ public final class TriggerShapeListModel {
     }
 
     @Nullable
-    public TriggerShape getSelectedItem() {
+    public Class<? extends ShapeComponent> getSelectedItem() {
         return (selectedPosition < 0) ? null : getItem(selectedPosition);
     }
 

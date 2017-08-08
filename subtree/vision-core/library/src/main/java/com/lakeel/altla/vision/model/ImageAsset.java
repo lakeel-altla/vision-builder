@@ -1,14 +1,17 @@
 package com.lakeel.altla.vision.model;
 
-import org.parceler.Parcel;
+import android.support.annotation.NonNull;
 
-@Parcel(Parcel.Serialization.BEAN)
 public final class ImageAsset extends Asset {
+
+    public static final String TYPE = "Image";
 
     private boolean fileUploaded;
 
-    public ImageAsset() {
-        super(AssetType.IMAGE);
+    @NonNull
+    @Override
+    public String getType() {
+        return TYPE;
     }
 
     public boolean isFileUploaded() {

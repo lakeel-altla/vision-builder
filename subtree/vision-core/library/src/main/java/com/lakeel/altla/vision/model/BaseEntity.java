@@ -13,16 +13,24 @@ import java.util.UUID;
 
 public class BaseEntity {
 
+    public static final String FIELD_ID = "id";
+
+    public static final String FIELD_USER_ID = "userId";
+
+    public static final String FIELD_GROUP_ID = "groupId";
+
+    public static final String FIELD_CREATED_AT = "createdAt";
+
+    public static final String FIELD_UPDATED_AT = "updatedAt";
+
     private String id;
 
     private String userId;
 
     private String groupId;
 
-    @Transient
     private Object createdAt;
 
-    @Transient
     private Object updatedAt;
 
     protected BaseEntity() {

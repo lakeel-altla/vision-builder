@@ -15,7 +15,7 @@ import com.lakeel.altla.android.log.Log;
 import com.lakeel.altla.android.log.LogFactory;
 import com.lakeel.altla.vision.helper.OnFailureListener;
 import com.lakeel.altla.vision.helper.OnSuccessListener;
-import com.lakeel.altla.vision.model.AssetType;
+import com.lakeel.altla.vision.model.ImageAsset;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -31,7 +31,7 @@ public final class AssetModelLoader implements Disposable {
 
     private static final Log LOG = LogFactory.getLog(AssetModelLoader.class);
 
-    private final SimpleArrayMap<AssetType, Loader> loaderMap = new SimpleArrayMap<>();
+    private final SimpleArrayMap<String, Loader> loaderMap = new SimpleArrayMap<>();
 
     // TODO: Consider caching models with its max capacity.
     private final SimpleArrayMap<String, Model> modelMap = new SimpleArrayMap<>();
@@ -41,7 +41,7 @@ public final class AssetModelLoader implements Disposable {
     private boolean loading;
 
     public AssetModelLoader() {
-        loaderMap.put(AssetType.IMAGE, new ImageAssetModelLoader());
+        loaderMap.put(ImageAsset.TYPE, new ImageAssetModelLoader());
     }
 
     @Override
@@ -64,16 +64,10 @@ public final class AssetModelLoader implements Disposable {
         }
     }
 
-    public void addTask(@NonNull String assetId, @NonNull AssetType assetType, @NonNull File assetFile,
+    public void addTask(@NonNull String assetId, @NonNull String assetType, @NonNull File assetFile,
                         @Nullable OnSuccessListener<Model> onSuccessListener,
                         @Nullable OnFailureListener onFailureListener) {
         final FileHandle assetFileHandle = Gdx.files.absolute(assetFile.getPath());
-        addTask(assetId, assetType, assetFileHandle, onSuccessListener, onFailureListener);
-    }
-
-    public void addTask(@NonNull String assetId, @NonNull AssetType assetType, @NonNull FileHandle assetFileHandle,
-                        @Nullable OnSuccessListener<Model> onSuccessListener,
-                        @Nullable OnFailureListener onFailureListener) {
         taskQueue.addLast(new Task(assetId, assetType, assetFileHandle, onSuccessListener, onFailureListener));
     }
 
@@ -83,7 +77,7 @@ public final class AssetModelLoader implements Disposable {
         final String assetId;
 
         @NonNull
-        final AssetType assetType;
+        final String assetType;
 
         @NonNull
         final FileHandle assetFileHandle;
@@ -94,7 +88,7 @@ public final class AssetModelLoader implements Disposable {
         @Nullable
         final OnFailureListener onFailureListener;
 
-        Task(@NonNull String assetId, @NonNull AssetType assetType, @NonNull FileHandle assetFileHandle,
+        Task(@NonNull String assetId, @NonNull String assetType, @NonNull FileHandle assetFileHandle,
              @Nullable OnSuccessListener<Model> onSuccessListener,
              @Nullable OnFailureListener onFailureListener) {
             this.assetId = assetId;
@@ -132,7 +126,6 @@ public final class AssetModelLoader implements Disposable {
         void load(@NonNull FileHandle assetFileHandle,
                   @Nullable OnSuccessListener<Model> onSuccessListener,
                   @Nullable OnFailureListener onFailureListener);
-
     }
 
     private static final class ImageAssetModelLoader implements Loader {
