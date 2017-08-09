@@ -558,7 +558,7 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
                         camera.setTangoPoseData(poseData);
                         camera.update();
                     } else if (poseData.statusCode == TangoPoseData.POSE_INVALID) {
-                        LOG.d("The tango pose is invalid:  cameraColorTimestamp = %f, displayRotation = %d",
+                        LOG.v("The tango pose is invalid:  cameraColorTimestamp = %f, displayRotation = %d",
                               cameraColorTimestamp, displayRotation);
                     } else if (poseData.statusCode == TangoPoseData.POSE_UNKNOWN) {
                         LOG.d("The tango pose is unknown.");
