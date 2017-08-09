@@ -112,7 +112,7 @@ public final class UserAssetApi extends BaseVisionApi {
                 if (activeTask == null) {
                     taskMap.put(assetId, newTask);
 
-                    LOG.d("Made the new task active: assetId = %s", assetId);
+                    LOG.d("A new task is activated: assetId = %s", assetId);
 
                     loaderHandler.post(newTask);
                 } else {

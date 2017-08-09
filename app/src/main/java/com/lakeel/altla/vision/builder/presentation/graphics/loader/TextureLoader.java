@@ -5,29 +5,28 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.TextureData;
 import com.lakeel.altla.vision.helper.OnFailureListener;
+import com.lakeel.altla.vision.helper.OnProgressListener;
 import com.lakeel.altla.vision.helper.OnSuccessListener;
 
-import android.os.Handler;
-import android.os.HandlerThread;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-public final class TextureLoader {
+final class TextureLoader extends AssetLoader<Texture> {
 
-    private final HandlerThread handlerThread = new HandlerThread("TextureLoader");
-
-    private final Handler handler;
-
-    public TextureLoader() {
-        handlerThread.start();
-        handler = new Handler(handlerThread.getLooper());
+    TextureLoader(@NonNull AssetLoaderContext context) {
+        super(context);
     }
 
-    public void load(@NonNull FileHandle fileHandle,
-                     @Nullable OnSuccessListener<Texture> onSuccessListener,
-                     @Nullable OnFailureListener onFailureListener) {
-        handler.post(() -> {
+    @Override
+    protected void loadCore(@NonNull String assetId,
+                            @Nullable OnSuccessListener<Texture> onSuccessListener,
+                            @Nullable OnFailureListener onFailureListener,
+                            @Nullable OnProgressListener onProgressListener) {
+        context.loadAssetFile(assetId, file -> {
+            // On the loader thread.
             try {
+                final FileHandle fileHandle = Gdx.files.absolute(file.getPath());
+
                 // Load contents on the loader thread.
                 final TextureData data = TextureData.Factory.loadFromFile(fileHandle, null, false);
 
@@ -42,6 +41,11 @@ public final class TextureLoader {
             } catch (RuntimeException e) {
                 if (onFailureListener != null) onFailureListener.onFailure(e);
             }
+
+        }, e -> {
+            if (onFailureListener != null) onFailureListener.onFailure(e);
+        }, (totalBytes, bytesTransferred) -> {
+            if (onProgressListener != null) onProgressListener.onProgress(totalBytes, bytesTransferred);
         });
     }
 }
