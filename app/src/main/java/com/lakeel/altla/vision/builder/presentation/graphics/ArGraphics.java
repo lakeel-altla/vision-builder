@@ -43,7 +43,7 @@ import com.lakeel.altla.vision.builder.presentation.graphics.shader.FillColorSha
 import com.lakeel.altla.vision.builder.presentation.model.Axis;
 import com.lakeel.altla.vision.model.Actor;
 import com.lakeel.altla.vision.model.Asset;
-import com.lakeel.altla.vision.model.GeometryComponent;
+import com.lakeel.altla.vision.model.Component;
 import com.lakeel.altla.vision.model.MeshComponent;
 import com.lakeel.altla.vision.model.ShapeComponent;
 import com.projecttango.tangosupport.TangoSupport;
@@ -443,11 +443,13 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
         triggerActorCursorObject = null;
     }
 
-    public void addGeometryObject(@NonNull Actor actor, @NonNull GeometryComponent component) {
-        if (component instanceof MeshComponent) {
-            addGeometryObject(actor, (MeshComponent) component);
-        } else if (component instanceof ShapeComponent) {
-            addGeometryObject(actor, (ShapeComponent) component);
+    public void addGeometryObject(@NonNull Actor actor) {
+        for (final Component component : actor.getComponents()) {
+            if (component instanceof MeshComponent) {
+                addGeometryObject(actor, (MeshComponent) component);
+            } else if (component instanceof ShapeComponent) {
+                addGeometryObject(actor, (ShapeComponent) component);
+            }
         }
     }
 

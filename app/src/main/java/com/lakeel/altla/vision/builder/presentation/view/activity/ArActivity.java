@@ -42,8 +42,6 @@ import com.lakeel.altla.vision.helper.TypedQuery;
 import com.lakeel.altla.vision.model.Actor;
 import com.lakeel.altla.vision.model.AreaSettings;
 import com.lakeel.altla.vision.model.Asset;
-import com.lakeel.altla.vision.model.Component;
-import com.lakeel.altla.vision.model.GeometryComponent;
 import com.lakeel.altla.vision.model.ImageAsset;
 import com.lakeel.altla.vision.model.ShapeComponent;
 import com.projecttango.tangosupport.TangoSupport;
@@ -522,10 +520,6 @@ public final class ArActivity extends AndroidApplication
     private void addActor(@NonNull Actor actor) {
         LOG.v("Adding an actor: id = %s", actor.getId());
 
-        for (final Component component : actor.getComponents()) {
-            if (component instanceof GeometryComponent) {
-                Gdx.app.postRunnable(() -> arGraphics.addGeometryObject(actor, (GeometryComponent) component));
-            }
-        }
+        Gdx.app.postRunnable(() -> arGraphics.addGeometryObject(actor));
     }
 }
