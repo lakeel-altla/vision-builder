@@ -6,9 +6,6 @@ import com.lakeel.altla.android.log.Log;
 import com.lakeel.altla.android.log.LogFactory;
 import com.lakeel.altla.vision.api.CurrentUser;
 import com.lakeel.altla.vision.api.VisionService;
-import com.lakeel.altla.vision.helper.OnFailureListener;
-import com.lakeel.altla.vision.helper.OnProgressListener;
-import com.lakeel.altla.vision.helper.OnSuccessListener;
 import com.lakeel.altla.vision.helper.TypedQuery;
 import com.lakeel.altla.vision.model.Actor;
 import com.lakeel.altla.vision.model.AreaSettings;
@@ -18,8 +15,6 @@ import com.lakeel.altla.vision.model.ShapeComponent;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-
-import java.io.File;
 
 public final class ArModel {
 
@@ -142,13 +137,5 @@ public final class ArModel {
         } catch (InstantiationException | IllegalAccessException e) {
             throw new RuntimeException("Failed to instantiate a ShapeComponent.", e);
         }
-    }
-
-    public void loadAssetFile(@NonNull String assetId,
-                              @Nullable OnSuccessListener<File> onSuccessListener,
-                              @Nullable OnFailureListener onFailureListener,
-                              @Nullable OnProgressListener onProgressListener) {
-        visionService.getUserAssetApi()
-                     .loadAssetFile(assetId, onSuccessListener, onFailureListener, onProgressListener);
     }
 }
