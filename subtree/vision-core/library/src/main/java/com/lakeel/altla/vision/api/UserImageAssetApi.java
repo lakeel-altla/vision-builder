@@ -4,15 +4,15 @@ import com.google.firebase.storage.UploadTask;
 
 import com.lakeel.altla.vision.data.repository.android.AssetCacheRepository;
 import com.lakeel.altla.vision.data.repository.android.DocumentRepository;
-import com.lakeel.altla.vision.data.repository.firebase.UserImageAssetFileRepository;
-import com.lakeel.altla.vision.data.repository.firebase.UserImageAssetFileUploadTaskRepository;
+import com.lakeel.altla.vision.data.repository.firebase.UserAssetFileRepository;
+import com.lakeel.altla.vision.data.repository.firebase.UserAssetFileUploadTaskRepository;
 import com.lakeel.altla.vision.data.repository.firebase.UserImageAssetRepository;
 import com.lakeel.altla.vision.helper.OnFailureListener;
 import com.lakeel.altla.vision.helper.OnProgressListener;
 import com.lakeel.altla.vision.helper.OnSuccessListener;
 import com.lakeel.altla.vision.helper.TypedQuery;
+import com.lakeel.altla.vision.model.AssetFileUploadTask;
 import com.lakeel.altla.vision.model.ImageAsset;
-import com.lakeel.altla.vision.model.ImageAssetFileUploadTask;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -30,25 +30,25 @@ public final class UserImageAssetApi extends BaseVisionApi {
 
     private final UserImageAssetRepository userImageAssetRepository;
 
-    private final UserImageAssetFileRepository userImageAssetFileRepository;
+    private final UserAssetFileRepository userAssetFileRepository;
 
-    private final UserImageAssetFileUploadTaskRepository userImageAssetFileUploadTaskRepository;
+    private final UserAssetFileUploadTaskRepository userAssetFileUploadTaskRepository;
 
     public UserImageAssetApi(@NonNull VisionService visionService) {
         super(visionService);
         assetCacheRepository = new AssetCacheRepository(visionService.getContext());
         documentRepository = new DocumentRepository(visionService.getContext().getContentResolver());
         userImageAssetRepository = new UserImageAssetRepository(visionService.getFirebaseDatabase());
-        userImageAssetFileRepository = new UserImageAssetFileRepository(visionService.getFirebaseStorage());
-        userImageAssetFileUploadTaskRepository =
-                new UserImageAssetFileUploadTaskRepository(visionService.getFirebaseDatabase());
+        userAssetFileRepository = new UserAssetFileRepository(visionService.getFirebaseStorage());
+        userAssetFileUploadTaskRepository =
+                new UserAssetFileUploadTaskRepository(visionService.getFirebaseDatabase());
     }
 
     public TypedQuery<ImageAsset> findAllImageAssets() {
         return userImageAssetRepository.findAll(CurrentUser.getInstance().getUserId());
     }
 
-    public void doImageAssetFileUploadTask(@NonNull ImageAssetFileUploadTask task,
+    public void doImageAssetFileUploadTask(@NonNull AssetFileUploadTask task,
                                            @Nullable OnSuccessListener<File> onSuccessListener,
                                            @Nullable OnFailureListener onFailureListener,
                                            @Nullable OnProgressListener onProgressListener) {
@@ -80,7 +80,7 @@ public final class UserImageAssetApi extends BaseVisionApi {
                             final long totalBytes = stream.available();
 
                             final UploadTask uploadTask =
-                                    userImageAssetFileRepository.upload(userId, assetId, stream);
+                                    userAssetFileRepository.upload(userId, assetId, stream);
 
                             uploadTask.addOnSuccessListener(aVoid -> {
                                 // Uploaded.
@@ -90,7 +90,7 @@ public final class UserImageAssetApi extends BaseVisionApi {
                                 userImageAssetRepository.save(asset);
 
                                 // Delete the task.
-                                userImageAssetFileUploadTaskRepository.delete(userId, assetId);
+                                userAssetFileUploadTaskRepository.delete(userId, assetId);
 
                                 try {
                                     stream.close();

@@ -31,7 +31,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.lakeel.altla.android.log.Log;
 import com.lakeel.altla.android.log.LogFactory;
-import com.lakeel.altla.vision.builder.presentation.graphics.loader.AssetCacheLoader;
+import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.presentation.graphics.loader.AssetModelLoader;
 import com.lakeel.altla.vision.builder.presentation.graphics.loader.ShapeModelLoader;
 import com.lakeel.altla.vision.builder.presentation.graphics.model.ActorAxesObject;
@@ -83,7 +83,7 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
 
     private final Listener listener;
 
-    private final AssetCacheLoader assetCacheLoader;
+    private final VisionService visionService;
 
     private Tango tango;
 
@@ -165,12 +165,11 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
     @Nullable
     private Axis transformAxis;
 
-    public ArGraphics(@NonNull Display display, @NonNull Listener listener,
-                      @NonNull AssetCacheLoader assetCacheLoader) {
+    public ArGraphics(@NonNull VisionService visionService, @NonNull Display display, @NonNull Listener listener) {
+        this.visionService = visionService;
         this.display = display;
         this.listener = listener;
-        this.assetCacheLoader = assetCacheLoader;
-        assetModelLoader = new AssetModelLoader(assetCacheLoader);
+        assetModelLoader = new AssetModelLoader(visionService);
     }
 
     @Override

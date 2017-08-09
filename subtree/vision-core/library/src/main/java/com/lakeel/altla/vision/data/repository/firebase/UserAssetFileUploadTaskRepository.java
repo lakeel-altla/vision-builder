@@ -4,21 +4,19 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 
 import com.lakeel.altla.vision.helper.TypedQuery;
-import com.lakeel.altla.vision.model.ImageAssetFileUploadTask;
+import com.lakeel.altla.vision.model.AssetFileUploadTask;
 
 import android.support.annotation.NonNull;
 
-public final class UserImageAssetFileUploadTaskRepository extends BaseDatabaseRepository {
+public final class UserAssetFileUploadTaskRepository extends BaseDatabaseRepository {
 
-    private static final String BASE_PATH = "userImageAssetFileUploadTasks";
+    private static final String BASE_PATH = "userAssetFileUploadTasks";
 
-    private static final String FIELD_ORDER = "order";
-
-    public UserImageAssetFileUploadTaskRepository(@NonNull FirebaseDatabase database) {
+    public UserAssetFileUploadTaskRepository(@NonNull FirebaseDatabase database) {
         super(database);
     }
 
-    public void save(@NonNull ImageAssetFileUploadTask task) {
+    public void save(@NonNull AssetFileUploadTask task) {
         if (task.getUserId() == null) throw new IllegalArgumentException("task.getUserId() must be not null.");
 
         task.setUpdatedAtAsLong(-1);
@@ -36,12 +34,11 @@ public final class UserImageAssetFileUploadTaskRepository extends BaseDatabaseRe
     }
 
     @NonNull
-    public TypedQuery<ImageAssetFileUploadTask> findAll(@NonNull String userId) {
+    public TypedQuery<AssetFileUploadTask> findAll(@NonNull String userId) {
         final Query query = getDatabase().getReference()
                                          .child(BASE_PATH)
-                                         .child(userId)
-                                         .orderByChild(FIELD_ORDER);
-        return new TypedQuery<>(query, ImageAssetFileUploadTask.class);
+                                         .child(userId);
+        return new TypedQuery<>(query, AssetFileUploadTask.class);
     }
 
     public void delete(@NonNull String userId, @NonNull String assetId) {

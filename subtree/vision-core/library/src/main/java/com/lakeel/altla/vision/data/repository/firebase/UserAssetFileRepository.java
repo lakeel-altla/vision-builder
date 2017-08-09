@@ -14,11 +14,12 @@ import android.support.annotation.Nullable;
 import java.io.File;
 import java.io.InputStream;
 
-public final class UserImageAssetFileRepository extends BaseStorageRepository {
+public final class UserAssetFileRepository extends BaseStorageRepository {
 
+    // TODO: rename to "userAssets".
     private static final String BASE_PATH = "userImageAssets";
 
-    public UserImageAssetFileRepository(@NonNull FirebaseStorage storage) {
+    public UserAssetFileRepository(@NonNull FirebaseStorage storage) {
         super(storage);
     }
 

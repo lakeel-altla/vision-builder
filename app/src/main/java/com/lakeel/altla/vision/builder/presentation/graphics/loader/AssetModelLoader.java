@@ -13,6 +13,7 @@ import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.Queue;
 import com.lakeel.altla.android.log.Log;
 import com.lakeel.altla.android.log.LogFactory;
+import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.helper.OnFailureListener;
 import com.lakeel.altla.vision.helper.OnSuccessListener;
 import com.lakeel.altla.vision.model.ImageAsset;
@@ -36,10 +37,10 @@ public final class AssetModelLoader implements Disposable {
 
     private final Queue<Task> taskQueue = new Queue<>();
 
-    private final AssetCacheLoader assetCacheLoader;
+    private final VisionService visionService;
 
-    public AssetModelLoader(@NonNull AssetCacheLoader assetCacheLoader) {
-        this.assetCacheLoader = assetCacheLoader;
+    public AssetModelLoader(@NonNull VisionService visionService) {
+        this.visionService = visionService;
         loaderMap.put(ImageAsset.TYPE, new ImageAssetModelLoader());
     }
 
@@ -94,22 +95,27 @@ public final class AssetModelLoader implements Disposable {
                 if (onSuccessListener != null) onSuccessListener.onSuccess(model);
             } else {
                 // TODO: public assets?
-                assetCacheLoader.loadUserAssetFile(assetId, assetType, file -> {
-                    final FileHandle fileHandle = Gdx.files.absolute(file.getPath());
-                    final Loader loader = loaderMap.get(assetType);
-                    if (loader == null) {
-                        throw new IllegalStateException("An asset type is not supported: assetType = " + assetType);
-                    }
+                visionService.getUserAssetApi().loadAssetFile(assetId, file -> {
+                    Gdx.app.postRunnable(() -> {
+                        final FileHandle fileHandle = Gdx.files.absolute(file.getPath());
+                        final Loader loader = loaderMap.get(assetType);
+                        if (loader == null) {
+                            throw new IllegalStateException(
+                                    "The asset type is not supported: assetType = " + assetType);
+                        }
 
-                    loader.load(fileHandle, m -> {
-                        LOG.d("An asset model is loaded: assetId = %s, assetType = %s", assetId, assetType);
-                        modelMap.put(assetId, m);
-                        if (onSuccessListener != null) onSuccessListener.onSuccess(m);
-                    }, e -> {
-                        if (onFailureListener != null) onFailureListener.onFailure(e);
+                        loader.load(fileHandle, m -> {
+                            LOG.d("An asset model is loaded: assetId = %s, assetType = %s", assetId, assetType);
+                            modelMap.put(assetId, m);
+                            if (onSuccessListener != null) onSuccessListener.onSuccess(m);
+                        }, e -> {
+                            if (onFailureListener != null) onFailureListener.onFailure(e);
+                        });
                     });
                 }, e -> {
-                    if (onFailureListener != null) onFailureListener.onFailure(e);
+                    if (onFailureListener != null) {
+                        Gdx.app.postRunnable(() -> onFailureListener.onFailure(e));
+                    }
                 }, null);
             }
         }

@@ -16,13 +16,13 @@ import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
 import com.lakeel.altla.android.log.Log;
 import com.lakeel.altla.android.log.LogFactory;
+import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.app.MyApplication;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.di.component.ActivityComponent;
 import com.lakeel.altla.vision.builder.presentation.di.module.ActivityModule;
 import com.lakeel.altla.vision.builder.presentation.graphics.ArGraphics;
-import com.lakeel.altla.vision.builder.presentation.graphics.loader.AssetCacheLoader;
 import com.lakeel.altla.vision.builder.presentation.helper.TangoMesher;
 import com.lakeel.altla.vision.builder.presentation.model.ArModel;
 import com.lakeel.altla.vision.builder.presentation.model.Axis;
@@ -35,9 +35,6 @@ import com.lakeel.altla.vision.builder.presentation.view.pane.PaneGroup;
 import com.lakeel.altla.vision.builder.presentation.view.pane.PaneLifecycle;
 import com.lakeel.altla.vision.builder.presentation.view.pane.TriggerShapeListPane;
 import com.lakeel.altla.vision.builder.presentation.view.pane.ViewModeMenuPane;
-import com.lakeel.altla.vision.helper.OnFailureListener;
-import com.lakeel.altla.vision.helper.OnProgressListener;
-import com.lakeel.altla.vision.helper.OnSuccessListener;
 import com.lakeel.altla.vision.helper.TypedQuery;
 import com.lakeel.altla.vision.model.Actor;
 import com.lakeel.altla.vision.model.AreaSettings;
@@ -57,7 +54,6 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toast;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -69,7 +65,6 @@ import butterknife.ButterKnife;
 public final class ArActivity extends AndroidApplication
         implements ActivityScopeContext,
                    ArGraphics.Listener,
-                   AssetCacheLoader,
                    DebugMenuPane.PaneContext,
                    ViewModeMenuPane.PaneContext,
                    EditModelMenuPane.PaneContext,
@@ -93,6 +88,9 @@ public final class ArActivity extends AndroidApplication
         COORDINATE_FRAME_PAIRS.add(new TangoCoordinateFramePair(TangoPoseData.COORDINATE_FRAME_AREA_DESCRIPTION,
                                                                 TangoPoseData.COORDINATE_FRAME_START_OF_SERVICE));
     }
+
+    @Inject
+    VisionService visionService;
 
     @Inject
     ArModel arModel;
@@ -166,7 +164,7 @@ public final class ArActivity extends AndroidApplication
         //
         // Add the OpenGL view provided by libGDX.
         //
-        arGraphics = new ArGraphics(getWindowManager().getDefaultDisplay(), this, this);
+        arGraphics = new ArGraphics(visionService, getWindowManager().getDefaultDisplay(), this);
         final AndroidApplicationConfiguration configuration = new AndroidApplicationConfiguration();
         final View view = initializeForView(arGraphics, configuration);
         viewTop.addView(view, 0);
@@ -404,29 +402,6 @@ public final class ArActivity extends AndroidApplication
     @Override
     public void onActorChanged(@NonNull Actor actor) {
         runOnUiThread(() -> arModel.saveActor(actor));
-    }
-
-    @Override
-    public void loadUserAssetFile(@NonNull String assetId, @NonNull String assetType,
-                                  @Nullable OnSuccessListener<File> onSuccessListener,
-                                  @Nullable OnFailureListener onFailureListener,
-                                  @Nullable OnProgressListener onProgressListener) {
-        // This method will be invoked by the graphics thread.
-        arModel.loadAssetFile(
-                assetId, assetType,
-                file -> {
-                    if (onSuccessListener != null) {
-                        Gdx.app.postRunnable(() -> onSuccessListener.onSuccess(file));
-                    }
-                }, e -> {
-                    if (onFailureListener != null) {
-                        Gdx.app.postRunnable(() -> onFailureListener.onFailure(e));
-                    }
-                }, (totalBytes, bytesTransferred) -> {
-                    if (onProgressListener != null) {
-                        Gdx.app.postRunnable(() -> onProgressListener.onProgress(totalBytes, bytesTransferred));
-                    }
-                });
     }
 
     @Override

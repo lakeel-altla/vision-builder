@@ -115,7 +115,7 @@ public final class ImageAssetListPane extends Pane {
             final ImageAsset imageAsset = imageAssetListModel.getQueryAdapter().getItem(position);
             holder.textViewName.setText(imageAsset.getName());
 
-            imageAssetListModel.getCachedFile(imageAsset.getId(), file -> {
+            imageAssetListModel.loadAssetFile(imageAsset.getId(), file -> {
                 thumbnailLoader.load(file, holder.imageViewThumbnail);
             }, e -> {
                 LOG.e("Failed.", e);

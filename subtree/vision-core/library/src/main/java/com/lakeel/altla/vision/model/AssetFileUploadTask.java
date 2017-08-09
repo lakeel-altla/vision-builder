@@ -1,11 +1,8 @@
 package com.lakeel.altla.vision.model;
 
-import org.parceler.Parcel;
-
 import android.support.annotation.Nullable;
 
-@Parcel(Parcel.Serialization.BEAN)
-public final class ImageAssetFileUploadTask extends BaseEntity {
+public final class AssetFileUploadTask extends BaseEntity {
 
     private String instanceId;
 

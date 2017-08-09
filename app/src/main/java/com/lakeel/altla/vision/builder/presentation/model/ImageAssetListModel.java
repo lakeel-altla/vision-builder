@@ -67,12 +67,11 @@ public final class ImageAssetListModel {
         return 0 <= selectedPosition;
     }
 
-    public void getCachedFile(@NonNull String assetId,
+    public void loadAssetFile(@NonNull String assetId,
                               @Nullable OnSuccessListener<File> onSuccessListener,
                               @Nullable OnFailureListener onFailureListener,
                               @Nullable OnProgressListener onProgressListener) {
         visionService.getUserAssetApi()
-                     .loadAssetFile(assetId, ImageAsset.TYPE,
-                                    onSuccessListener, onFailureListener, onProgressListener);
+                     .loadAssetFile(assetId, onSuccessListener, onFailureListener, onProgressListener);
     }
 }
