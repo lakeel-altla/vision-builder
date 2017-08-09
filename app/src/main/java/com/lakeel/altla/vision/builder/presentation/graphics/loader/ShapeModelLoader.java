@@ -10,6 +10,8 @@ import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Disposable;
+import com.lakeel.altla.android.log.Log;
+import com.lakeel.altla.android.log.LogFactory;
 import com.lakeel.altla.vision.model.BoxComponent;
 import com.lakeel.altla.vision.model.ShapeComponent;
 import com.lakeel.altla.vision.model.SphereComponent;
@@ -21,6 +23,8 @@ import static com.badlogic.gdx.graphics.VertexAttributes.Usage.Normal;
 import static com.badlogic.gdx.graphics.VertexAttributes.Usage.Position;
 
 public final class ShapeModelLoader implements Disposable {
+
+    private static final Log LOG = LogFactory.getLog(ShapeModelLoader.class);
 
     private final SimpleArrayMap<Class<? extends ShapeComponent>, Loader> loaderMap = new SimpleArrayMap<>();
 
@@ -47,6 +51,9 @@ public final class ShapeModelLoader implements Disposable {
             if (loader == null) throw new IllegalArgumentException("An unexpected shape component: " + clazz);
 
             model = loader.load();
+
+            LOG.d("The shape model is loaded: class = %s", clazz);
+
             modelMap.put(clazz, model);
         }
         return model;

@@ -12,10 +12,9 @@ import com.google.atap.tangoservice.TangoPoseData;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.android.AndroidApplication;
 import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
-import com.badlogic.gdx.math.Quaternion;
-import com.badlogic.gdx.math.Vector3;
 import com.lakeel.altla.android.log.Log;
 import com.lakeel.altla.android.log.LogFactory;
+import com.lakeel.altla.vision.api.CurrentUser;
 import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.app.MyApplication;
@@ -38,8 +37,9 @@ import com.lakeel.altla.vision.builder.presentation.view.pane.ViewModeMenuPane;
 import com.lakeel.altla.vision.helper.TypedQuery;
 import com.lakeel.altla.vision.model.Actor;
 import com.lakeel.altla.vision.model.AreaSettings;
-import com.lakeel.altla.vision.model.Asset;
+import com.lakeel.altla.vision.model.GeometryComponent;
 import com.lakeel.altla.vision.model.ImageAsset;
+import com.lakeel.altla.vision.model.MeshComponent;
 import com.lakeel.altla.vision.model.ShapeComponent;
 import com.projecttango.tangosupport.TangoSupport;
 
@@ -387,21 +387,13 @@ public final class ArActivity extends AndroidApplication
     }
 
     @Override
-    public void onMeshActorCursorObjectTouched(@NonNull Asset asset, @NonNull Vector3 position,
-                                               @NonNull Quaternion orientation, @NonNull Vector3 scale) {
-        runOnUiThread(() -> arModel.saveMeshActor(asset, position, orientation, scale));
-    }
-
-    @Override
-    public void onTriggerActorCursorObjectTouched(@NonNull Class<? extends ShapeComponent> clazz,
-                                                  @NonNull Vector3 position, @NonNull Quaternion orientation,
-                                                  @NonNull Vector3 scale) {
-        runOnUiThread(() -> arModel.saveTriggerActor(clazz, position, orientation, scale));
-    }
-
-    @Override
     public void onActorChanged(@NonNull Actor actor) {
         runOnUiThread(() -> arModel.saveActor(actor));
+    }
+
+    @Override
+    public void onGeometryCursorTouched(@NonNull GeometryComponent component) {
+        runOnUiThread(() -> arModel.saveActor(component));
     }
 
     @Override
@@ -445,9 +437,17 @@ public final class ArActivity extends AndroidApplication
     public void onImageAssetSelected(@Nullable ImageAsset asset) {
         Gdx.app.postRunnable(() -> {
             if (asset == null) {
-                arGraphics.removeMeshActorCursor();
+                arGraphics.removeGeometryCursor();
             } else {
-                arGraphics.addMeshActorCursor(asset);
+                final MeshComponent meshComponent = new MeshComponent();
+                meshComponent.setUserId(CurrentUser.getInstance().getUserId());
+                meshComponent.setAssetId(asset.getId());
+                meshComponent.setAssetType(asset.getType());
+                // TODO: generate the component name.
+                meshComponent.setName(asset.getType());
+                meshComponent.setVisible(true);
+                meshComponent.setVisibleAtRuntime(true);
+                arGraphics.addGeometryCursor(meshComponent);
             }
         });
     }
@@ -456,9 +456,19 @@ public final class ArActivity extends AndroidApplication
     public void onTriggerShapeSelected(@Nullable Class<? extends ShapeComponent> clazz) {
         Gdx.app.postRunnable(() -> {
             if (clazz == null) {
-                arGraphics.removeTriggerActorCursor();
+                arGraphics.removeGeometryCursor();
             } else {
-                arGraphics.addTriggerActorCursor(clazz);
+                try {
+                    final ShapeComponent shapeComponent = clazz.newInstance();
+                    shapeComponent.setUserId(CurrentUser.getInstance().getUserId());
+                    // TODO: generate the component name.
+                    shapeComponent.setName(clazz.getSimpleName());
+                    shapeComponent.setVisible(true);
+                    shapeComponent.setVisibleAtRuntime(false);
+                    arGraphics.addGeometryCursor(shapeComponent);
+                } catch (InstantiationException | IllegalAccessException e) {
+                    LOG.e("Failed to instantiate a ShapeComponent.", e);
+                }
             }
         });
     }

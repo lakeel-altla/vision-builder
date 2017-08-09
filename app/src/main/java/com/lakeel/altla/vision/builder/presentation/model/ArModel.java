@@ -1,7 +1,5 @@
 package com.lakeel.altla.vision.builder.presentation.model;
 
-import com.badlogic.gdx.math.Quaternion;
-import com.badlogic.gdx.math.Vector3;
 import com.lakeel.altla.android.log.Log;
 import com.lakeel.altla.android.log.LogFactory;
 import com.lakeel.altla.vision.api.CurrentUser;
@@ -9,9 +7,7 @@ import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.helper.TypedQuery;
 import com.lakeel.altla.vision.model.Actor;
 import com.lakeel.altla.vision.model.AreaSettings;
-import com.lakeel.altla.vision.model.Asset;
-import com.lakeel.altla.vision.model.MeshComponent;
-import com.lakeel.altla.vision.model.ShapeComponent;
+import com.lakeel.altla.vision.model.GeometryComponent;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -94,48 +90,13 @@ public final class ArModel {
                      .saveActor(getRequiredAreaSettings().getRequiredAreaId(), actor);
     }
 
-    public void saveMeshActor(@NonNull Asset asset, @NonNull Vector3 position, @NonNull Quaternion orientation,
-                              @NonNull Vector3 scale) {
+    public void saveActor(@NonNull GeometryComponent component) {
         final Actor actor = new Actor();
 
         actor.setUserId(CurrentUser.getInstance().getUserId());
-        actor.setName(asset.getName());
-
-        final MeshComponent meshComponent = new MeshComponent();
-        actor.addComponent(meshComponent);
-
-        meshComponent.setAssetId(asset.getId());
-        meshComponent.setAssetType(asset.getType());
-        meshComponent.setPosition(position.x, position.y, position.z);
-        meshComponent.setOrientation(orientation.x, orientation.y, orientation.z, orientation.w);
-        meshComponent.setScale(scale.x, scale.y, scale.z);
-        meshComponent.setVisible(true);
-        meshComponent.setVisibleAtRuntime(true);
+        actor.setName(component.getName());
+        actor.addComponent(component);
 
         saveActor(actor);
-    }
-
-    public void saveTriggerActor(@NonNull Class<? extends ShapeComponent> clazz,
-                                 @NonNull Vector3 position, @NonNull Quaternion orientation, @NonNull Vector3 scale) {
-        final Actor actor = new Actor();
-
-        actor.setUserId(CurrentUser.getInstance().getUserId());
-        // TODO
-        actor.setName(clazz.getSimpleName());
-
-        try {
-            final ShapeComponent shapeComponent = clazz.newInstance();
-            actor.addComponent(shapeComponent);
-
-            shapeComponent.setPosition(position.x, position.y, position.z);
-            shapeComponent.setOrientation(orientation.x, orientation.y, orientation.z, orientation.w);
-            shapeComponent.setScale(scale.x, scale.y, scale.z);
-            shapeComponent.setVisible(true);
-            shapeComponent.setVisibleAtRuntime(false);
-
-            saveActor(actor);
-        } catch (InstantiationException | IllegalAccessException e) {
-            throw new RuntimeException("Failed to instantiate a ShapeComponent.", e);
-        }
     }
 }

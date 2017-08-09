@@ -5,20 +5,24 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
 import com.lakeel.altla.vision.builder.presentation.graphics.TangoCamera;
+import com.lakeel.altla.vision.model.GeometryComponent;
 
 import android.support.annotation.NonNull;
 
-public class ActorCursorObject extends ModelInstance {
+public final class GeometryCursorObject extends ModelInstance {
 
     public final Vector3 position = new Vector3();
 
     public final Quaternion orientation = new Quaternion();
 
-    public ActorCursorObject(@NonNull Model model) {
+    public final GeometryComponent component;
+
+    public GeometryCursorObject(@NonNull Model model, @NonNull GeometryComponent component) {
         super(model);
+        this.component = component;
     }
 
-    public final void update(@NonNull TangoCamera camera) {
+    public void update(@NonNull TangoCamera camera) {
         position.set(0, 0, -1);
         position.mul(camera.invView);
 
@@ -28,5 +32,11 @@ public class ActorCursorObject extends ModelInstance {
         transform.rotate(orientation);
 
         transform.setTranslation(position);
+    }
+
+    public void saveTransform() {
+        component.setPosition(position.x, position.y, position.z);
+        component.setOrientation(orientation.x, orientation.y, orientation.z, orientation.w);
+        component.setScale(1, 1, 1);
     }
 }
