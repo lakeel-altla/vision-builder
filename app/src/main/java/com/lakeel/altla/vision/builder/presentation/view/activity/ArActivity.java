@@ -294,7 +294,8 @@ public final class ArActivity extends AndroidApplication
                                 new TypedQuery.TypedChildEventListener<Actor>() {
                                     @Override
                                     public void onChildAdded(@NonNull Actor actor, @Nullable String previousChildName) {
-                                        addActor(actor);
+                                        LOG.v("Adding an actor: id = %s", actor.getId());
+                                        Gdx.app.postRunnable(() -> arGraphics.addGeometryObject(actor));
                                     }
 
                                     @Override
@@ -304,6 +305,7 @@ public final class ArActivity extends AndroidApplication
 
                                     @Override
                                     public void onChildRemoved(@NonNull Actor actor) {
+                                        LOG.v("Removing an actor: id = %s", actor.getId());
                                         Gdx.app.postRunnable(() -> arGraphics.removeGeometryObjectsByActor(actor));
                                     }
 
@@ -405,12 +407,12 @@ public final class ArActivity extends AndroidApplication
     }
 
     @Override
-    public void loadUserAssetCache(@NonNull String assetId, @NonNull String assetType,
-                                   @Nullable OnSuccessListener<File> onSuccessListener,
-                                   @Nullable OnFailureListener onFailureListener,
-                                   @Nullable OnProgressListener onProgressListener) {
+    public void loadUserAssetFile(@NonNull String assetId, @NonNull String assetType,
+                                  @Nullable OnSuccessListener<File> onSuccessListener,
+                                  @Nullable OnFailureListener onFailureListener,
+                                  @Nullable OnProgressListener onProgressListener) {
         // This method will be invoked by the graphics thread.
-        arModel.getCachedAssetFile(
+        arModel.loadAssetFile(
                 assetId, assetType,
                 file -> {
                     if (onSuccessListener != null) {
@@ -515,11 +517,5 @@ public final class ArActivity extends AndroidApplication
     @Override
     public void setScaleEnabled(boolean enabled) {
         Gdx.app.postRunnable(() -> arGraphics.setScaleEnabled(enabled));
-    }
-
-    private void addActor(@NonNull Actor actor) {
-        LOG.v("Adding an actor: id = %s", actor.getId());
-
-        Gdx.app.postRunnable(() -> arGraphics.addGeometryObject(actor));
     }
 }

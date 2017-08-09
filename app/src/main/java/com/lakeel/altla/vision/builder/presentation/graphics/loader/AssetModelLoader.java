@@ -38,8 +38,6 @@ public final class AssetModelLoader implements Disposable {
 
     private final AssetCacheLoader assetCacheLoader;
 
-    private boolean loading;
-
     public AssetModelLoader(@NonNull AssetCacheLoader assetCacheLoader) {
         this.assetCacheLoader = assetCacheLoader;
         loaderMap.put(ImageAsset.TYPE, new ImageAssetModelLoader());
@@ -54,14 +52,10 @@ public final class AssetModelLoader implements Disposable {
     }
 
     public void run() {
-        if (loading) return;
-
+        // TODO: Control the max load count.
         if (0 < taskQueue.size) {
             final Task task = taskQueue.removeFirst();
             task.run();
-
-            // TODO: Control the max load count.
-            if (!loading) run();
         }
     }
 
@@ -94,15 +88,13 @@ public final class AssetModelLoader implements Disposable {
         }
 
         void run() {
-            loading = true;
-
             final Model model = modelMap.get(assetId);
+
             if (model != null) {
-                loading = false;
                 if (onSuccessListener != null) onSuccessListener.onSuccess(model);
             } else {
                 // TODO: public assets?
-                assetCacheLoader.loadUserAssetCache(assetId, assetType, file -> {
+                assetCacheLoader.loadUserAssetFile(assetId, assetType, file -> {
                     final FileHandle fileHandle = Gdx.files.absolute(file.getPath());
                     final Loader loader = loaderMap.get(assetType);
                     if (loader == null) {
@@ -112,14 +104,11 @@ public final class AssetModelLoader implements Disposable {
                     loader.load(fileHandle, m -> {
                         LOG.d("An asset model is loaded: assetId = %s, assetType = %s", assetId, assetType);
                         modelMap.put(assetId, m);
-                        loading = false;
                         if (onSuccessListener != null) onSuccessListener.onSuccess(m);
                     }, e -> {
-                        loading = false;
                         if (onFailureListener != null) onFailureListener.onFailure(e);
                     });
                 }, e -> {
-                    loading = false;
                     if (onFailureListener != null) onFailureListener.onFailure(e);
                 }, null);
             }

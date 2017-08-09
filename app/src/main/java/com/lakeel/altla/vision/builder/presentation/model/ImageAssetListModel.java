@@ -72,7 +72,7 @@ public final class ImageAssetListModel {
                               @Nullable OnFailureListener onFailureListener,
                               @Nullable OnProgressListener onProgressListener) {
         visionService.getUserAssetApi()
-                     .getCachedAssetFile(assetId, ImageAsset.TYPE,
-                                         onSuccessListener, onFailureListener, onProgressListener);
+                     .loadAssetFile(assetId, ImageAsset.TYPE,
+                                    onSuccessListener, onFailureListener, onProgressListener);
     }
 }

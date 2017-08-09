@@ -11,8 +11,8 @@ import java.io.File;
 
 public interface AssetCacheLoader {
 
-    void loadUserAssetCache(@NonNull String assetId, @NonNull String assetType,
-                            @Nullable OnSuccessListener<File> onSuccessListener,
-                            @Nullable OnFailureListener onFailureListener,
-                            @Nullable OnProgressListener onProgressListener);
+    void loadUserAssetFile(@NonNull String assetId, @NonNull String assetType,
+                           @Nullable OnSuccessListener<File> onSuccessListener,
+                           @Nullable OnFailureListener onFailureListener,
+                           @Nullable OnProgressListener onProgressListener);
 }
