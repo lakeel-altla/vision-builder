@@ -37,9 +37,7 @@ final class ImageAssetModelBuilder extends AssetBuilder {
         // This method will be invoked on the loader thread.
 
         // A result of the load() method will be invoked on the graphics thread.
-        context.load(Texture.class, assetId, assetType, result -> {
-            final Texture texture = (Texture) result;
-
+        context.load(Texture.class, assetId, assetType, texture -> {
             try {
                 final Material material = new Material(TextureAttribute.createDiffuse(texture),
                                                        new BlendingAttribute(),

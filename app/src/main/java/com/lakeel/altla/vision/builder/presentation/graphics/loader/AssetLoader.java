@@ -28,7 +28,7 @@ public final class AssetLoader implements AssetBuilderContext {
 
     private final VisionService visionService;
 
-    private final SimpleArrayMap<Class<?>, SimpleArrayMap<String, Task>> taskMap = new SimpleArrayMap<>();
+    private final SimpleArrayMap<Class<?>, SimpleArrayMap<String, Task<?>>> taskMap = new SimpleArrayMap<>();
 
     private final SimpleArrayMap<Class<?>, AssetBuilder> assetBuilderMap = new SimpleArrayMap<>();
 
@@ -46,9 +46,9 @@ public final class AssetLoader implements AssetBuilderContext {
     }
 
     @Override
-    public void load(@NonNull Class<?> clazz, @NonNull String assetId, @NonNull String assetType,
-                     @Nullable OnSuccessListener<Object> onSuccessListener,
-                     @Nullable OnFailureListener onFailureListener) {
+    public <T> void load(@NonNull Class<T> clazz, @NonNull String assetId, @NonNull String assetType,
+                         @Nullable OnSuccessListener<T> onSuccessListener,
+                         @Nullable OnFailureListener onFailureListener) {
 
         // This method will be invoked on any threads.
 
@@ -58,10 +58,13 @@ public final class AssetLoader implements AssetBuilderContext {
         }
 
         synchronized (taskMap) {
-            final Task newTask = new Task(clazz, assetId, assetType, assetBuilder,
-                                          onSuccessListener, onFailureListener);
-            final SimpleArrayMap<String, Task> classTaskMap = taskMap.get(clazz);
-            final Task activeTask = classTaskMap.get(assetId);
+            final Task<T> newTask = new Task<>(clazz, assetId, assetType, assetBuilder,
+                                               onSuccessListener, onFailureListener);
+
+            final SimpleArrayMap<String, Task<?>> classTaskMap = taskMap.get(clazz);
+
+            @SuppressWarnings("unchecked")
+            final Task<T> activeTask = (Task<T>) classTaskMap.get(assetId);
 
             if (activeTask == null) {
                 classTaskMap.put(assetId, newTask);
@@ -102,9 +105,9 @@ public final class AssetLoader implements AssetBuilderContext {
                      }, null);
     }
 
-    private final class Task implements Runnable {
+    private final class Task<T> implements Runnable {
 
-        final Class<?> clazz;
+        final Class<T> clazz;
 
         final String assetId;
 
@@ -112,15 +115,15 @@ public final class AssetLoader implements AssetBuilderContext {
 
         final AssetBuilder assetBuilder;
 
-        final OnSuccessListener<Object> onSuccessListener;
+        final OnSuccessListener<T> onSuccessListener;
 
         final OnFailureListener onFailureListener;
 
-        Array<Task> sameAssetTasks;
+        Array<Task<T>> sameAssetTasks;
 
-        Task(@NonNull Class<?> clazz, @NonNull String assetId, @NonNull String assetType,
+        Task(@NonNull Class<T> clazz, @NonNull String assetId, @NonNull String assetType,
              @NonNull AssetBuilder assetBuilder,
-             @Nullable OnSuccessListener<Object> onSuccessListener,
+             @Nullable OnSuccessListener<T> onSuccessListener,
              @Nullable OnFailureListener onFailureListener) {
 
             this.clazz = clazz;
@@ -149,14 +152,17 @@ public final class AssetLoader implements AssetBuilderContext {
                         taskMap.get(clazz).remove(assetId);
                     }
 
+                    @SuppressWarnings("unchecked")
+                    final T typedResult = (T) result;
+
                     if (onSuccessListener != null) {
-                        onSuccessListener.onSuccess(result);
+                        onSuccessListener.onSuccess(typedResult);
                     }
 
                     if (sameAssetTasks != null) {
-                        for (final Task task : sameAssetTasks) {
+                        for (final Task<T> task : sameAssetTasks) {
                             if (task.onSuccessListener != null) {
-                                task.onSuccessListener.onSuccess(result);
+                                task.onSuccessListener.onSuccess(typedResult);
                             }
                         }
                     }

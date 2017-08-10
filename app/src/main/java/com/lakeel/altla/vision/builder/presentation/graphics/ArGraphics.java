@@ -411,8 +411,8 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
             final String assetId = meshComponent.getRequiredAssetId();
             final String assetType = meshComponent.getRequiredAssetType();
 
-            assetLoader.load(Model.class, assetId, assetType, result -> {
-                geometryCursorObject = new GeometryCursorObject((Model) result, meshComponent, camera);
+            assetLoader.load(Model.class, assetId, assetType, model -> {
+                geometryCursorObject = new GeometryCursorObject(model, meshComponent, camera);
             }, e -> {
                 LOG.e("Failed to load a model: assetId = %s, assetType = %s", assetId, assetType);
             });
@@ -441,8 +441,8 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
         final String assetId = component.getRequiredAssetId();
         final String assetType = component.getRequiredAssetType();
 
-        assetLoader.load(Model.class, assetId, assetType, result -> {
-            final GeometryObject object = new GeometryObject((Model) result, actor, component);
+        assetLoader.load(Model.class, assetId, assetType, model -> {
+            final GeometryObject object = new GeometryObject(model, actor, component);
             geometryObjectManager.addGeometryObject(object);
 
             LOG.d("Added a geometry object: actorId = %s, componentClass = %s", actor.getId(), component.getClass());

@@ -8,7 +8,7 @@ import android.support.annotation.Nullable;
 
 interface AssetBuilderContext {
 
-    void load(@NonNull Class<?> clazz, @NonNull String assetId, @NonNull String assetType,
-              @Nullable OnSuccessListener<Object> onSuccessListener,
-              @Nullable OnFailureListener onFailureListener);
+    <T> void load(@NonNull Class<T> clazz, @NonNull String assetId, @NonNull String assetType,
+                  @Nullable OnSuccessListener<T> onSuccessListener,
+                  @Nullable OnFailureListener onFailureListener);
 }
