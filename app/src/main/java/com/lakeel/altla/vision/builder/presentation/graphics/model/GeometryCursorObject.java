@@ -17,12 +17,16 @@ public final class GeometryCursorObject extends ModelInstance {
 
     public final GeometryComponent component;
 
-    public GeometryCursorObject(@NonNull Model model, @NonNull GeometryComponent component) {
+    private final TangoCamera camera;
+
+    public GeometryCursorObject(@NonNull Model model, @NonNull GeometryComponent component,
+                                @NonNull TangoCamera camera) {
         super(model);
         this.component = component;
+        this.camera = camera;
     }
 
-    public void update(@NonNull TangoCamera camera) {
+    public void update() {
         position.set(0, 0, -1);
         position.mul(camera.invView);
 

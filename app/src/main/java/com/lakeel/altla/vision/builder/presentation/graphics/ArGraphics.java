@@ -415,7 +415,7 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
             if (ImageAsset.TYPE.equals(meshComponent.getAssetType())) {
                 assetLoaderManager.getImageAssetModelLoader()
                                   .load(assetId, model -> {
-                                      geometryCursorObject = new GeometryCursorObject(model, meshComponent);
+                                      geometryCursorObject = new GeometryCursorObject(model, meshComponent, camera);
                                   }, e -> {
                                       LOG.e("Failed to load a model: assetId = %s", assetId);
                                   }, null);
@@ -425,7 +425,7 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
         } else if (component instanceof ShapeComponent) {
             final ShapeComponent shapeComponent = (ShapeComponent) component;
             final Model model = shapeModelLoader.load(shapeComponent.getClass());
-            geometryCursorObject = new GeometryCursorObject(model, shapeComponent);
+            geometryCursorObject = new GeometryCursorObject(model, shapeComponent, camera);
         }
     }
 
@@ -562,11 +562,11 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
                 }
             }
         } catch (TangoException e) {
-            LOG.e("Tango API call error within the OpenGL renderDepth thread.", e);
+            LOG.e("A tango API call error occured.", e);
         }
 
         if (geometryCursorObject != null) {
-            geometryCursorObject.update(camera);
+            geometryCursorObject.update();
         }
 
         if (actorAxesObjectVisible && touchedGeometryObject != null) {
