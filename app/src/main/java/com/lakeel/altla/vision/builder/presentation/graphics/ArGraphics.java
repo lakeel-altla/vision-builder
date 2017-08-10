@@ -31,7 +31,7 @@ import com.badlogic.gdx.utils.Array;
 import com.lakeel.altla.android.log.Log;
 import com.lakeel.altla.android.log.LogFactory;
 import com.lakeel.altla.vision.api.VisionService;
-import com.lakeel.altla.vision.builder.presentation.graphics.loader.AssetLoaderManager;
+import com.lakeel.altla.vision.builder.presentation.graphics.loader.AssetLoader;
 import com.lakeel.altla.vision.builder.presentation.graphics.loader.ShapeModelLoader;
 import com.lakeel.altla.vision.builder.presentation.graphics.model.ActorAxesObject;
 import com.lakeel.altla.vision.builder.presentation.graphics.model.GeometryCursorObject;
@@ -42,7 +42,6 @@ import com.lakeel.altla.vision.builder.presentation.model.Axis;
 import com.lakeel.altla.vision.model.Actor;
 import com.lakeel.altla.vision.model.Component;
 import com.lakeel.altla.vision.model.GeometryComponent;
-import com.lakeel.altla.vision.model.ImageAsset;
 import com.lakeel.altla.vision.model.MeshComponent;
 import com.lakeel.altla.vision.model.ShapeComponent;
 import com.projecttango.tangosupport.TangoSupport;
@@ -118,7 +117,7 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
 
     private ColorObjectPicker picker;
 
-    private final AssetLoaderManager assetLoaderManager;
+    private final AssetLoader assetLoader;
 
     private final ShapeModelLoader shapeModelLoader = new ShapeModelLoader();
 
@@ -165,7 +164,7 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
         this.visionService = visionService;
         this.display = display;
         this.listener = listener;
-        assetLoaderManager = new AssetLoaderManager(visionService);
+        assetLoader = new AssetLoader(visionService);
     }
 
     @Override
@@ -409,19 +408,14 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
     public void addGeometryCursor(@NonNull GeometryComponent component) {
         if (component instanceof MeshComponent) {
             final MeshComponent meshComponent = (MeshComponent) component;
-            final String assetId = meshComponent.getAssetId();
-            if (assetId == null) throw new IllegalArgumentException("assetId is null.");
+            final String assetId = meshComponent.getRequiredAssetId();
+            final String assetType = meshComponent.getRequiredAssetType();
 
-            if (ImageAsset.TYPE.equals(meshComponent.getAssetType())) {
-                assetLoaderManager.getImageAssetModelLoader()
-                                  .load(assetId, model -> {
-                                      geometryCursorObject = new GeometryCursorObject(model, meshComponent, camera);
-                                  }, e -> {
-                                      LOG.e("Failed to load a model: assetId = %s", assetId);
-                                  }, null);
-            } else {
-                throw new IllegalStateException("A type is not supported yet: " + meshComponent.getAssetType());
-            }
+            assetLoader.load(Model.class, assetId, assetType, result -> {
+                geometryCursorObject = new GeometryCursorObject((Model) result, meshComponent, camera);
+            }, e -> {
+                LOG.e("Failed to load a model: assetId = %s, assetType = %s", assetId, assetType);
+            });
         } else if (component instanceof ShapeComponent) {
             final ShapeComponent shapeComponent = (ShapeComponent) component;
             final Model model = shapeModelLoader.load(shapeComponent.getClass());
@@ -447,20 +441,14 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
         final String assetId = component.getRequiredAssetId();
         final String assetType = component.getRequiredAssetType();
 
-        if (ImageAsset.TYPE.equals(assetType)) {
-            assetLoaderManager.getImageAssetModelLoader()
-                              .load(assetId, model -> {
-                                  final GeometryObject object = new GeometryObject(model, actor, component);
-                                  geometryObjectManager.addGeometryObject(object);
+        assetLoader.load(Model.class, assetId, assetType, result -> {
+            final GeometryObject object = new GeometryObject((Model) result, actor, component);
+            geometryObjectManager.addGeometryObject(object);
 
-                                  LOG.d("Added a geometry object: actorId = %s, component = %s",
-                                        actor.getId(), component.getClass());
-                              }, e -> {
-                                  LOG.e("Failed to load a model: assetId = %s", assetId);
-                              }, null);
-        } else {
-            throw new IllegalStateException("A type is not supported yet: " + assetType);
-        }
+            LOG.d("Added a geometry object: actorId = %s, componentClass = %s", actor.getId(), component.getClass());
+        }, e -> {
+            LOG.e("Failed to load a model: assetId = %s, assetType = %s", assetId, assetType);
+        });
     }
 
     private void addGeometryObject(@NonNull Actor actor, @NonNull ShapeComponent component) {

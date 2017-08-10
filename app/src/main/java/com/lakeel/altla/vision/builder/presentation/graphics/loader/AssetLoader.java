@@ -1,41 +1,78 @@
 package com.lakeel.altla.vision.builder.presentation.graphics.loader;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.utils.Array;
 import com.lakeel.altla.android.log.Log;
 import com.lakeel.altla.android.log.LogFactory;
+import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.helper.OnFailureListener;
-import com.lakeel.altla.vision.helper.OnProgressListener;
 import com.lakeel.altla.vision.helper.OnSuccessListener;
 
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.util.SimpleArrayMap;
 
-public abstract class AssetLoader<T> {
+import java.io.File;
+
+public final class AssetLoader implements AssetBuilderContext {
 
     private static final Log LOG = LogFactory.getLog(AssetLoader.class);
 
-    protected final AssetLoaderContext context;
+    private final HandlerThread handlerThread = new HandlerThread(AssetLoader.class.getSimpleName());
 
-    private final SimpleArrayMap<String, Task> taskMap = new SimpleArrayMap<>();
+    private final Handler handler;
 
-    protected AssetLoader(@NonNull AssetLoaderContext context) {
-        this.context = context;
+    private final VisionService visionService;
+
+    private final SimpleArrayMap<Class<?>, SimpleArrayMap<String, Task>> taskMap = new SimpleArrayMap<>();
+
+    private final SimpleArrayMap<Class<?>, AssetBuilder> assetBuilderMap = new SimpleArrayMap<>();
+
+    public AssetLoader(@NonNull VisionService visionService) {
+        this.visionService = visionService;
+
+        handlerThread.start();
+        handler = new Handler(handlerThread.getLooper());
+
+        assetBuilderMap.put(Texture.class, new TextureBuilder(this));
+        assetBuilderMap.put(Model.class, new ModelBuilder(this));
+
+        taskMap.put(Texture.class, new SimpleArrayMap<>());
+        taskMap.put(Model.class, new SimpleArrayMap<>());
     }
 
-    public void load(@NonNull String assetId,
-                     @Nullable OnSuccessListener<T> onSuccessListener,
-                     @Nullable OnFailureListener onFailureListener,
-                     @Nullable OnProgressListener onProgressListener) {
+    @Override
+    public void load(@NonNull Class<?> clazz, @NonNull String assetId, @NonNull String assetType,
+                     @Nullable OnSuccessListener<Object> onSuccessListener,
+                     @Nullable OnFailureListener onFailureListener) {
+
+        // This method will be invoked on any threads.
+
+        final AssetBuilder assetBuilder = assetBuilderMap.get(clazz);
+        if (assetBuilder == null) {
+            throw new IllegalArgumentException("The value of 'clazz' is not supported: clazz = " + clazz);
+        }
+
         synchronized (taskMap) {
-            final Task newTask = new Task(assetId, onSuccessListener, onFailureListener, onProgressListener);
-            final Task activeTask = taskMap.get(assetId);
+            final Task newTask = new Task(clazz, assetId, assetType, assetBuilder,
+                                          onSuccessListener, onFailureListener);
+            final SimpleArrayMap<String, Task> classTaskMap = taskMap.get(clazz);
+            final Task activeTask = classTaskMap.get(assetId);
+
             if (activeTask == null) {
-                taskMap.put(assetId, newTask);
-                LOG.d("A new task is activated: assetId = %s", assetId);
-                context.runOnLoaderThread(newTask);
+                classTaskMap.put(assetId, newTask);
+
+                LOG.d("A new task is activated: %s", newTask);
+
+                // Run tasks on the loader thread.
+                handler.post(newTask);
             } else {
-                LOG.d("An active task already exists: assetid = %s", assetId);
+                LOG.d("An active task already exists: %s", newTask);
+
                 if (activeTask.sameAssetTasks == null) {
                     activeTask.sameAssetTasks = new Array<>();
                 }
@@ -44,41 +81,78 @@ public abstract class AssetLoader<T> {
         }
     }
 
-    protected abstract void loadCore(@NonNull String assetId,
-                                     @Nullable OnSuccessListener<T> onSuccessListener,
-                                     @Nullable OnFailureListener onFailureListener,
-                                     @Nullable OnProgressListener onProgressListener);
+    private void loadAssetFile(@NonNull String assetId,
+                               @Nullable OnSuccessListener<File> onSuccessListener,
+                               @Nullable OnFailureListener onFailureListener) {
+
+        LOG.v("Loading an asset file: assetId = %s", assetId);
+
+        // TODO: how should we load public assets?
+        visionService.getUserAssetApi()
+                     .loadAssetFile(assetId, assetFile -> {
+                         LOG.v("Loaded an asset file: assetId = %s, assetFile = %s", assetId, assetFile);
+                         if (onSuccessListener != null) {
+                             handler.post(() -> onSuccessListener.onSuccess(assetFile));
+                         }
+                     }, e -> {
+                         LOG.e("Failed to load an asset file: assetId = %s", assetId, e);
+                         if (onFailureListener != null) {
+                             handler.post(() -> onFailureListener.onFailure(e));
+                         }
+                     }, null);
+    }
 
     private final class Task implements Runnable {
 
+        final Class<?> clazz;
+
         final String assetId;
 
-        final OnSuccessListener<T> onSuccessListener;
+        final String assetType;
+
+        final AssetBuilder assetBuilder;
+
+        final OnSuccessListener<Object> onSuccessListener;
 
         final OnFailureListener onFailureListener;
 
-        final OnProgressListener onProgressListener;
-
         Array<Task> sameAssetTasks;
 
-        Task(@NonNull String assetId,
-             @Nullable OnSuccessListener<T> onSuccessListener,
-             @Nullable OnFailureListener onFailureListener,
-             @Nullable OnProgressListener onProgressListener) {
+        Task(@NonNull Class<?> clazz, @NonNull String assetId, @NonNull String assetType,
+             @NonNull AssetBuilder assetBuilder,
+             @Nullable OnSuccessListener<Object> onSuccessListener,
+             @Nullable OnFailureListener onFailureListener) {
 
+            this.clazz = clazz;
             this.assetId = assetId;
+            this.assetType = assetType;
+            this.assetBuilder = assetBuilder;
             this.onSuccessListener = onSuccessListener;
             this.onFailureListener = onFailureListener;
-            this.onProgressListener = onProgressListener;
         }
 
         @Override
         public void run() {
-            loadCore(assetId, result -> {
-                if (onSuccessListener != null) {
-                    onSuccessListener.onSuccess(result);
-                }
-                synchronized (taskMap) {
+            // This method will be invoked on the loader thread.
+
+            LOG.v("Starting the task: %s", this);
+
+            // Callbacks of the loadAssetFile() method will be invoked on the loader thread.
+            loadAssetFile(assetId, assetFile -> {
+                LOG.v("Building an asset representation: assetFile = %s", assetFile);
+
+                // Callbacks of the build() method will be invoked on the graphics thread.
+                assetBuilder.build(assetId, assetType, assetFile, result -> {
+                    LOG.v("Built an asset representation: assetFile = %s", assetFile);
+
+                    synchronized (taskMap) {
+                        taskMap.get(clazz).remove(assetId);
+                    }
+
+                    if (onSuccessListener != null) {
+                        onSuccessListener.onSuccess(result);
+                    }
+
                     if (sameAssetTasks != null) {
                         for (final Task task : sameAssetTasks) {
                             if (task.onSuccessListener != null) {
@@ -86,13 +160,17 @@ public abstract class AssetLoader<T> {
                             }
                         }
                     }
-                    taskMap.remove(assetId);
-                }
-            }, e -> {
-                if (onFailureListener != null) {
-                    onFailureListener.onFailure(e);
-                }
-                synchronized (taskMap) {
+                }, e -> {
+                    LOG.e("Failed to build an asset representation: assetFile = %s", assetFile);
+
+                    synchronized (taskMap) {
+                        taskMap.get(clazz).remove(assetId);
+                    }
+
+                    if (onFailureListener != null) {
+                        Gdx.app.postRunnable(() -> onFailureListener.onFailure(e));
+                    }
+
                     if (sameAssetTasks != null) {
                         for (final Task task : sameAssetTasks) {
                             if (task.onFailureListener != null) {
@@ -100,20 +178,31 @@ public abstract class AssetLoader<T> {
                             }
                         }
                     }
-                    taskMap.remove(assetId);
-                }
-            }, (totalBytes, bytesTransferred) -> {
-                if (onProgressListener != null) {
-                    onProgressListener.onProgress(totalBytes, bytesTransferred);
-                }
+                });
+            }, e -> {
                 synchronized (taskMap) {
-                    for (final Task task : sameAssetTasks) {
-                        if (task.onProgressListener != null) {
-                            task.onProgressListener.onProgress(totalBytes, bytesTransferred);
+                    taskMap.get(clazz).remove(assetId);
+                }
+
+                if (onFailureListener != null) {
+                    Gdx.app.postRunnable(() -> onFailureListener.onFailure(e));
+                }
+
+                if (sameAssetTasks != null) {
+                    Gdx.app.postRunnable(() -> {
+                        for (final Task task : sameAssetTasks) {
+                            if (task.onFailureListener != null) {
+                                task.onFailureListener.onFailure(e);
+                            }
                         }
-                    }
+                    });
                 }
             });
+        }
+
+        @Override
+        public String toString() {
+            return "[class = " + clazz + ", assetId = " + assetId + ", assetType = " + assetType + "]";
         }
     }
 }

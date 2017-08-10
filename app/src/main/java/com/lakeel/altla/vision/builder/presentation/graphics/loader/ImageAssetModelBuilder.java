@@ -9,35 +9,37 @@ import com.badlogic.gdx.graphics.g3d.attributes.IntAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.lakeel.altla.vision.helper.OnFailureListener;
-import com.lakeel.altla.vision.helper.OnProgressListener;
 import com.lakeel.altla.vision.helper.OnSuccessListener;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import java.io.File;
+
 import static com.badlogic.gdx.graphics.VertexAttributes.Usage.Normal;
 import static com.badlogic.gdx.graphics.VertexAttributes.Usage.Position;
 import static com.badlogic.gdx.graphics.VertexAttributes.Usage.TextureCoordinates;
 
-final class ImageAssetModelLoader extends AssetLoader<Model> {
+final class ImageAssetModelBuilder extends AssetBuilder {
 
     // The texture scalling factor: 512 pixels = 1 meter.
     private static final float SCALING_FACTOR = 1f / 512f;
 
-    private final AssetLoader<Texture> textureLoader;
-
-    ImageAssetModelLoader(@NonNull AssetLoaderContext context, @NonNull AssetLoader<Texture> textureLoader) {
+    ImageAssetModelBuilder(@NonNull AssetBuilderContext context) {
         super(context);
-        this.textureLoader = textureLoader;
     }
 
     @Override
-    protected void loadCore(@NonNull String assetId,
-                            @Nullable OnSuccessListener<Model> onSuccessListener,
-                            @Nullable OnFailureListener onFailureListener,
-                            @Nullable OnProgressListener onProgressListener) {
-        textureLoader.load(assetId, texture -> {
-            // On the graphics thread.
+    void build(@NonNull String assetId, @NonNull String assetType, @NonNull File assetFile,
+               @Nullable OnSuccessListener<Object> onSuccessListener,
+               @Nullable OnFailureListener onFailureListener) {
+
+        // This method will be invoked on the loader thread.
+
+        // A result of the load() method will be invoked on the graphics thread.
+        context.load(Texture.class, assetId, assetType, result -> {
+            final Texture texture = (Texture) result;
+
             try {
                 final Material material = new Material(TextureAttribute.createDiffuse(texture),
                                                        new BlendingAttribute(),
@@ -62,14 +64,14 @@ final class ImageAssetModelLoader extends AssetLoader<Model> {
                 final float height = texture.getHeight() * SCALING_FACTOR;
                 model.meshes.get(0).scale(width, height, 1);
 
-                if (onSuccessListener != null) onSuccessListener.onSuccess(model);
+                if (onSuccessListener != null) {
+                    onSuccessListener.onSuccess(model);
+                }
             } catch (RuntimeException e) {
-                if (onFailureListener != null) onFailureListener.onFailure(e);
+                if (onFailureListener != null) {
+                    onFailureListener.onFailure(e);
+                }
             }
-        }, e -> {
-            if (onFailureListener != null) onFailureListener.onFailure(e);
-        }, (totalBytes, bytesTransferred) -> {
-            if (onProgressListener != null) onProgressListener.onProgress(totalBytes, bytesTransferred);
-        });
+        }, onFailureListener);
     }
 }
