@@ -1,8 +1,5 @@
 package com.lakeel.altla.vision.builder.presentation.graphics.loader;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.utils.Array;
 import com.lakeel.altla.android.log.Log;
 import com.lakeel.altla.android.log.LogFactory;
@@ -40,14 +37,8 @@ public final class AssetLoader implements AssetBuilderContext {
         handlerThread.start();
         handler = new Handler(handlerThread.getLooper());
 
-        assetBuilderMap.put(Texture.class, new TextureBuilder(this));
-        assetBuilderMap.put(Model.class, new ModelBuilder(this));
-
-        taskMap.put(Texture.class, new SimpleArrayMap<>());
-        taskMap.put(Model.class, new SimpleArrayMap<>());
-
-        assetMap.put(Texture.class, new SimpleArrayMap<>());
-        assetMap.put(Model.class, new SimpleArrayMap<>());
+        register(TextureBuilder.class);
+        register(ModelBuilder.class);
     }
 
     @Override
@@ -59,8 +50,6 @@ public final class AssetLoader implements AssetBuilderContext {
 
         final Task<T> newTask = new Task<>(clazz, assetId, assetType, onSuccessListener, onFailureListener);
         handler.post(newTask);
-
-        LOG.v("Added a new task: class = %s, assetId = %s", clazz, assetId);
     }
 
     @Override
@@ -68,25 +57,17 @@ public final class AssetLoader implements AssetBuilderContext {
         handler.post(runnable);
     }
 
-    private void loadAssetFile(@NonNull String assetId,
-                               @Nullable OnSuccessListener<File> onSuccessListener,
-                               @Nullable OnFailureListener onFailureListener) {
+    public void register(@NonNull Class<? extends AssetBuilder> clazz) {
+        try {
+            final AssetBuilder builder = clazz.newInstance();
+            final Class<?> targetType = builder.getTargetType();
 
-        LOG.v("Loading an asset file: assetId = %s", assetId);
-
-        // TODO: how should we load public assets?
-        visionService.getUserAssetApi()
-                     .loadAssetFile(assetId, assetFile -> {
-                         LOG.v("Loaded an asset file: assetId = %s, assetFile = %s", assetId, assetFile);
-                         if (onSuccessListener != null) {
-                             handler.post(() -> onSuccessListener.onSuccess(assetFile));
-                         }
-                     }, e -> {
-                         LOG.e("Failed to load an asset file: assetId = %s", assetId, e);
-                         if (onFailureListener != null) {
-                             handler.post(() -> onFailureListener.onFailure(e));
-                         }
-                     }, null);
+            assetBuilderMap.put(targetType, builder);
+            taskMap.put(targetType, new SimpleArrayMap<>());
+            assetMap.put(targetType, new SimpleArrayMap<>());
+        } catch (InstantiationException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private final class Task<T> implements Runnable {
@@ -120,7 +101,7 @@ public final class AssetLoader implements AssetBuilderContext {
             // This method will be invoked on the loader thread.
 
             try {
-                LOG.v("Starting the task: class = %s, assetId = %s", clazz, assetId);
+                LOG.v("Loading an asset: class = %s, assetId = %s", clazz, assetId);
 
                 final SimpleArrayMap<String, Task<?>> classTaskMap = taskMap.get(clazz);
                 if (classTaskMap == null) {
@@ -133,8 +114,6 @@ public final class AssetLoader implements AssetBuilderContext {
                 if (activeTask == null) {
                     classTaskMap.put(assetId, this);
 
-                    LOG.v("Handling this task as a new one: class = %s, assetId = %s", clazz, assetId);
-
                     load();
                 } else {
                     if (activeTask.sameAssetTasks == null) {
@@ -143,16 +122,15 @@ public final class AssetLoader implements AssetBuilderContext {
 
                     activeTask.sameAssetTasks.add(this);
 
-                    LOG.v("Handling this task in the one loading the same asset: class = %s, assetId = %s",
-                          clazz, assetId);
+                    LOG.v("Waiting a task loading the same asset: class = %s, assetId = %s", clazz, assetId);
                 }
 
             } catch (RuntimeException e) {
                 if (onFailureListener == null) {
-                    LOG.e("A runtime error occured on the loader thread.", e);
+                    LOG.e("A runtime error occured on the asset loader thread.", e);
                 } else {
                     // Callback on the graphics thread.
-                    Gdx.app.postRunnable(() -> onFailureListener.onFailure(e));
+                    onFailureListener.onFailure(e);
                 }
             }
         }
@@ -167,28 +145,13 @@ public final class AssetLoader implements AssetBuilderContext {
 
             final Object asset = classAssetMap.get(assetId);
             if (asset != null) {
-                LOG.v("The asset exists in the cache: class = %s, assetId = %s", clazz, assetId);
+                LOG.v("Using the cache: class = %s, assetId = %s", clazz, assetId);
 
                 taskMap.get(clazz).remove(assetId);
 
                 @SuppressWarnings("unchecked")
                 T typedResult = (T) asset;
-
-                // Callback on the graphics thread.
-                if (onSuccessListener != null) {
-                    Gdx.app.postRunnable(() -> onSuccessListener.onSuccess(typedResult));
-                }
-
-                // Callback on the graphics thread.
-                if (sameAssetTasks != null) {
-                    Gdx.app.postRunnable(() -> {
-                        for (final Task<T> task : sameAssetTasks) {
-                            if (task.onSuccessListener != null) {
-                                task.onSuccessListener.onSuccess(typedResult);
-                            }
-                        }
-                    });
-                }
+                raiseOnSuccess(typedResult);
 
                 return;
             }
@@ -198,77 +161,81 @@ public final class AssetLoader implements AssetBuilderContext {
                 throw new IllegalArgumentException("The value of 'clazz' is not supported: clazz = " + clazz);
             }
 
+            if (!assetBuilder.isInitialized()) {
+                assetBuilder.initialize(AssetLoader.this);
+            }
+
             // Callbacks of the loadAssetFile() method will be invoked on the loader thread.
             loadAssetFile(assetId, assetFile -> {
-                LOG.v("Building the asset: class = %s, assetFile = %s", clazz, assetFile);
-
-                // Callbacks of the build() method will be invoked on the loader thread.
                 assetBuilder.build(assetId, assetType, assetFile, result -> {
-                    LOG.v("Built an asset representation: class = %s, assetFile = %s", clazz, assetFile);
-
                     // Cache the asset.
                     assetMap.get(clazz).put(assetId, result);
-
                     taskMap.get(clazz).remove(assetId);
 
                     @SuppressWarnings("unchecked")
                     final T typedResult = (T) result;
-
-                    // Callback on the graphics thread.
-                    if (onSuccessListener != null) {
-                        Gdx.app.postRunnable(() -> onSuccessListener.onSuccess(typedResult));
-                    }
-
-                    // Callback on the graphics thread.
-                    if (sameAssetTasks != null) {
-                        Gdx.app.postRunnable(() -> {
-                            for (final Task<T> task : sameAssetTasks) {
-                                if (task.onSuccessListener != null) {
-                                    task.onSuccessListener.onSuccess(typedResult);
-                                }
-                            }
-                        });
-                    }
+                    raiseOnSuccess(typedResult);
                 }, e -> {
-                    LOG.e("Failed to build an asset representation: class = %s, assetFile = %s", clazz, assetFile);
-
                     taskMap.get(clazz).remove(assetId);
-
-                    // Callback on the graphics thread.
-                    if (onFailureListener != null) {
-                        Gdx.app.postRunnable(() -> onFailureListener.onFailure(e));
-                    }
-
-                    // Callback on the graphics thread.
-                    if (sameAssetTasks != null) {
-                        Gdx.app.postRunnable(() -> {
-                            for (final Task task : sameAssetTasks) {
-                                if (task.onFailureListener != null) {
-                                    task.onFailureListener.onFailure(e);
-                                }
-                            }
-                        });
-                    }
+                    raiseOnFailure(e);
                 });
             }, e -> {
                 taskMap.get(clazz).remove(assetId);
-
-                // Callback on the graphics thread.
-                if (onFailureListener != null) {
-                    Gdx.app.postRunnable(() -> onFailureListener.onFailure(e));
-                }
-
-                // Callback on the graphics thread.
-                if (sameAssetTasks != null) {
-                    Gdx.app.postRunnable(() -> {
-                        for (final Task task : sameAssetTasks) {
-                            if (task.onFailureListener != null) {
-                                task.onFailureListener.onFailure(e);
-                            }
-                        }
-                    });
-                }
+                raiseOnFailure(e);
             });
+        }
+
+        private void loadAssetFile(@NonNull String assetId,
+                                   @Nullable OnSuccessListener<File> onSuccessListener,
+                                   @Nullable OnFailureListener onFailureListener) {
+
+            LOG.v("Loading a file: assetId = %s", assetId);
+
+            // TODO: how should we load public assets?
+            visionService.getUserAssetApi()
+                         .loadAssetFile(assetId, assetFile -> {
+                             LOG.v("Loaded the file: assetId = %s, assetFile = %s", assetId, assetFile);
+                             if (onSuccessListener != null) {
+                                 handler.post(() -> onSuccessListener.onSuccess(assetFile));
+                             }
+                         }, e -> {
+                             LOG.e("Failed to load the file: assetId = %s", assetId, e);
+                             if (onFailureListener != null) {
+                                 handler.post(() -> onFailureListener.onFailure(e));
+                             }
+                         }, null);
+        }
+
+        private void raiseOnSuccess(@NonNull T result) {
+            LOG.v("Loaded the asset: class = %s, assetId = %s", clazz, assetId);
+
+            if (onSuccessListener != null) {
+                onSuccessListener.onSuccess(result);
+            }
+
+            if (sameAssetTasks != null) {
+                for (final Task<T> task : sameAssetTasks) {
+                    if (task.onSuccessListener != null) {
+                        task.onSuccessListener.onSuccess(result);
+                    }
+                }
+            }
+        }
+
+        private void raiseOnFailure(@NonNull Exception e) {
+            LOG.e("Failed to load the asset: class = %s, assetId = %s", clazz, assetId);
+
+            if (onFailureListener != null) {
+                onFailureListener.onFailure(e);
+            }
+
+            if (sameAssetTasks != null) {
+                for (final Task task : sameAssetTasks) {
+                    if (task.onFailureListener != null) {
+                        task.onFailureListener.onFailure(e);
+                    }
+                }
+            }
         }
     }
 }

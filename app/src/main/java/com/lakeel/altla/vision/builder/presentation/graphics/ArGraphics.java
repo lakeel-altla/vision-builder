@@ -411,10 +411,14 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
             final String assetId = meshComponent.getRequiredAssetId();
             final String assetType = meshComponent.getRequiredAssetType();
 
+            LOG.v("Loading a model: assetId = %s, assetType = %s", assetId, assetType);
+
             assetLoader.load(Model.class, assetId, assetType, model -> {
-                geometryCursorObject = new GeometryCursorObject(model, meshComponent, camera);
+                Gdx.app.postRunnable(() -> {
+                    geometryCursorObject = new GeometryCursorObject(model, meshComponent, camera);
+                });
             }, e -> {
-                LOG.e("Failed to load a model: assetId = %s, assetType = %s", assetId, assetType);
+                LOG.e("Failed to load the model: assetId = %s, assetType = %s", assetId, assetType);
             });
         } else if (component instanceof ShapeComponent) {
             final ShapeComponent shapeComponent = (ShapeComponent) component;
@@ -441,11 +445,16 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
         final String assetId = component.getRequiredAssetId();
         final String assetType = component.getRequiredAssetType();
 
-        assetLoader.load(Model.class, assetId, assetType, model -> {
-            final GeometryObject object = new GeometryObject(model, actor, component);
-            geometryObjectManager.addGeometryObject(object);
+        LOG.v("Loading a model: assetId = %s, assetType = %s", assetId, assetType);
 
-            LOG.v("Added a geometry object: actorId = %s, componentClass = %s", actor.getId(), component.getClass());
+        assetLoader.load(Model.class, assetId, assetType, model -> {
+            Gdx.app.postRunnable(() -> {
+                final GeometryObject object = new GeometryObject(model, actor, component);
+                geometryObjectManager.addGeometryObject(object);
+
+                LOG.v("Added a geometry object: actorId = %s, componentClass = %s",
+                      actor.getId(), component.getClass());
+            });
         }, e -> {
             LOG.e("Failed to load a model: assetId = %s, assetType = %s", assetId, assetType);
         });

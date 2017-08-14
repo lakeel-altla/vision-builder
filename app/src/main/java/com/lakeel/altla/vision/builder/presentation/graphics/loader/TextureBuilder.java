@@ -14,8 +14,9 @@ import java.io.File;
 
 final class TextureBuilder extends AssetBuilder {
 
-    TextureBuilder(@NonNull AssetBuilderContext context) {
-        super(context);
+    @Override
+    Class<?> getTargetType() {
+        return Texture.class;
     }
 
     @Override
@@ -23,14 +24,10 @@ final class TextureBuilder extends AssetBuilder {
                @Nullable OnSuccessListener<Object> onSuccessListener,
                @Nullable OnFailureListener onFailureListener) {
 
-        // This method will be invoked on the loader thread.
         try {
             final FileHandle fileHandle = Gdx.files.absolute(assetFile.getPath());
-
-            // Load contents on the loader thread.
             final TextureData data = TextureData.Factory.loadFromFile(fileHandle, null, false);
 
-            // Create a texture on the graphics thread.
             Gdx.app.postRunnable(() -> {
                 try {
                     final Texture texture = new Texture(data);

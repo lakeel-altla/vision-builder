@@ -10,11 +10,20 @@ import java.io.File;
 
 abstract class AssetBuilder {
 
-    protected final AssetBuilderContext context;
+    protected AssetBuilderContext context;
 
-    AssetBuilder(@NonNull AssetBuilderContext context) {
-        this.context = context;
+    private boolean initialized;
+
+    boolean isInitialized() {
+        return initialized;
     }
+
+    void initialize(@NonNull AssetBuilderContext context) {
+        this.context = context;
+        initialized = true;
+    }
+
+    abstract Class<?> getTargetType();
 
     abstract void build(@NonNull String assetId, @NonNull String assetType, @NonNull File assetFile,
                         @Nullable OnSuccessListener<Object> onSuccessListener,
