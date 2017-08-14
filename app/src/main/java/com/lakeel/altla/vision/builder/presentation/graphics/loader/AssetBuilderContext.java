@@ -11,4 +11,6 @@ interface AssetBuilderContext {
     <T> void load(@NonNull Class<T> clazz, @NonNull String assetId, @NonNull String assetType,
                   @Nullable OnSuccessListener<T> onSuccessListener,
                   @Nullable OnFailureListener onFailureListener);
+
+    void runOnLoaderThread(@NonNull Runnable runnable);
 }

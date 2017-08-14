@@ -33,18 +33,22 @@ final class TextureBuilder extends AssetBuilder {
             // Create a texture on the graphics thread.
             Gdx.app.postRunnable(() -> {
                 try {
+                    final Texture texture = new Texture(data);
+
+                    // Callback on the loadet thread.
                     if (onSuccessListener != null) {
-                        onSuccessListener.onSuccess(new Texture(data));
+                        context.runOnLoaderThread(() -> onSuccessListener.onSuccess(texture));
                     }
                 } catch (RuntimeException e) {
+                    // Callback on the loadet thread.
                     if (onFailureListener != null) {
-                        onFailureListener.onFailure(e);
+                        context.runOnLoaderThread(() -> onFailureListener.onFailure(e));
                     }
                 }
             });
         } catch (RuntimeException e) {
             if (onFailureListener != null) {
-                Gdx.app.postRunnable(() -> onFailureListener.onFailure(e));
+                onFailureListener.onFailure(e);
             }
         }
     }

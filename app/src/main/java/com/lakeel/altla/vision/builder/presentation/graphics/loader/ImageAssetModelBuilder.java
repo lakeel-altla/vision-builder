@@ -62,12 +62,14 @@ final class ImageAssetModelBuilder extends AssetBuilder {
                 final float height = texture.getHeight() * SCALING_FACTOR;
                 model.meshes.get(0).scale(width, height, 1);
 
+                // Callback on the loader thread.
                 if (onSuccessListener != null) {
-                    onSuccessListener.onSuccess(model);
+                    context.runOnLoaderThread(() -> onSuccessListener.onSuccess(model));
                 }
             } catch (RuntimeException e) {
+                // Callback on the loader thread.
                 if (onFailureListener != null) {
-                    onFailureListener.onFailure(e);
+                    context.runOnLoaderThread(() -> onFailureListener.onFailure(e));
                 }
             }
         }, onFailureListener);
