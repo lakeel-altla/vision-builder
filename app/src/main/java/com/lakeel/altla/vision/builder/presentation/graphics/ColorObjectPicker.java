@@ -35,7 +35,7 @@ public final class ColorObjectPicker implements Disposable {
     private final FlushablePool<Renderable> renderablePool = new FlushablePool<Renderable>() {
         @Override
         protected Renderable newObject() {
-            LOG.d("newObject");
+            LOG.v("Creating a new Renderable that will be pooled.");
             return new Renderable();
         }
 
