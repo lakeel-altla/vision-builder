@@ -17,17 +17,11 @@ import com.lakeel.altla.vision.helper.TypedQuery;
 import com.lakeel.altla.vision.model.AssetFileUploadTask;
 
 import android.net.Uri;
-import android.os.Handler;
-import android.os.HandlerThread;
-import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.util.SimpleArrayMap;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 public final class UserAssetApi extends BaseVisionApi {
 
@@ -78,163 +72,47 @@ public final class UserAssetApi extends BaseVisionApi {
         return assetCacheRepository.findOrCreate(assetId);
     }
 
-    private final AssetFileLoader assetFileLoader = new AssetFileLoader();
-
     public void loadAssetFile(@NonNull String assetId,
                               @Nullable OnSuccessListener<File> onSuccessListener,
                               @Nullable OnFailureListener onFailureListener,
                               @Nullable OnProgressListener onProgressListener) {
-        assetFileLoader.queue(assetId, onSuccessListener, onFailureListener, onProgressListener);
-    }
 
-    private final class AssetFileLoader {
+        final File file = assetCacheRepository.find(assetId);
+        if (file == null) {
+            LOG.d("Downloading the asset file: assetId = %s", assetId);
 
-        final HandlerThread loaderHandlerThread = new HandlerThread("AssetFileLoader");
+            try {
+                final File destination = assetCacheRepository.findOrCreate(assetId);
+                final FileDownloadTask downloadTask = userAssetFileRepository.download(
+                        CurrentUser.getInstance().getUserId(), assetId, destination);
 
-        final Handler loaderHandler;
-
-        final Handler uiHandler = new Handler(Looper.getMainLooper());
-
-        final SimpleArrayMap<String, Task> taskMap = new SimpleArrayMap<>();
-
-        AssetFileLoader() {
-            loaderHandlerThread.start();
-            loaderHandler = new Handler(loaderHandlerThread.getLooper());
-        }
-
-        void queue(@NonNull String assetId,
-                   @Nullable OnSuccessListener<File> onSuccessListener,
-                   @Nullable OnFailureListener onFailureListener,
-                   @Nullable OnProgressListener onProgressListener) {
-            synchronized (taskMap) {
-                final Task newTask = new Task(assetId, onSuccessListener, onFailureListener, onProgressListener);
-                final Task activeTask = taskMap.get(assetId);
-                if (activeTask == null) {
-                    taskMap.put(assetId, newTask);
-
-                    LOG.d("A new task is activated: assetId = %s", assetId);
-
-                    loaderHandler.post(newTask);
-                } else {
-                    LOG.d("An active task already exists: assetId = %s", assetId);
-
-                    if (activeTask.sameAssetTasks == null) {
-                        activeTask.sameAssetTasks = new ArrayList<>();
+                downloadTask.addOnSuccessListener(aVoid -> {
+                    if (onSuccessListener != null) {
+                        onSuccessListener.onSuccess(destination);
                     }
-                    activeTask.sameAssetTasks.add(newTask);
-                }
-            }
-        }
+                });
 
-        private final class Task implements Runnable {
-
-            final String assetId;
-
-            @Nullable
-            final OnSuccessListener<File> onSuccessListener;
-
-            @Nullable
-            final OnFailureListener onFailureListener;
-
-            @Nullable
-            final OnProgressListener onProgressListener;
-
-            @Nullable
-            List<Task> sameAssetTasks;
-
-            Task(@NonNull String assetId,
-                 @Nullable OnSuccessListener<File> onSuccessListener, @Nullable OnFailureListener onFailureListener,
-                 @Nullable OnProgressListener onProgressListener) {
-                this.assetId = assetId;
-                this.onSuccessListener = onSuccessListener;
-                this.onFailureListener = onFailureListener;
-                this.onProgressListener = onProgressListener;
-            }
-
-            @Override
-            public void run() {
-                final File file = assetCacheRepository.find(assetId);
-                if (file == null) {
-                    LOG.d("The asset file is not downloaded and cached yet: assetId = %s", assetId);
-
-                    try {
-                        final File destination = assetCacheRepository.findOrCreate(assetId);
-                        final FileDownloadTask downloadTask = userAssetFileRepository.download(
-                                CurrentUser.getInstance().getUserId(), assetId, destination);
-
-                        downloadTask.addOnSuccessListener(aVoid -> {
-                            // The UI thread.
-                            if (onSuccessListener != null) {
-                                onSuccessListener.onSuccess(destination);
-                            }
-                            synchronized (taskMap) {
-                                if (sameAssetTasks != null) {
-                                    for (final Task task : sameAssetTasks) {
-                                        if (task.onSuccessListener != null) {
-                                            task.onSuccessListener.onSuccess(destination);
-                                        }
-                                    }
-                                }
-                                taskMap.remove(assetId);
-                            }
-                        });
-
-                        downloadTask.addOnFailureListener(e -> {
-                            // The UI thread.
-                            if (onFailureListener != null) {
-                                onFailureListener.onFailure(e);
-                            }
-                            synchronized (taskMap) {
-                                if (sameAssetTasks != null) {
-                                    for (final Task task : sameAssetTasks) {
-                                        if (task.onFailureListener != null) {
-                                            task.onFailureListener.onFailure(e);
-                                        }
-                                    }
-                                }
-                                taskMap.remove(assetId);
-                            }
-                        });
-
-                        downloadTask.addOnProgressListener(snapshot -> {
-                            // The UI thread.
-                            final long totalBytes = snapshot.getTotalByteCount();
-                            final long bytesTransferred = snapshot.getBytesTransferred();
-                            if (onProgressListener != null) {
-                                onProgressListener.onProgress(totalBytes, bytesTransferred);
-                            }
-                            synchronized (taskMap) {
-                                if (sameAssetTasks != null) {
-                                    for (final Task task : sameAssetTasks) {
-                                        if (task.onProgressListener != null) {
-                                            task.onProgressListener.onProgress(totalBytes, bytesTransferred);
-                                        }
-                                    }
-                                }
-                            }
-                        });
-                    } catch (IOException e) {
-                        if (onFailureListener != null) onFailureListener.onFailure(e);
+                downloadTask.addOnFailureListener(e -> {
+                    if (onFailureListener != null) {
+                        onFailureListener.onFailure(e);
                     }
-                } else {
-                    LOG.d("The asset file is already downloaded and cached: assetId = %s", assetId);
+                });
 
-                    // The loader thread.
-                    uiHandler.post(() -> {
-                        // The UI thread.
-                        if (onSuccessListener != null) onSuccessListener.onSuccess(file);
-                        synchronized (taskMap) {
-                            if (sameAssetTasks != null) {
-                                for (final Task task : sameAssetTasks) {
-                                    if (task.onSuccessListener != null) {
-                                        task.onSuccessListener.onSuccess(file);
-                                    }
-                                }
-                            }
-                            taskMap.remove(assetId);
-                        }
-                    });
-                }
+                downloadTask.addOnProgressListener(snapshot -> {
+                    final long totalBytes = snapshot.getTotalByteCount();
+                    final long bytesTransferred = snapshot.getBytesTransferred();
+                    if (onProgressListener != null) {
+                        onProgressListener.onProgress(totalBytes, bytesTransferred);
+                    }
+                });
+            } catch (IOException e) {
+                if (onFailureListener != null) onFailureListener.onFailure(e);
+            }
+        } else {
+            LOG.d("Using the cached asset file: assetId = %s", assetId);
+
+            if (onSuccessListener != null) {
+                onSuccessListener.onSuccess(file);
             }
         }
     }

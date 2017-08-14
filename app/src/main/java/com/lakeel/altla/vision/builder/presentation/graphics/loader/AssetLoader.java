@@ -143,7 +143,7 @@ public final class AssetLoader implements AssetBuilderContext {
 
                     activeTask.sameAssetTasks.add(this);
 
-                    LOG.v("Handling this task into the one loading the same asset: class = %s, assetId = %s",
+                    LOG.v("Handling this task in the one loading the same asset: class = %s, assetId = %s",
                           clazz, assetId);
                 }
 
