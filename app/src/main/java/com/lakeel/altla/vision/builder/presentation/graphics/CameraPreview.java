@@ -4,6 +4,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.Disposable;
+import com.lakeel.altla.vision.builder.presentation.graphics.shader.ShaderNames;
+import com.lakeel.altla.vision.builder.presentation.graphics.shader.ShaderProgramFactory;
 import com.projecttango.tangosupport.TangoSupport;
 
 import android.opengl.GLES11Ext;
@@ -21,23 +23,11 @@ import java.nio.ShortBuffer;
  */
 public final class CameraPreview implements Disposable {
 
-    private static final String VERTEX_SHADER_SOURCE =
-            "attribute vec2 a_Position;\n" +
-            "attribute vec2 a_TexCoord;\n" +
-            "varying vec2 v_TexCoord;\n" +
-            "void main() {\n" +
-            "  v_TexCoord = a_TexCoord;\n" +
-            "  gl_Position = vec4(a_Position.x, a_Position.y, 0.0, 1.0);\n" +
-            "}";
+    public static final String ATTRIBUTE_POSITION = "a_position";
 
-    private static final String FRAGMENT_SHADER_SOURCE =
-            "#extension GL_OES_EGL_image_external : require\n" +
-            "precision mediump float;\n" +
-            "uniform samplerExternalOES u_Texture;\n" +
-            "varying vec2 v_TexCoord;\n" +
-            "void main() {\n" +
-            "  gl_FragColor = texture2D(u_Texture,v_TexCoord);\n" +
-            "}";
+    public static final String ATTRIBUTE_TEX_COORD = "a_texCoord";
+
+    public static final String UNIFORM_TEXTURE = "u_texture";
 
     private final Mesh mesh;
 
@@ -48,7 +38,7 @@ public final class CameraPreview implements Disposable {
     public CameraPreview() {
         mesh = new Mesh();
         texture = new Texture();
-        shaderProgram = new ShaderProgram(VERTEX_SHADER_SOURCE, FRAGMENT_SHADER_SOURCE);
+        shaderProgram = ShaderProgramFactory.create(ShaderNames.CAMERA_PREVIEW);
     }
 
     @Override
@@ -67,9 +57,9 @@ public final class CameraPreview implements Disposable {
     public void render() {
         shaderProgram.begin();
 
-        final int positionHandle = shaderProgram.getAttributeLocation("a_Position");
-        final int texCoordHandle = shaderProgram.getAttributeLocation("a_TexCoord");
-        final int textureHandle = shaderProgram.getUniformLocation("u_Texture");
+        final int positionHandle = shaderProgram.getAttributeLocation(ATTRIBUTE_POSITION);
+        final int texCoordHandle = shaderProgram.getAttributeLocation(ATTRIBUTE_TEX_COORD);
+        final int textureHandle = shaderProgram.getUniformLocation(UNIFORM_TEXTURE);
 
         texture.bind();
         Gdx.gl.glUniform1i(textureHandle, 0);

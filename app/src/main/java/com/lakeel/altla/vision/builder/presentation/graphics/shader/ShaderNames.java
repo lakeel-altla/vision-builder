@@ -8,6 +8,8 @@ public final class ShaderNames {
 
     public static final String OUTLINE = "outline";
 
+    public static final String CAMERA_PREVIEW = "camera_preview";
+
     private ShaderNames() {
     }
 }
