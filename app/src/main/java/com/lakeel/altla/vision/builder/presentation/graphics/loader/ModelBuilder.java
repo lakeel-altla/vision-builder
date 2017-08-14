@@ -24,10 +24,10 @@ import static com.badlogic.gdx.graphics.VertexAttributes.Usage.TextureCoordinate
 
 final class ModelBuilder extends AssetBuilder {
 
-    private final SimpleArrayMap<String, TypedBuilder> typedBuilderMap = new SimpleArrayMap<>();
+    private final SimpleArrayMap<String, AssetTypeBuilder> assetTypeBuilderMap = new SimpleArrayMap<>();
 
     ModelBuilder() {
-        typedBuilderMap.put(ImageAsset.TYPE, new ImageAssetBuilder());
+        register(ImageAssetBuilder.class);
     }
 
     @Override
@@ -39,7 +39,7 @@ final class ModelBuilder extends AssetBuilder {
     void build(@NonNull String assetId, @NonNull String assetType, @NonNull File assetFile,
                @Nullable OnSuccessListener<Object> onSuccessListener, @Nullable OnFailureListener onFailureListener) {
 
-        final TypedBuilder builder = typedBuilderMap.get(assetType);
+        final AssetTypeBuilder builder = assetTypeBuilderMap.get(assetType);
         if (builder == null) {
             throw new IllegalArgumentException("The value of 'assetType' is not supported: assetType = " + assetType);
         }
@@ -51,22 +51,41 @@ final class ModelBuilder extends AssetBuilder {
         builder.build(assetId, assetType, assetFile, onSuccessListener, onFailureListener);
     }
 
-    private static abstract class TypedBuilder {
+    private void register(@NonNull Class<? extends AssetTypeBuilder> clazz) {
+        try {
+            final AssetTypeBuilder assetTypeBuilder = clazz.newInstance();
+            assetTypeBuilderMap.put(assetTypeBuilder.getTargetType(), assetTypeBuilder);
+        } catch (InstantiationException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static abstract class AssetTypeBuilder {
 
         AssetBuilderContext context;
+
+        abstract String getTargetType();
 
         abstract void build(@NonNull String assetId, @NonNull String assetType, @NonNull File assetFile,
                             @Nullable OnSuccessListener<Object> onSuccessListener,
                             @Nullable OnFailureListener onFailureListener);
     }
 
-    private static final class ImageAssetBuilder extends TypedBuilder {
+    private static final class ImageAssetBuilder extends AssetTypeBuilder {
 
         // The texture scalling factor: 512 pixels = 1 meter.
         static final float SCALING_FACTOR = 1f / 512f;
 
         final com.badlogic.gdx.graphics.g3d.utils.ModelBuilder
                 modelBuilder = new com.badlogic.gdx.graphics.g3d.utils.ModelBuilder();
+
+        ImageAssetBuilder() {
+        }
+
+        @Override
+        String getTargetType() {
+            return ImageAsset.TYPE;
+        }
 
         @Override
         public void build(@NonNull String assetId, @NonNull String assetType, @NonNull File assetFile,
