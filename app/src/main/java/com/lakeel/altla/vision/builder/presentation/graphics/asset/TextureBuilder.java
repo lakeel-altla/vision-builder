@@ -1,4 +1,4 @@
-package com.lakeel.altla.vision.builder.presentation.graphics.loader;
+package com.lakeel.altla.vision.builder.presentation.graphics.asset;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;

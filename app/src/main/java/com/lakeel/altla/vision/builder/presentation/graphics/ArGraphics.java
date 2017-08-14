@@ -31,7 +31,7 @@ import com.badlogic.gdx.utils.Array;
 import com.lakeel.altla.android.log.Log;
 import com.lakeel.altla.android.log.LogFactory;
 import com.lakeel.altla.vision.api.VisionService;
-import com.lakeel.altla.vision.builder.presentation.graphics.loader.AssetLoader;
+import com.lakeel.altla.vision.builder.presentation.graphics.asset.AssetLoader;
 import com.lakeel.altla.vision.builder.presentation.graphics.loader.ShapeModelLoader;
 import com.lakeel.altla.vision.builder.presentation.graphics.model.ActorAxesObject;
 import com.lakeel.altla.vision.builder.presentation.graphics.model.GeometryCursorObject;
