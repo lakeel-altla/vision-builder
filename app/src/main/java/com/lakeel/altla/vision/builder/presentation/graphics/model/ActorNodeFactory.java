@@ -20,11 +20,11 @@ public final class ActorNodeFactory {
 
     private final AssetLoader assetLoader;
 
-    private final ShapeModelLoader shapeModelLoader;
+    private final ShapeModelFactory shapeModelFactory;
 
-    public ActorNodeFactory(@NonNull AssetLoader assetLoader, @NonNull ShapeModelLoader shapeModelLoader) {
+    public ActorNodeFactory(@NonNull AssetLoader assetLoader, @NonNull ShapeModelFactory shapeModelFactory) {
         this.assetLoader = assetLoader;
-        this.shapeModelLoader = shapeModelLoader;
+        this.shapeModelFactory = shapeModelFactory;
     }
 
     @NonNull
@@ -60,24 +60,24 @@ public final class ActorNodeFactory {
                     node.addComponentInstance(instance);
                     node.setMainComponentInstance(instance);
 
-                    LOG.v("Added an actor mesh instance: actorId = %s, componentClass = %s",
+                    LOG.v("Added a mesh component instance: actorId = %s, componentClass = %s",
                           node.actor.getId(), component.getClass());
                 });
             }, e -> {
-                LOG.e("Failed to load the model: assetId = %s, assetType = %s", assetId, assetType);
+                LOG.e("Failed to build the model: assetId = %s, assetType = %s", assetId, assetType);
             });
 
         } else if (meshComponent instanceof PrimitiveMeshComponent) {
 
             final PrimitiveMeshComponent component = (PrimitiveMeshComponent) meshComponent;
 
-            final Model model = shapeModelLoader.load(component.getClass());
+            final Model model = shapeModelFactory.create(component.getClass());
 
             final MeshComponentInstance instance = new MeshComponentInstance(model, node);
             node.addComponentInstance(instance);
             node.setMainComponentInstance(instance);
 
-            LOG.v("Added an actor mesh instance: actorId = %s, componentClass = %s",
+            LOG.v("Added a mesh component instance: actorId = %s, componentClass = %s",
                   node.actor.getId(), component.getClass());
 
         } else {
@@ -85,7 +85,18 @@ public final class ActorNodeFactory {
         }
     }
 
-    private void buildCollisionComponentInstance(@NonNull ActorNode node, @NonNull CollisionComponent component) {
-        // TODO
+    private void buildCollisionComponentInstance(@NonNull ActorNode node,
+                                                 @NonNull CollisionComponent collisionComponent) {
+
+        final Model model = shapeModelFactory.create(collisionComponent.getClass());
+        final CollisionComponentInstance instance = new CollisionComponentInstance(model, node, collisionComponent);
+        node.addComponentInstance(instance);
+
+        if (node.getMainComponentInstance() == null) {
+            node.setMainComponentInstance(instance);
+        }
+
+        LOG.v("Added a collision component instance: actorId = %s, componentClass = %s",
+              node.actor.getId(), collisionComponent.getClass());
     }
 }

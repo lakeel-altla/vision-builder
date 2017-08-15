@@ -62,5 +62,7 @@
     <string name="button_set_camera_preview_visible_false">Hide Camera Preview</string>
     <string name="button_set_camera_preview_visible_true">Show Camera Preview</string>
     <string name="button_show_trigger_list_pane">Trigger</string>
+    <string name="label_box_collision">Box</string>
+    <string name="label_sphere_collision">Shpere</string>
 
 </resources>

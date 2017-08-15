@@ -37,11 +37,13 @@ import com.lakeel.altla.vision.builder.presentation.graphics.model.ActorCursorIn
 import com.lakeel.altla.vision.builder.presentation.graphics.model.ActorNode;
 import com.lakeel.altla.vision.builder.presentation.graphics.model.ActorNodeFactory;
 import com.lakeel.altla.vision.builder.presentation.graphics.model.ComponentInstance;
-import com.lakeel.altla.vision.builder.presentation.graphics.model.ShapeModelLoader;
+import com.lakeel.altla.vision.builder.presentation.graphics.model.ShapeModelFactory;
 import com.lakeel.altla.vision.builder.presentation.graphics.shader.FillColorShader;
 import com.lakeel.altla.vision.builder.presentation.model.Axis;
 import com.lakeel.altla.vision.model.Actor;
 import com.lakeel.altla.vision.model.AssetMeshComponent;
+import com.lakeel.altla.vision.model.CollisionComponent;
+import com.lakeel.altla.vision.model.MeshComponent;
 import com.lakeel.altla.vision.model.PrimitiveMeshComponent;
 import com.projecttango.tangosupport.TangoSupport;
 
@@ -119,7 +121,7 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
 
     private final AssetLoader assetLoader;
 
-    private final ShapeModelLoader shapeModelLoader = new ShapeModelLoader();
+    private final ShapeModelFactory shapeModelFactory = new ShapeModelFactory();
 
     private final ActorNodeFactory actorNodeFactory;
 
@@ -165,7 +167,7 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
         this.display = display;
         this.listener = listener;
         assetLoader = new AssetLoader(visionService);
-        actorNodeFactory = new ActorNodeFactory(assetLoader, shapeModelLoader);
+        actorNodeFactory = new ActorNodeFactory(assetLoader, shapeModelFactory);
     }
 
     @Override
@@ -246,7 +248,7 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
 
         fillColorShader.dispose();
 
-        shapeModelLoader.dispose();
+        shapeModelFactory.dispose();
 
         if (sceneFrameBuffer != null) {
             sceneFrameBuffer.dispose();
@@ -406,26 +408,41 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
     }
 
     public void addActorCursor(@NonNull Actor actor) {
-        final AssetMeshComponent assetMeshComponent = actor.findComponent(AssetMeshComponent.class);
-        if (assetMeshComponent != null) {
-            final String assetId = assetMeshComponent.getRequiredAssetId();
-            final String assetType = assetMeshComponent.getRequiredAssetType();
+        final MeshComponent meshComponent = actor.findComponent(MeshComponent.class);
+        if (meshComponent != null) {
 
-            LOG.v("Loading a model: assetId = %s, assetType = %s", assetId, assetType);
+            if (meshComponent instanceof AssetMeshComponent) {
 
-            assetLoader.load(Model.class, assetId, assetType, model -> {
-                Gdx.app.postRunnable(() -> {
-                    actorCursorInstance = new ActorCursorInstance(model, actor, camera);
+                final AssetMeshComponent assetMeshComponent = (AssetMeshComponent) meshComponent;
+                final String assetId = assetMeshComponent.getRequiredAssetId();
+                final String assetType = assetMeshComponent.getRequiredAssetType();
+
+                LOG.v("Loading a model: assetId = %s, assetType = %s", assetId, assetType);
+
+                assetLoader.load(Model.class, assetId, assetType, model -> {
+                    Gdx.app.postRunnable(() -> {
+                        actorCursorInstance = new ActorCursorInstance(model, actor, camera);
+                    });
+                }, e -> {
+                    LOG.e("Failed to build the model: assetId = %s, assetType = %s", assetId, assetType);
                 });
-            }, e -> {
-                LOG.e("Failed to load the model: assetId = %s, assetType = %s", assetId, assetType);
-            });
 
-            return;
+            } else if (meshComponent instanceof PrimitiveMeshComponent) {
+
+                final PrimitiveMeshComponent primitiveMeshComponent = (PrimitiveMeshComponent) meshComponent;
+                final Model model = shapeModelFactory.create(primitiveMeshComponent.getClass());
+                actorCursorInstance = new ActorCursorInstance(model, actor, camera);
+
+            } else {
+                throw new IllegalStateException("An unexpected type of a mesh component: " + meshComponent.getClass());
+            }
+
         } else {
-            final PrimitiveMeshComponent primitiveMeshComponent = actor.findComponent(PrimitiveMeshComponent.class);
-            if (primitiveMeshComponent != null) {
-                final Model model = shapeModelLoader.load(primitiveMeshComponent.getClass());
+
+            final CollisionComponent collisionComponent = actor.findComponent(CollisionComponent.class);
+            if (collisionComponent != null) {
+
+                final Model model = shapeModelFactory.create(collisionComponent.getClass());
                 actorCursorInstance = new ActorCursorInstance(model, actor, camera);
             }
         }

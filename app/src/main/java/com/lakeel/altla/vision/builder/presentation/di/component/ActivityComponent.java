@@ -18,7 +18,7 @@ import com.lakeel.altla.vision.builder.presentation.view.fragment.SettingsFragme
 import com.lakeel.altla.vision.builder.presentation.view.pane.ActorEditMenuPane;
 import com.lakeel.altla.vision.builder.presentation.view.pane.ActorMetadataPane;
 import com.lakeel.altla.vision.builder.presentation.view.pane.ImageAssetListPane;
-import com.lakeel.altla.vision.builder.presentation.view.pane.TriggerShapeListPane;
+import com.lakeel.altla.vision.builder.presentation.view.pane.TriggerListPane;
 import com.lakeel.altla.vision.builder.presentation.view.pane.ViewModeMenuPane;
 
 import dagger.Subcomponent;
@@ -60,7 +60,7 @@ public interface ActivityComponent {
 
     void inject(ImageAssetListPane pane);
 
-    void inject(TriggerShapeListPane pane);
+    void inject(TriggerListPane pane);
 
     void inject(ActorEditMenuPane pane);
 

@@ -5,8 +5,10 @@ import com.lakeel.altla.vision.helper.ComponentTypeResolver;
 import com.lakeel.altla.vision.helper.TypedQuery;
 import com.lakeel.altla.vision.model.Actor;
 import com.lakeel.altla.vision.model.AssetMeshComponent;
+import com.lakeel.altla.vision.model.BoxCollisionComponent;
 import com.lakeel.altla.vision.model.BoxMeshComponent;
 import com.lakeel.altla.vision.model.Component;
+import com.lakeel.altla.vision.model.SphereCollisionComponent;
 import com.lakeel.altla.vision.model.SphereMeshComponent;
 import com.lakeel.altla.vision.model.TransformComponent;
 
@@ -25,10 +27,17 @@ public final class UserActorApi extends BaseVisionApi {
             private final SimpleArrayMap<String, Class<? extends Component>> classMap = new SimpleArrayMap<>();
 
             {
+                // The transform compopent.
                 classMap.put(TransformComponent.TYPE, TransformComponent.class);
+
+                // The mesh components.
                 classMap.put(AssetMeshComponent.TYPE, AssetMeshComponent.class);
                 classMap.put(BoxMeshComponent.TYPE, BoxMeshComponent.class);
                 classMap.put(SphereMeshComponent.TYPE, SphereMeshComponent.class);
+
+                // The collision components.
+                classMap.put(BoxCollisionComponent.TYPE, BoxCollisionComponent.class);
+                classMap.put(SphereCollisionComponent.TYPE, SphereCollisionComponent.class);
             }
 
             @Override

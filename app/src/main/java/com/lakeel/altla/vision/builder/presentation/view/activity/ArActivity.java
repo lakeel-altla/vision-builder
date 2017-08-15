@@ -32,14 +32,14 @@ import com.lakeel.altla.vision.builder.presentation.view.pane.EditModelMenuPane;
 import com.lakeel.altla.vision.builder.presentation.view.pane.ImageAssetListPane;
 import com.lakeel.altla.vision.builder.presentation.view.pane.PaneGroup;
 import com.lakeel.altla.vision.builder.presentation.view.pane.PaneLifecycle;
-import com.lakeel.altla.vision.builder.presentation.view.pane.TriggerShapeListPane;
+import com.lakeel.altla.vision.builder.presentation.view.pane.TriggerListPane;
 import com.lakeel.altla.vision.builder.presentation.view.pane.ViewModeMenuPane;
 import com.lakeel.altla.vision.helper.TypedQuery;
 import com.lakeel.altla.vision.model.Actor;
 import com.lakeel.altla.vision.model.AreaSettings;
 import com.lakeel.altla.vision.model.AssetMeshComponent;
+import com.lakeel.altla.vision.model.CollisionComponent;
 import com.lakeel.altla.vision.model.ImageAsset;
-import com.lakeel.altla.vision.model.PrimitiveMeshComponent;
 import com.lakeel.altla.vision.model.TransformComponent;
 import com.projecttango.tangosupport.TangoSupport;
 
@@ -69,7 +69,7 @@ public final class ArActivity extends AndroidApplication
                    ViewModeMenuPane.PaneContext,
                    EditModelMenuPane.PaneContext,
                    ImageAssetListPane.PaneContext,
-                   TriggerShapeListPane.PaneContext,
+                   TriggerListPane.PaneContext,
                    ActorEditMenuPane.PaneContext {
 
     private static final Log LOG = LogFactory.getLog(ArActivity.class);
@@ -110,7 +110,7 @@ public final class ArActivity extends AndroidApplication
 
     private ImageAssetListPane imageAssetListPane;
 
-    private TriggerShapeListPane triggerShapeListPane;
+    private TriggerListPane triggerListPane;
 
     private ActorEditMenuPane actorEditMenuPane;
 
@@ -174,7 +174,7 @@ public final class ArActivity extends AndroidApplication
         viewModeMenuPane = new ViewModeMenuPane(this);
         editModelMenuPane = new EditModelMenuPane(this);
         imageAssetListPane = new ImageAssetListPane(this);
-        triggerShapeListPane = new TriggerShapeListPane(this);
+        triggerListPane = new TriggerListPane(this);
         actorEditMenuPane = new ActorEditMenuPane(this);
         actorMetadataPane = new ActorMetadataPane(this);
 
@@ -182,14 +182,14 @@ public final class ArActivity extends AndroidApplication
         paneLifecycle.add(viewModeMenuPane);
         paneLifecycle.add(editModelMenuPane);
         paneLifecycle.add(imageAssetListPane);
-        paneLifecycle.add(triggerShapeListPane);
+        paneLifecycle.add(triggerListPane);
         paneLifecycle.add(actorEditMenuPane);
         paneLifecycle.add(actorMetadataPane);
 
         paneGroup.add(viewModeMenuPane);
         paneGroup.add(editModelMenuPane);
         paneGroup.add(imageAssetListPane);
-        paneGroup.add(triggerShapeListPane);
+        paneGroup.add(triggerListPane);
         paneGroup.add(actorEditMenuPane);
 
         viewModeMenuPane.setOnVisibleChangedListener(visible -> {
@@ -403,7 +403,7 @@ public final class ArActivity extends AndroidApplication
 
     @Override
     public void showTriggerListPane() {
-        paneGroup.show(R.id.pane_trigger_shape_list);
+        paneGroup.show(R.id.pane_trigger_list);
     }
 
     @Override
@@ -434,30 +434,21 @@ public final class ArActivity extends AndroidApplication
     }
 
     @Override
-    public void onTriggerShapeSelected(@Nullable Class<? extends PrimitiveMeshComponent> clazz) {
+    public void onTriggerSelected(@Nullable CollisionComponent collisionComponent) {
         Gdx.app.postRunnable(() -> {
-            if (clazz == null) {
+            if (collisionComponent == null) {
                 arGraphics.removeActorCursor();
             } else {
-                try {
-                    final TransformComponent transformComponent = new TransformComponent();
+                final TransformComponent transformComponent = new TransformComponent();
 
-                    final PrimitiveMeshComponent primitiveMeshComponent = clazz.newInstance();
-                    primitiveMeshComponent.setUserId(CurrentUser.getInstance().getUserId());
-                    primitiveMeshComponent.setVisible(true);
-                    primitiveMeshComponent.setVisibleAtRuntime(false);
+                final Actor actor = new Actor();
+                actor.setUserId(CurrentUser.getInstance().getUserId());
+                // TODO: generate the name of the new actor.
+                actor.setName(collisionComponent.getType());
+                actor.setTransformComponent(transformComponent);
+                actor.addComponent(collisionComponent);
 
-                    final Actor actor = new Actor();
-                    actor.setUserId(CurrentUser.getInstance().getUserId());
-                    // TODO: generate the name of the new actor.
-                    actor.setName(primitiveMeshComponent.getType());
-                    actor.setTransformComponent(transformComponent);
-                    actor.addComponent(primitiveMeshComponent);
-
-                    arGraphics.addActorCursor(actor);
-                } catch (InstantiationException | IllegalAccessException e) {
-                    LOG.e("Failed to instantiate a ShapeComponent.", e);
-                }
+                arGraphics.addActorCursor(actor);
             }
         });
     }

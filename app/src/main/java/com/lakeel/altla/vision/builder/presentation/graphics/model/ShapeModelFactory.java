@@ -12,27 +12,33 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Disposable;
 import com.lakeel.altla.android.log.Log;
 import com.lakeel.altla.android.log.LogFactory;
+import com.lakeel.altla.vision.model.BoxCollisionComponent;
 import com.lakeel.altla.vision.model.BoxMeshComponent;
-import com.lakeel.altla.vision.model.PrimitiveMeshComponent;
+import com.lakeel.altla.vision.model.Component;
+import com.lakeel.altla.vision.model.SphereCollisionComponent;
 import com.lakeel.altla.vision.model.SphereMeshComponent;
 
 import android.support.annotation.NonNull;
-import android.support.v4.util.SimpleArrayMap;
+import android.support.v4.util.SparseArrayCompat;
 
 import static com.badlogic.gdx.graphics.VertexAttributes.Usage.Normal;
 import static com.badlogic.gdx.graphics.VertexAttributes.Usage.Position;
 
-public final class ShapeModelLoader implements Disposable {
+public final class ShapeModelFactory implements Disposable {
 
-    private static final Log LOG = LogFactory.getLog(ShapeModelLoader.class);
+    private static final Log LOG = LogFactory.getLog(ShapeModelFactory.class);
 
-    private final SimpleArrayMap<Class<? extends PrimitiveMeshComponent>, Loader> loaderMap = new SimpleArrayMap<>();
+    private static final int SHAPE_BOX = 0;
 
-    private final SimpleArrayMap<Class<? extends PrimitiveMeshComponent>, Model> modelMap = new SimpleArrayMap<>();
+    private static final int SHAPE_SPHERE = 1;
 
-    public ShapeModelLoader() {
-        loaderMap.put(BoxMeshComponent.class, new BoxModelLoader());
-        loaderMap.put(SphereMeshComponent.class, new SphereModelLoader());
+    private final SparseArrayCompat<Builder> builderMap = new SparseArrayCompat<>();
+
+    private final SparseArrayCompat<Model> modelMap = new SparseArrayCompat<>();
+
+    public ShapeModelFactory() {
+        builderMap.put(SHAPE_BOX, new BoxModelBuilder());
+        builderMap.put(SHAPE_SPHERE, new SphereModelBuilder());
     }
 
     @Override
@@ -44,25 +50,35 @@ public final class ShapeModelLoader implements Disposable {
     }
 
     @NonNull
-    public Model load(@NonNull Class<? extends PrimitiveMeshComponent> clazz) {
-        Model model = modelMap.get(clazz);
+    public Model create(@NonNull Class<? extends Component> clazz) {
+
+        final int shapeId;
+        if (BoxCollisionComponent.class == clazz || BoxMeshComponent.class == clazz) {
+            shapeId = SHAPE_BOX;
+        } else if (SphereCollisionComponent.class == clazz || SphereMeshComponent.class == clazz) {
+            shapeId = SHAPE_SPHERE;
+        } else {
+            throw new IllegalArgumentException("'clazz' is invalid: " + clazz);
+        }
+
+        Model model = modelMap.get(shapeId);
         if (model == null) {
-            final Loader loader = loaderMap.get(clazz);
-            if (loader == null) throw new IllegalArgumentException("The value of 'clazz' is invalid: " + clazz);
+            final Builder builder = builderMap.get(shapeId);
+            if (builder == null) throw new IllegalArgumentException("'shapeId' is invalid: " + shapeId);
 
-            model = loader.load();
+            model = builder.build();
 
-            modelMap.put(clazz, model);
+            modelMap.put(shapeId, model);
         }
         return model;
     }
 
-    private interface Loader {
+    private interface Builder {
 
-        Model load();
+        Model build();
     }
 
-    private static final class BoxModelLoader implements Loader {
+    private static final class BoxModelBuilder implements Builder {
 
         private static final float SIZE = 0.25f;
 
@@ -94,7 +110,7 @@ public final class ShapeModelLoader implements Disposable {
 
         private final Vector3 position = new Vector3();
 
-        BoxModelLoader() {
+        BoxModelBuilder() {
             for (int i = 0; i < vertexInfos.length; i++) {
                 vertexInfos[i] = new MeshPartBuilder.VertexInfo();
             }
@@ -102,7 +118,7 @@ public final class ShapeModelLoader implements Disposable {
 
         @Override
         @NonNull
-        public Model load() {
+        public Model build() {
 //            final float s = SIZE;
 
             modelBuilder.begin();
@@ -147,7 +163,7 @@ public final class ShapeModelLoader implements Disposable {
         }
     }
 
-    private static final class SphereModelLoader implements Loader {
+    private static final class SphereModelBuilder implements Builder {
 
         private static final float SCALE = 0.5f;
 
@@ -160,7 +176,7 @@ public final class ShapeModelLoader implements Disposable {
 
         @Override
         @NonNull
-        public Model load() {
+        public Model build() {
             final float s = SCALE;
 
             modelBuilder.begin();

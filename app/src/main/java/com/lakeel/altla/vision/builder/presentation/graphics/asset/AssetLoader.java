@@ -191,7 +191,7 @@ public final class AssetLoader implements AssetBuilderContext {
 
             LOG.v("Loading a file: assetId = %s", assetId);
 
-            // TODO: how should we load public assets?
+            // TODO: how should we build public assets?
             visionService.getUserAssetApi()
                          .loadAssetFile(assetId, assetFile -> {
                              LOG.v("Loaded the file: assetId = %s, assetFile = %s", assetId, assetFile);
@@ -199,7 +199,7 @@ public final class AssetLoader implements AssetBuilderContext {
                                  handler.post(() -> onSuccessListener.onSuccess(assetFile));
                              }
                          }, e -> {
-                             LOG.e("Failed to load the file: assetId = %s", assetId, e);
+                             LOG.e("Failed to build the file: assetId = %s", assetId, e);
                              if (onFailureListener != null) {
                                  handler.post(() -> onFailureListener.onFailure(e));
                              }
@@ -223,7 +223,7 @@ public final class AssetLoader implements AssetBuilderContext {
         }
 
         private void raiseOnFailure(@NonNull Exception e) {
-            LOG.e("Failed to load the asset: class = %s, assetId = %s", clazz, assetId);
+            LOG.e("Failed to build the asset: class = %s, assetId = %s", clazz, assetId);
 
             if (onFailureListener != null) {
                 onFailureListener.onFailure(e);

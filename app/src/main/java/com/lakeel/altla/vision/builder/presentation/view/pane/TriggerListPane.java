@@ -2,10 +2,11 @@ package com.lakeel.altla.vision.builder.presentation.view.pane;
 
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
-import com.lakeel.altla.vision.builder.presentation.model.TriggerShapeListModel;
-import com.lakeel.altla.vision.model.PrimitiveMeshComponent;
+import com.lakeel.altla.vision.builder.presentation.model.TriggerListModel;
+import com.lakeel.altla.vision.model.CollisionComponent;
 
 import android.app.Activity;
+import android.content.res.Resources;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
@@ -15,11 +16,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import javax.inject.Inject;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public final class TriggerShapeListPane extends Pane {
+public final class TriggerListPane extends Pane {
+
+    @Inject
+    Resources resources;
 
     @BindView(R.id.recycler_view)
     RecyclerView recyclerView;
@@ -28,14 +34,16 @@ public final class TriggerShapeListPane extends Pane {
 
     private final Adapter adapter = new Adapter();
 
-    private final TriggerShapeListModel triggerShapeListModel = new TriggerShapeListModel();
+    private final TriggerListModel triggerListModel;
 
-    public TriggerShapeListPane(@NonNull Activity activity) {
-        super(activity, R.id.pane_trigger_shape_list);
+    public TriggerListPane(@NonNull Activity activity) {
+        super(activity, R.id.pane_trigger_list);
 
         ((ActivityScopeContext) activity).getActivityComponent().inject(this);
 
         paneContext = (PaneContext) activity;
+
+        triggerListModel = new TriggerListModel(resources);
 
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(activity, LinearLayoutManager.HORIZONTAL, false));
@@ -48,7 +56,7 @@ public final class TriggerShapeListPane extends Pane {
 
     public interface PaneContext {
 
-        void onTriggerShapeSelected(@Nullable Class<? extends PrimitiveMeshComponent> clazz);
+        void onTriggerSelected(@Nullable CollisionComponent collisionComponent);
 
         void showEditModeMenuPane();
     }
@@ -79,8 +87,8 @@ public final class TriggerShapeListPane extends Pane {
                     selectedPosition = recyclerView.getChildAdapterPosition(selectedItemView);
                 }
 
-                triggerShapeListModel.setSelectedPosition(selectedPosition);
-                paneContext.onTriggerShapeSelected(triggerShapeListModel.getSelectedItem());
+                triggerListModel.setSelectedPosition(selectedPosition);
+                paneContext.onTriggerSelected(triggerListModel.getSelectedItem().createCollisionComponent());
             });
 
             return new Adapter.ViewHolder(itemView);
@@ -88,14 +96,13 @@ public final class TriggerShapeListPane extends Pane {
 
         @Override
         public void onBindViewHolder(Adapter.ViewHolder holder, int position) {
-            final Class<? extends PrimitiveMeshComponent> clazz = triggerShapeListModel.getItem(position);
-            // TODO: use a name for the display.
-            holder.textViewName.setText(clazz.getSimpleName());
+            final TriggerListModel.Item item = triggerListModel.getItem(position);
+            holder.textViewName.setText(item.getName());
         }
 
         @Override
         public int getItemCount() {
-            return triggerShapeListModel.getItemCount();
+            return triggerListModel.getItemCount();
         }
 
         final class ViewHolder extends RecyclerView.ViewHolder {
