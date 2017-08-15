@@ -405,7 +405,7 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
     }
 
     public void addActorCursorObject(@NonNull Actor actor) {
-        final AssetMeshComponent assetMeshComponent = actor.getComponent(AssetMeshComponent.class);
+        final AssetMeshComponent assetMeshComponent = actor.findComponent(AssetMeshComponent.class);
         if (assetMeshComponent != null) {
             final String assetId = assetMeshComponent.getRequiredAssetId();
             final String assetType = assetMeshComponent.getRequiredAssetType();
@@ -422,7 +422,7 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
 
             return;
         } else {
-            final PrimitiveMeshComponent primitiveMeshComponent = actor.getComponent(PrimitiveMeshComponent.class);
+            final PrimitiveMeshComponent primitiveMeshComponent = actor.findComponent(PrimitiveMeshComponent.class);
             if (primitiveMeshComponent != null) {
                 final Model model = shapeModelLoader.load(primitiveMeshComponent.getClass());
                 actorCursorObject = new ActorCursorObject(model, actor, camera);

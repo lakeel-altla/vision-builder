@@ -59,7 +59,7 @@ public final class Actor extends BaseEntity {
 
     @Exclude
     @Nullable
-    public <T extends Component> T getComponent(@NonNull Class<T> clazz) {
+    public <T extends Component> T findComponent(@NonNull Class<T> clazz) {
         if (components == null) return null;
 
         for (final Component component : components) {
@@ -75,13 +75,13 @@ public final class Actor extends BaseEntity {
     @Exclude
     @NonNull
     public <T extends Component> T getRequiredComponent(@NonNull Class<T> clazz) {
-        final T component = getComponent(clazz);
+        final T component = findComponent(clazz);
         if (component == null) throw new IllegalStateException("The component could not be found: " + clazz);
         return component;
     }
 
     public boolean hasComponent(@NonNull Class<? extends Component> clazz) {
-        return getComponent(clazz) != null;
+        return findComponent(clazz) != null;
     }
 
     public void addComponent(@NonNull Component component) {
