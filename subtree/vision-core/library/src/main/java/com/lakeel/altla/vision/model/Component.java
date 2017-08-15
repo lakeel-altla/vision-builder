@@ -1,5 +1,7 @@
 package com.lakeel.altla.vision.model;
 
+import com.google.firebase.database.Exclude;
+
 import android.support.annotation.NonNull;
 
 public abstract class Component extends BaseEntity {
@@ -9,6 +11,7 @@ public abstract class Component extends BaseEntity {
     Component() {
     }
 
+    @Exclude
     @NonNull
     public abstract String getType();
 }

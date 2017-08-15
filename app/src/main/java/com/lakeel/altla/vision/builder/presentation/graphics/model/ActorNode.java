@@ -1,17 +1,22 @@
 package com.lakeel.altla.vision.builder.presentation.graphics.model;
 
-import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.Array;
+import com.lakeel.altla.android.log.Log;
+import com.lakeel.altla.android.log.LogFactory;
 import com.lakeel.altla.vision.builder.presentation.model.Axis;
 import com.lakeel.altla.vision.model.Actor;
-import com.lakeel.altla.vision.model.MeshComponent;
 import com.lakeel.altla.vision.model.TransformComponent;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
-public final class ActorObject extends ModelInstance {
+public final class ActorNode {
+
+    private static final Log LOG = LogFactory.getLog(ActorNode.class);
 
     private static final float MAX_SCALE_RATIO = 1.2f;
 
@@ -19,9 +24,6 @@ public final class ActorObject extends ModelInstance {
 
     @NonNull
     public final Actor actor;
-
-    @NonNull
-    public final MeshComponent meshComponent;
 
     @NonNull
     public final Vector3 position = new Vector3();
@@ -34,17 +36,21 @@ public final class ActorObject extends ModelInstance {
 
     public boolean transformDirty;
 
+    @NonNull
+    public final Matrix4 transform = new Matrix4();
+
+    private final Array<ComponentInstance> componentInstances = new Array<>();
+
+    private ComponentInstance mainComponentInstance;
+
     // A temp vector.
     private final Vector3 tempAxisVector = new Vector3();
 
     // A temp vector.
     private final Quaternion tempOrientation = new Quaternion();
 
-    public ActorObject(@NonNull Model model, @NonNull Actor actor) {
-        super(model);
-
+    public ActorNode(@NonNull Actor actor) {
         this.actor = actor;
-        this.meshComponent = actor.getRequiredComponent(MeshComponent.class);
 
         final TransformComponent transformComponent = actor.getRequiredTransformComponent();
 
@@ -64,11 +70,54 @@ public final class ActorObject extends ModelInstance {
         transformDirty = true;
     }
 
+    public int getComponentInstanceCount() {
+        return componentInstances.size;
+    }
+
+    @NonNull
+    public ComponentInstance getComponentInstance(int index) {
+        return componentInstances.get(index);
+    }
+
+    @Nullable
+    public ComponentInstance getMainComponentInstance() {
+        return mainComponentInstance;
+    }
+
+    @NonNull
+    public ComponentInstance getRequiredMainComponentInstance() {
+        if (mainComponentInstance == null) {
+            throw new IllegalStateException("The property 'mainComponentInstance' is null.");
+        }
+        return mainComponentInstance;
+    }
+
+    void setMainComponentInstance(@Nullable ComponentInstance mainComponentInstance) {
+        this.mainComponentInstance = mainComponentInstance;
+    }
+
+    void addComponentInstance(@NonNull ComponentInstance componentInstance) {
+        componentInstances.add(componentInstance);
+        // Must be initialize the transform of a component instance by this node's one.
+        componentInstance.transform.set(transform);
+    }
+
     public void update() {
+        final boolean transformDirtyMemento = transformDirty;
+
         if (transformDirty) {
             transformDirty = false;
             transform.set(position, orientation, scale);
         }
+
+        for (int i = 0; i < componentInstances.size; i++) {
+            componentInstances.get(i).update(transformDirtyMemento);
+        }
+    }
+
+    public void collectVisibleInstances(@NonNull Array<ModelInstance> out) {
+        // TODO
+        out.addAll(componentInstances);
     }
 
     public void translate(@NonNull Axis axis, float distance) {

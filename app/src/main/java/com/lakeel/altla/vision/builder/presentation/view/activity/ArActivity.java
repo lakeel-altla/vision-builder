@@ -37,8 +37,8 @@ import com.lakeel.altla.vision.builder.presentation.view.pane.ViewModeMenuPane;
 import com.lakeel.altla.vision.helper.TypedQuery;
 import com.lakeel.altla.vision.model.Actor;
 import com.lakeel.altla.vision.model.AreaSettings;
-import com.lakeel.altla.vision.model.ImageAsset;
 import com.lakeel.altla.vision.model.AssetMeshComponent;
+import com.lakeel.altla.vision.model.ImageAsset;
 import com.lakeel.altla.vision.model.PrimitiveMeshComponent;
 import com.lakeel.altla.vision.model.TransformComponent;
 import com.projecttango.tangosupport.TangoSupport;
@@ -288,34 +288,7 @@ public final class ArActivity extends AndroidApplication
                         // TODO: for public scope.
                         // TODO: for other actor types.
                         queryUserActors = arModel.loadUserActors();
-                        queryUserActors.addTypedChildEventListener(
-                                new TypedQuery.TypedChildEventListener<Actor>() {
-                                    @Override
-                                    public void onChildAdded(@NonNull Actor actor, @Nullable String previousChildName) {
-                                        LOG.v("Adding an actor: id = %s", actor.getId());
-                                        Gdx.app.postRunnable(() -> arGraphics.addActorObject(actor));
-                                    }
-
-                                    @Override
-                                    public void onChildChanged(@NonNull Actor actor, String previousChildName) {
-                                        // TODO
-                                    }
-
-                                    @Override
-                                    public void onChildRemoved(@NonNull Actor actor) {
-                                        LOG.v("Removing an actor: id = %s", actor.getId());
-                                        Gdx.app.postRunnable(() -> arGraphics.removeActorObject(actor));
-                                    }
-
-                                    @Override
-                                    public void onChildMoved(@NonNull Actor actor, String previousChildName) {
-                                    }
-
-                                    @Override
-                                    public void onError(@NonNull Exception e) {
-                                        LOG.e("Failed.", e);
-                                    }
-                                });
+                        queryUserActors.addTypedChildEventListener(new ActorChildEventListener());
                     }
                 } catch (TangoOutOfDateException e) {
                     LOG.e("Tango service outdated.", e);
@@ -362,8 +335,8 @@ public final class ArActivity extends AndroidApplication
     }
 
     @Override
-    public void onActorObjectTouched(@Nullable Actor actor) {
-        LOG.d("onActorObjectTouched");
+    public void onActorTouched(@Nullable Actor actor) {
+        LOG.d("onActorTouched");
 
         runOnUiThread(() -> {
             arModel.setSelectedActor(actor);
@@ -374,7 +347,7 @@ public final class ArActivity extends AndroidApplication
                     paneGroup.show(R.id.pane_actor_edit_menu);
                 }
                 Gdx.app.postRunnable(() -> {
-                    arGraphics.setActorAxesObjectVisible(actor != null);
+                    arGraphics.setActorAxes(actor);
                 });
             } else {
                 if (actor == null) {
@@ -392,7 +365,7 @@ public final class ArActivity extends AndroidApplication
     }
 
     @Override
-    public void onActorCursorObjectTouched(@NonNull Actor actor) {
+    public void onActorCursorTouched(@NonNull Actor actor) {
         runOnUiThread(() -> arModel.saveActor(actor));
     }
 
@@ -437,7 +410,7 @@ public final class ArActivity extends AndroidApplication
     public void onImageAssetSelected(@Nullable ImageAsset asset) {
         Gdx.app.postRunnable(() -> {
             if (asset == null) {
-                arGraphics.removeActorCursorObject();
+                arGraphics.removeActorCursor();
             } else {
                 final TransformComponent transformComponent = new TransformComponent();
 
@@ -455,7 +428,7 @@ public final class ArActivity extends AndroidApplication
                 actor.setTransformComponent(transformComponent);
                 actor.addComponent(assetMeshComponent);
 
-                arGraphics.addActorCursorObject(actor);
+                arGraphics.addActorCursor(actor);
             }
         });
     }
@@ -464,7 +437,7 @@ public final class ArActivity extends AndroidApplication
     public void onTriggerShapeSelected(@Nullable Class<? extends PrimitiveMeshComponent> clazz) {
         Gdx.app.postRunnable(() -> {
             if (clazz == null) {
-                arGraphics.removeActorCursorObject();
+                arGraphics.removeActorCursor();
             } else {
                 try {
                     final TransformComponent transformComponent = new TransformComponent();
@@ -481,7 +454,7 @@ public final class ArActivity extends AndroidApplication
                     actor.setTransformComponent(transformComponent);
                     actor.addComponent(primitiveMeshComponent);
 
-                    arGraphics.addActorCursorObject(actor);
+                    arGraphics.addActorCursor(actor);
                 } catch (InstantiationException | IllegalAccessException e) {
                     LOG.e("Failed to instantiate a ShapeComponent.", e);
                 }
@@ -502,7 +475,7 @@ public final class ArActivity extends AndroidApplication
 
     @Override
     public void setSelectedActorLocked(boolean locked) {
-        Gdx.app.postRunnable(() -> arGraphics.setTouchedActorObjectLocked(locked));
+        Gdx.app.postRunnable(() -> arGraphics.setTouchedActorLocked(locked));
     }
 
     @Override
@@ -518,5 +491,36 @@ public final class ArActivity extends AndroidApplication
     @Override
     public void setScaleEnabled(boolean enabled) {
         Gdx.app.postRunnable(() -> arGraphics.setScaleEnabled(enabled));
+    }
+
+    private final class ActorChildEventListener implements TypedQuery.TypedChildEventListener<Actor> {
+
+        @Override
+        public void onChildAdded(@NonNull Actor actor, @Nullable String previousChildName) {
+            LOG.v("Adding an actor: id = %s", actor.getId());
+
+
+            Gdx.app.postRunnable(() -> arGraphics.addActor(actor));
+        }
+
+        @Override
+        public void onChildChanged(@NonNull Actor actor, String previousChildName) {
+            // TODO
+        }
+
+        @Override
+        public void onChildRemoved(@NonNull Actor actor) {
+            LOG.v("Removing an actor: id = %s", actor.getId());
+            Gdx.app.postRunnable(() -> arGraphics.removeActor(actor));
+        }
+
+        @Override
+        public void onChildMoved(@NonNull Actor actor, String previousChildName) {
+        }
+
+        @Override
+        public void onError(@NonNull Exception e) {
+            LOG.e("Failed.", e);
+        }
     }
 }
