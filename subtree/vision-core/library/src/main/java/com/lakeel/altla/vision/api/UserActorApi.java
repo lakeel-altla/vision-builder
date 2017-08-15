@@ -4,10 +4,10 @@ import com.lakeel.altla.vision.data.repository.firebase.UserActorRepository;
 import com.lakeel.altla.vision.helper.ComponentTypeResolver;
 import com.lakeel.altla.vision.helper.TypedQuery;
 import com.lakeel.altla.vision.model.Actor;
-import com.lakeel.altla.vision.model.BoxComponent;
+import com.lakeel.altla.vision.model.AssetMeshComponent;
+import com.lakeel.altla.vision.model.BoxMeshComponent;
 import com.lakeel.altla.vision.model.Component;
-import com.lakeel.altla.vision.model.MeshComponent;
-import com.lakeel.altla.vision.model.SphereComponent;
+import com.lakeel.altla.vision.model.SphereMeshComponent;
 import com.lakeel.altla.vision.model.TransformComponent;
 
 import android.support.annotation.NonNull;
@@ -26,9 +26,9 @@ public final class UserActorApi extends BaseVisionApi {
 
             {
                 classMap.put(TransformComponent.TYPE, TransformComponent.class);
-                classMap.put(MeshComponent.TYPE, MeshComponent.class);
-                classMap.put(BoxComponent.TYPE, BoxComponent.class);
-                classMap.put(SphereComponent.TYPE, SphereComponent.class);
+                classMap.put(AssetMeshComponent.TYPE, AssetMeshComponent.class);
+                classMap.put(BoxMeshComponent.TYPE, BoxMeshComponent.class);
+                classMap.put(SphereMeshComponent.TYPE, SphereMeshComponent.class);
             }
 
             @Override

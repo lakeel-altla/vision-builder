@@ -1,9 +1,8 @@
 package com.lakeel.altla.vision.builder.presentation.model;
 
-import com.lakeel.altla.vision.model.BoxComponent;
-import com.lakeel.altla.vision.model.ShapeComponent;
-import com.lakeel.altla.vision.model.SphereComponent;
-import com.lakeel.altla.vision.model.TriggerShape;
+import com.lakeel.altla.vision.model.BoxMeshComponent;
+import com.lakeel.altla.vision.model.PrimitiveMeshComponent;
+import com.lakeel.altla.vision.model.SphereMeshComponent;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -13,13 +12,13 @@ import java.util.List;
 
 public final class TriggerShapeListModel {
 
-    private final List<Class<? extends ShapeComponent>> items = new ArrayList<>(TriggerShape.values().length - 1);
+    private final List<Class<? extends PrimitiveMeshComponent>> items = new ArrayList<>();
 
     private int selectedPosition;
 
     public TriggerShapeListModel() {
-        items.add(BoxComponent.class);
-        items.add(SphereComponent.class);
+        items.add(BoxMeshComponent.class);
+        items.add(SphereMeshComponent.class);
     }
 
     public int getItemCount() {
@@ -27,7 +26,7 @@ public final class TriggerShapeListModel {
     }
 
     @NonNull
-    public Class<? extends ShapeComponent> getItem(int position) {
+    public Class<? extends PrimitiveMeshComponent> getItem(int position) {
         return items.get(position);
     }
 
@@ -40,7 +39,7 @@ public final class TriggerShapeListModel {
     }
 
     @Nullable
-    public Class<? extends ShapeComponent> getSelectedItem() {
+    public Class<? extends PrimitiveMeshComponent> getSelectedItem() {
         return (selectedPosition < 0) ? null : getItem(selectedPosition);
     }
 

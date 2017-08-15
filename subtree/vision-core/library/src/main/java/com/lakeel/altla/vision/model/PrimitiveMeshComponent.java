@@ -1,6 +1,6 @@
 package com.lakeel.altla.vision.model;
 
-public abstract class ShapeComponent extends GeometryComponent {
+public abstract class PrimitiveMeshComponent extends MeshComponent {
 
     private float colorR;
 

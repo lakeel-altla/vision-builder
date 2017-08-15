@@ -33,19 +33,20 @@ import com.lakeel.altla.android.log.LogFactory;
 import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.presentation.graphics.asset.AssetLoader;
 import com.lakeel.altla.vision.builder.presentation.graphics.model.ActorAxesObject;
-import com.lakeel.altla.vision.builder.presentation.graphics.model.GeometryCursorObject;
-import com.lakeel.altla.vision.builder.presentation.graphics.model.GeometryObject;
-import com.lakeel.altla.vision.builder.presentation.graphics.model.GeometryObjectManager;
+import com.lakeel.altla.vision.builder.presentation.graphics.model.ActorCursorObject;
+import com.lakeel.altla.vision.builder.presentation.graphics.model.ActorObject;
 import com.lakeel.altla.vision.builder.presentation.graphics.model.ShapeModelLoader;
 import com.lakeel.altla.vision.builder.presentation.graphics.shader.FillColorShader;
 import com.lakeel.altla.vision.builder.presentation.model.Axis;
 import com.lakeel.altla.vision.model.Actor;
+import com.lakeel.altla.vision.model.AssetMeshComponent;
 import com.lakeel.altla.vision.model.MeshComponent;
-import com.lakeel.altla.vision.model.ShapeComponent;
+import com.lakeel.altla.vision.model.PrimitiveMeshComponent;
 import com.projecttango.tangosupport.TangoSupport;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.util.SimpleArrayMap;
 import android.view.Display;
 
 import java.util.List;
@@ -119,7 +120,7 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
 
     private final ShapeModelLoader shapeModelLoader = new ShapeModelLoader();
 
-    private final GeometryObjectManager geometryObjectManager = new GeometryObjectManager();
+    private final SimpleArrayMap<String, ActorObject> actorObjectMap = new SimpleArrayMap<>();
 
     private final Array<ModelInstance> visibleInstances = new Array<>();
 
@@ -134,14 +135,14 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
     private final FillColorShader fillColorShader = new FillColorShader();
 
     @Nullable
-    private GeometryCursorObject geometryCursorObject;
+    private ActorCursorObject actorCursorObject;
 
     private Model actorAxesModel;
 
     private ActorAxesObject actorAxesObject;
 
     @Nullable
-    private GeometryObject touchedGeometryObject;
+    private ActorObject touchedActorObject;
 
     private final Vector3 originalTouchedActorObjectScale = new Vector3();
 
@@ -289,7 +290,7 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
     @Override
     public boolean pan(float x, float y, float deltaX, float deltaY) {
         LOG.d("pan: x = %f, y = %f, deltaX = %f, deltaY = %f", x, y, deltaX, deltaY);
-        if (touchedGeometryObject != null) {
+        if (touchedActorObject != null) {
             if (translationEnabled && transformAxis != null) {
                 float distance;
                 switch (transformAxis) {
@@ -306,7 +307,7 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
                         throw new IllegalStateException("An unexpected axis: " + transformAxis);
                 }
                 distance *= TRANSLATION_COEFF;
-                touchedGeometryObject.translate(transformAxis, distance);
+                touchedActorObject.translate(transformAxis, distance);
                 return true;
             } else if (rotationEnabled && transformAxis != null) {
                 float degrees;
@@ -324,11 +325,11 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
                         throw new IllegalStateException("An unexpected axis: " + transformAxis);
                 }
                 degrees *= ROTATION_COEFF;
-                touchedGeometryObject.rotate(transformAxis, degrees);
+                touchedActorObject.rotate(transformAxis, degrees);
             } else if (scaleEnabled) {
                 float delta = (Math.abs(deltaY) <= Math.abs(deltaX)) ? deltaX : -deltaY;
                 delta *= SCALING_COEFF;
-                touchedGeometryObject.scaleByExtent(delta);
+                touchedActorObject.scaleByExtent(delta);
             }
         }
         return false;
@@ -337,16 +338,16 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
     @Override
     public boolean panStop(float x, float y, int pointer, int button) {
         LOG.d("panStop: x = %f, y = %f, pointer = %d, button = %d");
-        if (touchedGeometryObject != null) {
+        if (touchedActorObject != null) {
             if (translationEnabled && transformAxis != null) {
-                touchedGeometryObject.savePositionToActor();
-                listener.onActorChanged(touchedGeometryObject.actor);
+                touchedActorObject.savePositionToActor();
+                listener.onActorChanged(touchedActorObject.actor);
             } else if (rotationEnabled && transformAxis != null) {
-                touchedGeometryObject.saveOrientationToActor();
-                listener.onActorChanged(touchedGeometryObject.actor);
+                touchedActorObject.saveOrientationToActor();
+                listener.onActorChanged(touchedActorObject.actor);
             } else if (scaleEnabled) {
-                touchedGeometryObject.saveScaleToActor();
-                listener.onActorChanged(touchedGeometryObject.actor);
+                touchedActorObject.saveScaleToActor();
+                listener.onActorChanged(touchedActorObject.actor);
             }
         }
         return false;
@@ -403,17 +404,17 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
         this.debugCameraPreviewVisible = debugCameraPreviewVisible;
     }
 
-    public void addGeometryCursor(@NonNull Actor actor) {
-        final MeshComponent meshComponent = actor.getComponent(MeshComponent.class);
-        if (meshComponent != null) {
-            final String assetId = meshComponent.getRequiredAssetId();
-            final String assetType = meshComponent.getRequiredAssetType();
+    public void addActorCursorObject(@NonNull Actor actor) {
+        final AssetMeshComponent assetMeshComponent = actor.getComponent(AssetMeshComponent.class);
+        if (assetMeshComponent != null) {
+            final String assetId = assetMeshComponent.getRequiredAssetId();
+            final String assetType = assetMeshComponent.getRequiredAssetType();
 
             LOG.v("Loading a model: assetId = %s, assetType = %s", assetId, assetType);
 
             assetLoader.load(Model.class, assetId, assetType, model -> {
                 Gdx.app.postRunnable(() -> {
-                    geometryCursorObject = new GeometryCursorObject(model, actor, camera);
+                    actorCursorObject = new ActorCursorObject(model, actor, camera);
                 });
             }, e -> {
                 LOG.e("Failed to load the model: assetId = %s, assetType = %s", assetId, assetType);
@@ -421,21 +422,23 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
 
             return;
         } else {
-            final ShapeComponent shapeComponent = actor.getComponent(ShapeComponent.class);
-            if (shapeComponent != null) {
-                final Model model = shapeModelLoader.load(shapeComponent.getClass());
-                geometryCursorObject = new GeometryCursorObject(model, actor, camera);
+            final PrimitiveMeshComponent primitiveMeshComponent = actor.getComponent(PrimitiveMeshComponent.class);
+            if (primitiveMeshComponent != null) {
+                final Model model = shapeModelLoader.load(primitiveMeshComponent.getClass());
+                actorCursorObject = new ActorCursorObject(model, actor, camera);
             }
         }
     }
 
-    public void removeGeometryCursor() {
-        geometryCursorObject = null;
+    public void removeActorCursorObject() {
+        actorCursorObject = null;
     }
 
-    public void addGeometryObject(@NonNull Actor actor) {
-        if (actor.hasComponent(MeshComponent.class)) {
-            final MeshComponent component = actor.getRequiredComponent(MeshComponent.class);
+    public void addActorObject(@NonNull Actor actor) {
+        final MeshComponent meshComponent = actor.getRequiredComponent(MeshComponent.class);
+        if (meshComponent instanceof AssetMeshComponent) {
+
+            final AssetMeshComponent component = (AssetMeshComponent) meshComponent;
 
             final String assetId = component.getRequiredAssetId();
             final String assetType = component.getRequiredAssetType();
@@ -444,31 +447,33 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
 
             assetLoader.load(Model.class, assetId, assetType, model -> {
                 Gdx.app.postRunnable(() -> {
-                    final GeometryObject object = new GeometryObject(model, actor);
-                    geometryObjectManager.addGeometryObject(object);
+                    final ActorObject object = new ActorObject(model, actor);
+                    actorObjectMap.put(actor.getId(), object);
 
-                    LOG.v("Added a geometry object: actorId = %s, componentClass = %s",
+                    LOG.v("Added an actor object: actorId = %s, componentClass = %s",
                           actor.getId(), component.getClass());
                 });
             }, e -> {
                 LOG.e("Failed to load the model: assetId = %s, assetType = %s", assetId, assetType);
             });
 
-        } else if (actor.hasComponent(ShapeComponent.class)) {
-            final ShapeComponent component = actor.getRequiredComponent(ShapeComponent.class);
+        } else if (meshComponent instanceof PrimitiveMeshComponent) {
+
+            final PrimitiveMeshComponent component = (PrimitiveMeshComponent) meshComponent;
 
             final Model model = shapeModelLoader.load(component.getClass());
 
-            final GeometryObject object = new GeometryObject(model, actor);
-            geometryObjectManager.addGeometryObject(object);
+            final ActorObject object = new ActorObject(model, actor);
+            actorObjectMap.put(actor.getId(), object);
 
-            LOG.v("Added a geometry object: actorId = %s, component = %s",
+            LOG.v("Added an actor object: actorId = %s, component = %s",
                   actor.getId(), component.getClass());
+
         }
     }
 
-    public void removeGeometryObjectsByActor(@NonNull Actor actor) {
-        geometryObjectManager.removeGeometryObjects(actor.getId());
+    public void removeActorObject(@NonNull Actor actor) {
+        actorObjectMap.remove(actor.getId());
     }
 
     public void setTouchedActorObjectLocked(boolean touchedActorObjectLocked) {
@@ -560,16 +565,16 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
             LOG.e("A tango API call error occured.", e);
         }
 
-        if (geometryCursorObject != null) {
-            geometryCursorObject.update();
+        if (actorCursorObject != null) {
+            actorCursorObject.update();
         }
 
-        if (actorAxesObjectVisible && touchedGeometryObject != null) {
-            actorAxesObject.update(touchedGeometryObject);
+        if (actorAxesObjectVisible && touchedActorObject != null) {
+            actorAxesObject.update(touchedActorObject);
         }
 
-        for (int i = 0; i < geometryObjectManager.getGeometryObjectCount(); i++) {
-            geometryObjectManager.getGeometryObject(i).update();
+        for (int i = 0; i < actorObjectMap.size(); i++) {
+            actorObjectMap.valueAt(i).update();
         }
     }
 
@@ -643,13 +648,13 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
         // TODO: Do frustum culling.
         visibleInstances.clear();
 
-        for (int i = 0; i < geometryObjectManager.getGeometryObjectCount(); i++) {
-            final GeometryObject object = geometryObjectManager.getGeometryObject(i);
-            if (!object.geometryComponent.isVisible()) {
+        for (int i = 0; i < actorObjectMap.size(); i++) {
+            final ActorObject object = actorObjectMap.valueAt(i);
+            if (!object.meshComponent.isVisible()) {
                 continue;
             }
 
-            if (touchedGeometryObject == null || touchedGeometryObject != object) {
+            if (touchedActorObject == null || touchedActorObject != object) {
                 visibleInstances.add(object);
             }
         }
@@ -660,31 +665,31 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
         // Draw models.
         modelBatch.begin(camera);
         modelBatch.render(visibleInstances, environment);
-        if (touchedGeometryObject != null) {
-            originalTouchedActorObjectScale.set(touchedGeometryObject.scale);
-            touchedGeometryObject.scaleByExtent(0.1f);
-            touchedGeometryObject.update();
+        if (touchedActorObject != null) {
+            originalTouchedActorObjectScale.set(touchedActorObject.scale);
+            touchedActorObject.scaleByExtent(0.1f);
+            touchedActorObject.update();
 
             renderContext.setDepthMask(false);
             renderContext.setBlending(true, GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
             // ORANGE: 0xffa500ff
             // Transparent 50%: 0xffa50088
             fillColorShader.color.set(0xffa50088);
-            modelBatch.render(touchedGeometryObject, environment, fillColorShader);
+            modelBatch.render(touchedActorObject, environment, fillColorShader);
 
-            touchedGeometryObject.scale.set(originalTouchedActorObjectScale);
-            touchedGeometryObject.transformDirty = true;
-            touchedGeometryObject.update();
+            touchedActorObject.scale.set(originalTouchedActorObjectScale);
+            touchedActorObject.transformDirty = true;
+            touchedActorObject.update();
 
             renderContext.setDepthMask(true);
-            modelBatch.render(touchedGeometryObject, environment);
+            modelBatch.render(touchedActorObject, environment);
         }
         modelBatch.end();
 
-        if (geometryCursorObject != null) {
+        if (actorCursorObject != null) {
             Gdx.gl.glLineWidth(5);
             modelBatch.begin(camera);
-            modelBatch.render(geometryCursorObject);
+            modelBatch.render(actorCursorObject);
             modelBatch.end();
             Gdx.gl.glLineWidth(1);
         }
@@ -701,12 +706,12 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
     private void renderColorObjectPicker() {
         pickableInstances.clear();
 
-        if (geometryCursorObject != null) {
-            pickableInstances.add(geometryCursorObject);
+        if (actorCursorObject != null) {
+            pickableInstances.add(actorCursorObject);
         } else {
             // In the non-cursor mode.
-            for (int i = 0; i < geometryObjectManager.getGeometryObjectCount(); i++) {
-                pickableInstances.add(geometryObjectManager.getGeometryObject(i));
+            for (int i = 0; i < actorObjectMap.size(); i++) {
+                pickableInstances.add(actorObjectMap.valueAt(i));
             }
         }
 
@@ -718,24 +723,24 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
             final ModelInstance instance = picker.pick(pickableInstances, Gdx.input.getX(), Gdx.input.getY());
 
             if (instance == null) {
-                if (geometryCursorObject == null) {
+                if (actorCursorObject == null) {
                     if (!touchedActorObjectLocked) {
-                        touchedGeometryObject = null;
+                        touchedActorObject = null;
                         listener.onActorObjectTouched(null);
                     }
                 }
-            } else if (instance instanceof GeometryObject) {
+            } else if (instance instanceof ActorObject) {
                 if (!touchedActorObjectLocked) {
-                    touchedGeometryObject = (GeometryObject) instance;
-                    listener.onActorObjectTouched(touchedGeometryObject.actor);
+                    touchedActorObject = (ActorObject) instance;
+                    listener.onActorObjectTouched(touchedActorObject.actor);
                 }
-            } else if (instance instanceof GeometryCursorObject) {
-                final GeometryCursorObject object = (GeometryCursorObject) instance;
+            } else if (instance instanceof ActorCursorObject) {
+                final ActorCursorObject object = (ActorCursorObject) instance;
 
                 object.saveTransform();
-                listener.onGeometryCursorTouched(object.actor);
+                listener.onActorCursorObjectTouched(object.actor);
 
-                removeGeometryCursor();
+                removeActorCursorObject();
             } else {
                 LOG.e("Detected an unexpected model instance.");
             }
@@ -770,7 +775,7 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
 
         void onActorChanged(@NonNull Actor actor);
 
-        void onGeometryCursorTouched(@NonNull Actor actor);
+        void onActorCursorObjectTouched(@NonNull Actor actor);
     }
 
 }

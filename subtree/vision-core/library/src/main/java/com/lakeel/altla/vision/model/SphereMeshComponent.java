@@ -2,9 +2,9 @@ package com.lakeel.altla.vision.model;
 
 import android.support.annotation.NonNull;
 
-public final class BoxComponent extends ShapeComponent {
+public final class SphereMeshComponent extends PrimitiveMeshComponent {
 
-    public static final String TYPE = "Box";
+    public static final String TYPE = "SphereMesh";
 
     @NonNull
     @Override

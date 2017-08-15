@@ -38,8 +38,8 @@ import com.lakeel.altla.vision.helper.TypedQuery;
 import com.lakeel.altla.vision.model.Actor;
 import com.lakeel.altla.vision.model.AreaSettings;
 import com.lakeel.altla.vision.model.ImageAsset;
-import com.lakeel.altla.vision.model.MeshComponent;
-import com.lakeel.altla.vision.model.ShapeComponent;
+import com.lakeel.altla.vision.model.AssetMeshComponent;
+import com.lakeel.altla.vision.model.PrimitiveMeshComponent;
 import com.lakeel.altla.vision.model.TransformComponent;
 import com.projecttango.tangosupport.TangoSupport;
 
@@ -293,7 +293,7 @@ public final class ArActivity extends AndroidApplication
                                     @Override
                                     public void onChildAdded(@NonNull Actor actor, @Nullable String previousChildName) {
                                         LOG.v("Adding an actor: id = %s", actor.getId());
-                                        Gdx.app.postRunnable(() -> arGraphics.addGeometryObject(actor));
+                                        Gdx.app.postRunnable(() -> arGraphics.addActorObject(actor));
                                     }
 
                                     @Override
@@ -304,7 +304,7 @@ public final class ArActivity extends AndroidApplication
                                     @Override
                                     public void onChildRemoved(@NonNull Actor actor) {
                                         LOG.v("Removing an actor: id = %s", actor.getId());
-                                        Gdx.app.postRunnable(() -> arGraphics.removeGeometryObjectsByActor(actor));
+                                        Gdx.app.postRunnable(() -> arGraphics.removeActorObject(actor));
                                     }
 
                                     @Override
@@ -392,7 +392,7 @@ public final class ArActivity extends AndroidApplication
     }
 
     @Override
-    public void onGeometryCursorTouched(@NonNull Actor actor) {
+    public void onActorCursorObjectTouched(@NonNull Actor actor) {
         runOnUiThread(() -> arModel.saveActor(actor));
     }
 
@@ -437,51 +437,51 @@ public final class ArActivity extends AndroidApplication
     public void onImageAssetSelected(@Nullable ImageAsset asset) {
         Gdx.app.postRunnable(() -> {
             if (asset == null) {
-                arGraphics.removeGeometryCursor();
+                arGraphics.removeActorCursorObject();
             } else {
                 final TransformComponent transformComponent = new TransformComponent();
 
-                final MeshComponent meshComponent = new MeshComponent();
-                meshComponent.setUserId(CurrentUser.getInstance().getUserId());
-                meshComponent.setAssetId(asset.getId());
-                meshComponent.setAssetType(asset.getType());
-                meshComponent.setVisible(true);
-                meshComponent.setVisibleAtRuntime(true);
+                final AssetMeshComponent assetMeshComponent = new AssetMeshComponent();
+                assetMeshComponent.setUserId(CurrentUser.getInstance().getUserId());
+                assetMeshComponent.setAssetId(asset.getId());
+                assetMeshComponent.setAssetType(asset.getType());
+                assetMeshComponent.setVisible(true);
+                assetMeshComponent.setVisibleAtRuntime(true);
 
                 final Actor actor = new Actor();
                 actor.setUserId(CurrentUser.getInstance().getUserId());
                 // TODO: generate the name of the new actor.
-                actor.setName(MeshComponent.TYPE);
+                actor.setName(AssetMeshComponent.TYPE);
                 actor.setTransformComponent(transformComponent);
-                actor.addComponent(meshComponent);
+                actor.addComponent(assetMeshComponent);
 
-                arGraphics.addGeometryCursor(actor);
+                arGraphics.addActorCursorObject(actor);
             }
         });
     }
 
     @Override
-    public void onTriggerShapeSelected(@Nullable Class<? extends ShapeComponent> clazz) {
+    public void onTriggerShapeSelected(@Nullable Class<? extends PrimitiveMeshComponent> clazz) {
         Gdx.app.postRunnable(() -> {
             if (clazz == null) {
-                arGraphics.removeGeometryCursor();
+                arGraphics.removeActorCursorObject();
             } else {
                 try {
                     final TransformComponent transformComponent = new TransformComponent();
 
-                    final ShapeComponent shapeComponent = clazz.newInstance();
-                    shapeComponent.setUserId(CurrentUser.getInstance().getUserId());
-                    shapeComponent.setVisible(true);
-                    shapeComponent.setVisibleAtRuntime(false);
+                    final PrimitiveMeshComponent primitiveMeshComponent = clazz.newInstance();
+                    primitiveMeshComponent.setUserId(CurrentUser.getInstance().getUserId());
+                    primitiveMeshComponent.setVisible(true);
+                    primitiveMeshComponent.setVisibleAtRuntime(false);
 
                     final Actor actor = new Actor();
                     actor.setUserId(CurrentUser.getInstance().getUserId());
                     // TODO: generate the name of the new actor.
-                    actor.setName(shapeComponent.getType());
+                    actor.setName(primitiveMeshComponent.getType());
                     actor.setTransformComponent(transformComponent);
-                    actor.addComponent(shapeComponent);
+                    actor.addComponent(primitiveMeshComponent);
 
-                    arGraphics.addGeometryCursor(actor);
+                    arGraphics.addActorCursorObject(actor);
                 } catch (InstantiationException | IllegalAccessException e) {
                     LOG.e("Failed to instantiate a ShapeComponent.", e);
                 }

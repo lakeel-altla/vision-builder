@@ -10,7 +10,7 @@ import com.lakeel.altla.vision.model.TransformComponent;
 
 import android.support.annotation.NonNull;
 
-public final class GeometryCursorObject extends ModelInstance {
+public final class ActorCursorObject extends ModelInstance {
 
     @NonNull
     public final Vector3 position = new Vector3();
@@ -23,7 +23,7 @@ public final class GeometryCursorObject extends ModelInstance {
 
     private final TangoCamera camera;
 
-    public GeometryCursorObject(@NonNull Model model, @NonNull Actor actor, @NonNull TangoCamera camera) {
+    public ActorCursorObject(@NonNull Model model, @NonNull Actor actor, @NonNull TangoCamera camera) {
         super(model);
 
         if (actor.getTransformComponent() == null) {

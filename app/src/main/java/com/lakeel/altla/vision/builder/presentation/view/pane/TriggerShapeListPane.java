@@ -3,7 +3,7 @@ package com.lakeel.altla.vision.builder.presentation.view.pane;
 import com.lakeel.altla.vision.builder.R;
 import com.lakeel.altla.vision.builder.presentation.di.ActivityScopeContext;
 import com.lakeel.altla.vision.builder.presentation.model.TriggerShapeListModel;
-import com.lakeel.altla.vision.model.ShapeComponent;
+import com.lakeel.altla.vision.model.PrimitiveMeshComponent;
 
 import android.app.Activity;
 import android.support.annotation.NonNull;
@@ -48,7 +48,7 @@ public final class TriggerShapeListPane extends Pane {
 
     public interface PaneContext {
 
-        void onTriggerShapeSelected(@Nullable Class<? extends ShapeComponent> clazz);
+        void onTriggerShapeSelected(@Nullable Class<? extends PrimitiveMeshComponent> clazz);
 
         void showEditModeMenuPane();
     }
@@ -88,7 +88,7 @@ public final class TriggerShapeListPane extends Pane {
 
         @Override
         public void onBindViewHolder(Adapter.ViewHolder holder, int position) {
-            final Class<? extends ShapeComponent> clazz = triggerShapeListModel.getItem(position);
+            final Class<? extends PrimitiveMeshComponent> clazz = triggerShapeListModel.getItem(position);
             // TODO: use a name for the display.
             holder.textViewName.setText(clazz.getSimpleName());
         }

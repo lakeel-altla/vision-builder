@@ -6,12 +6,12 @@ import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
 import com.lakeel.altla.vision.builder.presentation.model.Axis;
 import com.lakeel.altla.vision.model.Actor;
-import com.lakeel.altla.vision.model.GeometryComponent;
+import com.lakeel.altla.vision.model.MeshComponent;
 import com.lakeel.altla.vision.model.TransformComponent;
 
 import android.support.annotation.NonNull;
 
-public final class GeometryObject extends ModelInstance {
+public final class ActorObject extends ModelInstance {
 
     private static final float MAX_SCALE_RATIO = 1.2f;
 
@@ -21,7 +21,7 @@ public final class GeometryObject extends ModelInstance {
     public final Actor actor;
 
     @NonNull
-    public final GeometryComponent geometryComponent;
+    public final MeshComponent meshComponent;
 
     @NonNull
     public final Vector3 position = new Vector3();
@@ -40,11 +40,11 @@ public final class GeometryObject extends ModelInstance {
     // A temp vector.
     private final Quaternion tempOrientation = new Quaternion();
 
-    public GeometryObject(@NonNull Model model, @NonNull Actor actor) {
+    public ActorObject(@NonNull Model model, @NonNull Actor actor) {
         super(model);
 
         this.actor = actor;
-        this.geometryComponent = actor.getRequiredComponent(GeometryComponent.class);
+        this.meshComponent = actor.getRequiredComponent(MeshComponent.class);
 
         final TransformComponent transformComponent = actor.getRequiredTransformComponent();
 

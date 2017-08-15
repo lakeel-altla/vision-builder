@@ -12,9 +12,9 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Disposable;
 import com.lakeel.altla.android.log.Log;
 import com.lakeel.altla.android.log.LogFactory;
-import com.lakeel.altla.vision.model.BoxComponent;
-import com.lakeel.altla.vision.model.ShapeComponent;
-import com.lakeel.altla.vision.model.SphereComponent;
+import com.lakeel.altla.vision.model.BoxMeshComponent;
+import com.lakeel.altla.vision.model.PrimitiveMeshComponent;
+import com.lakeel.altla.vision.model.SphereMeshComponent;
 
 import android.support.annotation.NonNull;
 import android.support.v4.util.SimpleArrayMap;
@@ -26,13 +26,13 @@ public final class ShapeModelLoader implements Disposable {
 
     private static final Log LOG = LogFactory.getLog(ShapeModelLoader.class);
 
-    private final SimpleArrayMap<Class<? extends ShapeComponent>, Loader> loaderMap = new SimpleArrayMap<>();
+    private final SimpleArrayMap<Class<? extends PrimitiveMeshComponent>, Loader> loaderMap = new SimpleArrayMap<>();
 
-    private final SimpleArrayMap<Class<? extends ShapeComponent>, Model> modelMap = new SimpleArrayMap<>();
+    private final SimpleArrayMap<Class<? extends PrimitiveMeshComponent>, Model> modelMap = new SimpleArrayMap<>();
 
     public ShapeModelLoader() {
-        loaderMap.put(BoxComponent.class, new BoxModelLoader());
-        loaderMap.put(SphereComponent.class, new SphereModelLoader());
+        loaderMap.put(BoxMeshComponent.class, new BoxModelLoader());
+        loaderMap.put(SphereMeshComponent.class, new SphereModelLoader());
     }
 
     @Override
@@ -44,15 +44,13 @@ public final class ShapeModelLoader implements Disposable {
     }
 
     @NonNull
-    public Model load(@NonNull Class<? extends ShapeComponent> clazz) {
+    public Model load(@NonNull Class<? extends PrimitiveMeshComponent> clazz) {
         Model model = modelMap.get(clazz);
         if (model == null) {
             final Loader loader = loaderMap.get(clazz);
-            if (loader == null) throw new IllegalArgumentException("An unexpected shape component: " + clazz);
+            if (loader == null) throw new IllegalArgumentException("The value of 'clazz' is invalid: " + clazz);
 
             model = loader.load();
-
-            LOG.d("The shape model is loaded: class = %s", clazz);
 
             modelMap.put(clazz, model);
         }
