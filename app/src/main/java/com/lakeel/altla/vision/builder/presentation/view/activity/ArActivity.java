@@ -37,10 +37,10 @@ import com.lakeel.altla.vision.builder.presentation.view.pane.ViewModeMenuPane;
 import com.lakeel.altla.vision.helper.TypedQuery;
 import com.lakeel.altla.vision.model.Actor;
 import com.lakeel.altla.vision.model.AreaSettings;
-import com.lakeel.altla.vision.model.GeometryComponent;
 import com.lakeel.altla.vision.model.ImageAsset;
 import com.lakeel.altla.vision.model.MeshComponent;
 import com.lakeel.altla.vision.model.ShapeComponent;
+import com.lakeel.altla.vision.model.TransformComponent;
 import com.projecttango.tangosupport.TangoSupport;
 
 import android.app.Activity;
@@ -392,8 +392,8 @@ public final class ArActivity extends AndroidApplication
     }
 
     @Override
-    public void onGeometryCursorTouched(@NonNull GeometryComponent component) {
-        runOnUiThread(() -> arModel.saveActor(component));
+    public void onGeometryCursorTouched(@NonNull Actor actor) {
+        runOnUiThread(() -> arModel.saveActor(actor));
     }
 
     @Override
@@ -439,15 +439,23 @@ public final class ArActivity extends AndroidApplication
             if (asset == null) {
                 arGraphics.removeGeometryCursor();
             } else {
+                final TransformComponent transformComponent = new TransformComponent();
+
                 final MeshComponent meshComponent = new MeshComponent();
                 meshComponent.setUserId(CurrentUser.getInstance().getUserId());
                 meshComponent.setAssetId(asset.getId());
                 meshComponent.setAssetType(asset.getType());
-                // TODO: generate the component name.
-                meshComponent.setName(asset.getType());
                 meshComponent.setVisible(true);
                 meshComponent.setVisibleAtRuntime(true);
-                arGraphics.addGeometryCursor(meshComponent);
+
+                final Actor actor = new Actor();
+                actor.setUserId(CurrentUser.getInstance().getUserId());
+                // TODO: generate the name of the new actor.
+                actor.setName(MeshComponent.TYPE);
+                actor.setTransformComponent(transformComponent);
+                actor.addComponent(meshComponent);
+
+                arGraphics.addGeometryCursor(actor);
             }
         });
     }
@@ -459,13 +467,21 @@ public final class ArActivity extends AndroidApplication
                 arGraphics.removeGeometryCursor();
             } else {
                 try {
+                    final TransformComponent transformComponent = new TransformComponent();
+
                     final ShapeComponent shapeComponent = clazz.newInstance();
                     shapeComponent.setUserId(CurrentUser.getInstance().getUserId());
-                    // TODO: generate the component name.
-                    shapeComponent.setName(clazz.getSimpleName());
                     shapeComponent.setVisible(true);
                     shapeComponent.setVisibleAtRuntime(false);
-                    arGraphics.addGeometryCursor(shapeComponent);
+
+                    final Actor actor = new Actor();
+                    actor.setUserId(CurrentUser.getInstance().getUserId());
+                    // TODO: generate the name of the new actor.
+                    actor.setName(shapeComponent.getType());
+                    actor.setTransformComponent(transformComponent);
+                    actor.addComponent(shapeComponent);
+
+                    arGraphics.addGeometryCursor(actor);
                 } catch (InstantiationException | IllegalAccessException e) {
                     LOG.e("Failed to instantiate a ShapeComponent.", e);
                 }

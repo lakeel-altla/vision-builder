@@ -32,16 +32,14 @@ import com.lakeel.altla.android.log.Log;
 import com.lakeel.altla.android.log.LogFactory;
 import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.builder.presentation.graphics.asset.AssetLoader;
-import com.lakeel.altla.vision.builder.presentation.graphics.model.ShapeModelLoader;
 import com.lakeel.altla.vision.builder.presentation.graphics.model.ActorAxesObject;
 import com.lakeel.altla.vision.builder.presentation.graphics.model.GeometryCursorObject;
 import com.lakeel.altla.vision.builder.presentation.graphics.model.GeometryObject;
 import com.lakeel.altla.vision.builder.presentation.graphics.model.GeometryObjectManager;
+import com.lakeel.altla.vision.builder.presentation.graphics.model.ShapeModelLoader;
 import com.lakeel.altla.vision.builder.presentation.graphics.shader.FillColorShader;
 import com.lakeel.altla.vision.builder.presentation.model.Axis;
 import com.lakeel.altla.vision.model.Actor;
-import com.lakeel.altla.vision.model.Component;
-import com.lakeel.altla.vision.model.GeometryComponent;
 import com.lakeel.altla.vision.model.MeshComponent;
 import com.lakeel.altla.vision.model.ShapeComponent;
 import com.projecttango.tangosupport.TangoSupport;
@@ -405,9 +403,9 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
         this.debugCameraPreviewVisible = debugCameraPreviewVisible;
     }
 
-    public void addGeometryCursor(@NonNull GeometryComponent component) {
-        if (component instanceof MeshComponent) {
-            final MeshComponent meshComponent = (MeshComponent) component;
+    public void addGeometryCursor(@NonNull Actor actor) {
+        final MeshComponent meshComponent = actor.getComponent(MeshComponent.class);
+        if (meshComponent != null) {
             final String assetId = meshComponent.getRequiredAssetId();
             final String assetType = meshComponent.getRequiredAssetType();
 
@@ -415,15 +413,19 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
 
             assetLoader.load(Model.class, assetId, assetType, model -> {
                 Gdx.app.postRunnable(() -> {
-                    geometryCursorObject = new GeometryCursorObject(model, meshComponent, camera);
+                    geometryCursorObject = new GeometryCursorObject(model, actor, camera);
                 });
             }, e -> {
                 LOG.e("Failed to load the model: assetId = %s, assetType = %s", assetId, assetType);
             });
-        } else if (component instanceof ShapeComponent) {
-            final ShapeComponent shapeComponent = (ShapeComponent) component;
-            final Model model = shapeModelLoader.load(shapeComponent.getClass());
-            geometryCursorObject = new GeometryCursorObject(model, shapeComponent, camera);
+
+            return;
+        } else {
+            final ShapeComponent shapeComponent = actor.getComponent(ShapeComponent.class);
+            if (shapeComponent != null) {
+                final Model model = shapeModelLoader.load(shapeComponent.getClass());
+                geometryCursorObject = new GeometryCursorObject(model, actor, camera);
+            }
         }
     }
 
@@ -432,41 +434,37 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
     }
 
     public void addGeometryObject(@NonNull Actor actor) {
-        for (final Component component : actor.getComponents()) {
-            if (component instanceof MeshComponent) {
-                addGeometryObject(actor, (MeshComponent) component);
-            } else if (component instanceof ShapeComponent) {
-                addGeometryObject(actor, (ShapeComponent) component);
-            }
-        }
-    }
+        if (actor.hasComponent(MeshComponent.class)) {
+            final MeshComponent component = actor.getRequiredComponent(MeshComponent.class);
 
-    private void addGeometryObject(@NonNull Actor actor, @NonNull MeshComponent component) {
-        final String assetId = component.getRequiredAssetId();
-        final String assetType = component.getRequiredAssetType();
+            final String assetId = component.getRequiredAssetId();
+            final String assetType = component.getRequiredAssetType();
 
-        LOG.v("Loading a model: assetId = %s, assetType = %s", assetId, assetType);
+            LOG.v("Loading a model: assetId = %s, assetType = %s", assetId, assetType);
 
-        assetLoader.load(Model.class, assetId, assetType, model -> {
-            Gdx.app.postRunnable(() -> {
-                final GeometryObject object = new GeometryObject(model, actor, component);
-                geometryObjectManager.addGeometryObject(object);
+            assetLoader.load(Model.class, assetId, assetType, model -> {
+                Gdx.app.postRunnable(() -> {
+                    final GeometryObject object = new GeometryObject(model, actor);
+                    geometryObjectManager.addGeometryObject(object);
 
-                LOG.v("Added a geometry object: actorId = %s, componentClass = %s",
-                      actor.getId(), component.getClass());
+                    LOG.v("Added a geometry object: actorId = %s, componentClass = %s",
+                          actor.getId(), component.getClass());
+                });
+            }, e -> {
+                LOG.e("Failed to load the model: assetId = %s, assetType = %s", assetId, assetType);
             });
-        }, e -> {
-            LOG.e("Failed to load a model: assetId = %s, assetType = %s", assetId, assetType);
-        });
-    }
 
-    private void addGeometryObject(@NonNull Actor actor, @NonNull ShapeComponent component) {
-        final Model model = shapeModelLoader.load(component.getClass());
-        final GeometryObject object = new GeometryObject(model, actor, component);
-        geometryObjectManager.addGeometryObject(object);
+        } else if (actor.hasComponent(ShapeComponent.class)) {
+            final ShapeComponent component = actor.getRequiredComponent(ShapeComponent.class);
 
-        LOG.v("Added a geometry object: actorId = %s, component = %s",
-              actor.getId(), component.getClass());
+            final Model model = shapeModelLoader.load(component.getClass());
+
+            final GeometryObject object = new GeometryObject(model, actor);
+            geometryObjectManager.addGeometryObject(object);
+
+            LOG.v("Added a geometry object: actorId = %s, component = %s",
+                  actor.getId(), component.getClass());
+        }
     }
 
     public void removeGeometryObjectsByActor(@NonNull Actor actor) {
@@ -735,7 +733,7 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
                 final GeometryCursorObject object = (GeometryCursorObject) instance;
 
                 object.saveTransform();
-                listener.onGeometryCursorTouched(object.component);
+                listener.onGeometryCursorTouched(object.actor);
 
                 removeGeometryCursor();
             } else {
@@ -772,7 +770,7 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
 
         void onActorChanged(@NonNull Actor actor);
 
-        void onGeometryCursorTouched(@NonNull GeometryComponent component);
+        void onGeometryCursorTouched(@NonNull Actor actor);
     }
 
 }

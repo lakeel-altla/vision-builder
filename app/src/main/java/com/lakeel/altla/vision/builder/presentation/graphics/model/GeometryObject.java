@@ -7,6 +7,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.lakeel.altla.vision.builder.presentation.model.Axis;
 import com.lakeel.altla.vision.model.Actor;
 import com.lakeel.altla.vision.model.GeometryComponent;
+import com.lakeel.altla.vision.model.TransformComponent;
 
 import android.support.annotation.NonNull;
 
@@ -16,14 +17,19 @@ public final class GeometryObject extends ModelInstance {
 
     private static final float MIN_SCALE_RATIO = 0.8f;
 
+    @NonNull
     public final Actor actor;
 
+    @NonNull
     public final GeometryComponent geometryComponent;
 
+    @NonNull
     public final Vector3 position = new Vector3();
 
+    @NonNull
     public final Quaternion orientation = new Quaternion();
 
+    @NonNull
     public final Vector3 scale = new Vector3();
 
     public boolean transformDirty;
@@ -34,24 +40,26 @@ public final class GeometryObject extends ModelInstance {
     // A temp vector.
     private final Quaternion tempOrientation = new Quaternion();
 
-    public GeometryObject(@NonNull Model model, @NonNull Actor actor, @NonNull GeometryComponent geometryComponent) {
+    public GeometryObject(@NonNull Model model, @NonNull Actor actor) {
         super(model);
 
         this.actor = actor;
-        this.geometryComponent = geometryComponent;
+        this.geometryComponent = actor.getRequiredComponent(GeometryComponent.class);
 
-        position.set(geometryComponent.getPositionX(),
-                     geometryComponent.getPositionY(),
-                     geometryComponent.getPositionZ());
+        final TransformComponent transformComponent = actor.getRequiredTransformComponent();
 
-        orientation.set(geometryComponent.getOrientationX(),
-                        geometryComponent.getOrientationY(),
-                        geometryComponent.getOrientationZ(),
-                        geometryComponent.getOrientationW());
+        position.set(transformComponent.getPositionX(),
+                     transformComponent.getPositionY(),
+                     transformComponent.getPositionZ());
 
-        scale.set(geometryComponent.getScaleX(),
-                  geometryComponent.getScaleY(),
-                  geometryComponent.getScaleZ());
+        orientation.set(transformComponent.getOrientationX(),
+                        transformComponent.getOrientationY(),
+                        transformComponent.getOrientationZ(),
+                        transformComponent.getOrientationW());
+
+        scale.set(transformComponent.getScaleX(),
+                  transformComponent.getScaleY(),
+                  transformComponent.getScaleZ());
 
         transformDirty = true;
     }
@@ -94,14 +102,17 @@ public final class GeometryObject extends ModelInstance {
     }
 
     public void savePositionToActor() {
-        geometryComponent.setPosition(position.x, position.y, position.z);
+        actor.getRequiredTransformComponent()
+             .setPosition(position.x, position.y, position.z);
     }
 
     public void saveOrientationToActor() {
-        geometryComponent.setOrientation(orientation.x, orientation.y, orientation.z, orientation.w);
+        actor.getRequiredTransformComponent()
+             .setOrientation(orientation.x, orientation.y, orientation.z, orientation.w);
     }
 
     public void saveScaleToActor() {
-        geometryComponent.setScale(scale.x, scale.y, scale.z);
+        actor.getRequiredTransformComponent()
+             .setScale(scale.x, scale.y, scale.z);
     }
 }

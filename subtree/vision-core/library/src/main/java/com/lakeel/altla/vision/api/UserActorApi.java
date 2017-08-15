@@ -8,6 +8,7 @@ import com.lakeel.altla.vision.model.BoxComponent;
 import com.lakeel.altla.vision.model.Component;
 import com.lakeel.altla.vision.model.MeshComponent;
 import com.lakeel.altla.vision.model.SphereComponent;
+import com.lakeel.altla.vision.model.TransformComponent;
 
 import android.support.annotation.NonNull;
 import android.support.v4.util.SimpleArrayMap;
@@ -24,6 +25,7 @@ public final class UserActorApi extends BaseVisionApi {
             private final SimpleArrayMap<String, Class<? extends Component>> classMap = new SimpleArrayMap<>();
 
             {
+                classMap.put(TransformComponent.TYPE, TransformComponent.class);
                 classMap.put(MeshComponent.TYPE, MeshComponent.class);
                 classMap.put(BoxComponent.TYPE, BoxComponent.class);
                 classMap.put(SphereComponent.TYPE, SphereComponent.class);

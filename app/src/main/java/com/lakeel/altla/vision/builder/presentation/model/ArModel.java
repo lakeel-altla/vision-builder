@@ -2,12 +2,10 @@ package com.lakeel.altla.vision.builder.presentation.model;
 
 import com.lakeel.altla.android.log.Log;
 import com.lakeel.altla.android.log.LogFactory;
-import com.lakeel.altla.vision.api.CurrentUser;
 import com.lakeel.altla.vision.api.VisionService;
 import com.lakeel.altla.vision.helper.TypedQuery;
 import com.lakeel.altla.vision.model.Actor;
 import com.lakeel.altla.vision.model.AreaSettings;
-import com.lakeel.altla.vision.model.GeometryComponent;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -88,15 +86,5 @@ public final class ArModel {
     public void saveActor(@NonNull Actor actor) {
         visionService.getUserActorApi()
                      .saveActor(getRequiredAreaSettings().getRequiredAreaId(), actor);
-    }
-
-    public void saveActor(@NonNull GeometryComponent component) {
-        final Actor actor = new Actor();
-
-        actor.setUserId(CurrentUser.getInstance().getUserId());
-        actor.setName(component.getName());
-        actor.addComponent(component);
-
-        saveActor(actor);
     }
 }

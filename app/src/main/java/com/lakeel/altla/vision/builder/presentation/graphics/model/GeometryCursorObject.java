@@ -5,24 +5,32 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
 import com.lakeel.altla.vision.builder.presentation.graphics.TangoCamera;
-import com.lakeel.altla.vision.model.GeometryComponent;
+import com.lakeel.altla.vision.model.Actor;
+import com.lakeel.altla.vision.model.TransformComponent;
 
 import android.support.annotation.NonNull;
 
 public final class GeometryCursorObject extends ModelInstance {
 
+    @NonNull
     public final Vector3 position = new Vector3();
 
+    @NonNull
     public final Quaternion orientation = new Quaternion();
 
-    public final GeometryComponent component;
+    @NonNull
+    public final Actor actor;
 
     private final TangoCamera camera;
 
-    public GeometryCursorObject(@NonNull Model model, @NonNull GeometryComponent component,
-                                @NonNull TangoCamera camera) {
+    public GeometryCursorObject(@NonNull Model model, @NonNull Actor actor, @NonNull TangoCamera camera) {
         super(model);
-        this.component = component;
+
+        if (actor.getTransformComponent() == null) {
+            throw new IllegalArgumentException("'actor.transformComponent' is null.");
+        }
+
+        this.actor = actor;
         this.camera = camera;
     }
 
@@ -39,8 +47,9 @@ public final class GeometryCursorObject extends ModelInstance {
     }
 
     public void saveTransform() {
-        component.setPosition(position.x, position.y, position.z);
-        component.setOrientation(orientation.x, orientation.y, orientation.z, orientation.w);
-        component.setScale(1, 1, 1);
+        final TransformComponent transformComponent = actor.getRequiredTransformComponent();
+        transformComponent.setPosition(position.x, position.y, position.z);
+        transformComponent.setOrientation(orientation.x, orientation.y, orientation.z, orientation.w);
+        transformComponent.setScale(1, 1, 1);
     }
 }

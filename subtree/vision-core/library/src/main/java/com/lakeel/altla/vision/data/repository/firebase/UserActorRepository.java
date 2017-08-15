@@ -13,10 +13,12 @@ import com.lakeel.altla.vision.helper.TypedQuery;
 import com.lakeel.altla.vision.model.Actor;
 import com.lakeel.altla.vision.model.BaseEntity;
 import com.lakeel.altla.vision.model.Component;
+import com.lakeel.altla.vision.model.TransformComponent;
 
 import android.support.annotation.NonNull;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public final class UserActorRepository extends BaseDatabaseRepository {
 
@@ -105,13 +107,16 @@ public final class UserActorRepository extends BaseDatabaseRepository {
             final Long updatedAt = snapshot.child(BaseEntity.FIELD_UPDATED_AT).getValue(Long.class);
             actor.setUpdatedAtAsLong(updatedAt == null ? -1 : updatedAt);
 
-            actor.setName((String) snapshot.child(Actor.FIELD_NAME).getValue());
+            actor.setName(snapshot.child(Actor.FIELD_NAME).getValue(String.class));
+
+            final DataSnapshot transformComponentSnapshot = snapshot.child(Actor.FIELD_TRANSFORM_COMPONENT);
+            actor.setTransformComponent((TransformComponent) componentConverter.convert(transformComponentSnapshot));
 
             final DataSnapshot componentsSnapshot = snapshot.child(Actor.FIELD_COMPONENTS);
-            actor.setComponents(new ArrayList<>((int) componentsSnapshot.getChildrenCount()));
+            final List<Component> components = new ArrayList<>((int) componentsSnapshot.getChildrenCount());
+            actor.setComponents(components);
             for (final DataSnapshot componentSnapshot : componentsSnapshot.getChildren()) {
-                final Component component = componentConverter.convert(componentSnapshot);
-                actor.getComponents().add(component);
+                components.add(componentConverter.convert(componentSnapshot));
             }
 
             return actor;

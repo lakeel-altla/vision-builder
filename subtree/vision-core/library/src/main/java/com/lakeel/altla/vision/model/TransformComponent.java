@@ -1,6 +1,10 @@
 package com.lakeel.altla.vision.model;
 
-public abstract class SceneComponent extends Component {
+import android.support.annotation.NonNull;
+
+public final class TransformComponent extends Component {
+
+    public static final String TYPE = "Transform";
 
     private float positionX;
 
@@ -22,11 +26,10 @@ public abstract class SceneComponent extends Component {
 
     private float scaleZ = 1;
 
-    private boolean visible;
-
-    private boolean visibleAtRuntime;
-
-    SceneComponent() {
+    @NonNull
+    @Override
+    public String getType() {
+        return TYPE;
     }
 
     public float getPositionX() {
@@ -107,22 +110,6 @@ public abstract class SceneComponent extends Component {
 
     public void setScaleZ(float scaleZ) {
         this.scaleZ = scaleZ;
-    }
-
-    public boolean isVisible() {
-        return visible;
-    }
-
-    public void setVisible(boolean visible) {
-        this.visible = visible;
-    }
-
-    public boolean isVisibleAtRuntime() {
-        return visibleAtRuntime;
-    }
-
-    public void setVisibleAtRuntime(boolean visibleAtRuntime) {
-        this.visibleAtRuntime = visibleAtRuntime;
     }
 
     public void setPosition(float x, float y, float z) {
