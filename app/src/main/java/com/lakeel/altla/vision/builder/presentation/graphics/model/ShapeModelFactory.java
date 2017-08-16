@@ -98,7 +98,7 @@ public final class ShapeModelFactory implements Disposable {
         private final Material faceMaterial = new Material(ColorAttribute.createDiffuse(Color.YELLOW),
                                                            new BlendingAttribute(0.5f));
 
-        private final Material lineMaterial = new Material(ColorAttribute.createDiffuse(Color.YELLOW));
+//        private final Material lineMaterial = new Material(ColorAttribute.createDiffuse(Color.YELLOW));
 
         private final Vector3 side1 = new Vector3();
 
@@ -172,7 +172,7 @@ public final class ShapeModelFactory implements Disposable {
         private final Material faceMaterial = new Material(ColorAttribute.createDiffuse(Color.YELLOW),
                                                            new BlendingAttribute(0.5f));
 
-        private final Material lineMaterial = new Material(ColorAttribute.createDiffuse(Color.YELLOW));
+//        private final Material lineMaterial = new Material(ColorAttribute.createDiffuse(Color.YELLOW));
 
         @Override
         @NonNull
@@ -183,8 +183,8 @@ public final class ShapeModelFactory implements Disposable {
 
             modelBuilder.part("faces", GL20.GL_TRIANGLES, Position | Normal, faceMaterial)
                         .sphere(s, s, s, 8, 8);
-            modelBuilder.part("lines", GL20.GL_LINES, Position, lineMaterial)
-                        .sphere(s, s, s, 8, 8);
+//            modelBuilder.part("lines", GL20.GL_LINES, Position, lineMaterial)
+//                        .sphere(s, s, s, 8, 8);
 
             return modelBuilder.end();
         }

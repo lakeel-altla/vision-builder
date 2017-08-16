@@ -25,6 +25,7 @@ import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.RenderContext;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.input.GestureDetector;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
@@ -36,7 +37,9 @@ import com.lakeel.altla.vision.builder.presentation.graphics.model.ActorAxesInst
 import com.lakeel.altla.vision.builder.presentation.graphics.model.ActorCursorInstance;
 import com.lakeel.altla.vision.builder.presentation.graphics.model.ActorNode;
 import com.lakeel.altla.vision.builder.presentation.graphics.model.ActorNodeFactory;
+import com.lakeel.altla.vision.builder.presentation.graphics.model.CollisionComponentInstance;
 import com.lakeel.altla.vision.builder.presentation.graphics.model.ComponentInstance;
+import com.lakeel.altla.vision.builder.presentation.graphics.model.MeshComponentInstance;
 import com.lakeel.altla.vision.builder.presentation.graphics.model.ShapeModelFactory;
 import com.lakeel.altla.vision.builder.presentation.graphics.shader.FillColorShader;
 import com.lakeel.altla.vision.builder.presentation.model.Axis;
@@ -161,6 +164,10 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
 
     @Nullable
     private Axis transformAxis;
+
+    private final Matrix4 tempTransform = new Matrix4();
+
+    private final Vector3 tempScale = new Vector3();
 
     public ArGraphics(@NonNull VisionService visionService, @NonNull Display display, @NonNull Listener listener) {
         this.visionService = visionService;
@@ -648,28 +655,49 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
         renderContext.setDepthMask(true);
         renderContext.setDepthTest(GL20.GL_LEQUAL);
 
-        // Draw models.
         modelBatch.begin(camera);
+
+        // Render visible model instances.
         modelBatch.render(visibleInstances, environment);
+
+        // Render an actor node touched if exists.
         if (touchedActorNode != null) {
-            originalTouchedActorObjectScale.set(touchedActorNode.scale);
-            touchedActorNode.scaleByExtent(0.1f);
-            touchedActorNode.update();
+            for (int i = 0; i < touchedActorNode.getComponentInstanceCount(); i++) {
+                final ComponentInstance componentInstance = touchedActorNode.getComponentInstance(i);
+                if (componentInstance instanceof MeshComponentInstance) {
+                    // If the component represents the mesh, render the border of it.
 
-            renderContext.setDepthMask(false);
-            renderContext.setBlending(true, GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-            // ORANGE: 0xffa500ff
-            // Transparent 50%: 0xffa50088
-            fillColorShader.color.set(0xffa50088);
-            modelBatch.render(touchedActorNode.getRequiredMainComponentInstance(), environment, fillColorShader);
+                    // Scale up slightly.
+                    tempTransform.set(componentInstance.transform);
+                    tempScale.set(touchedActorNode.scale).scl(1.1f);
+                    componentInstance.transform.set(touchedActorNode.position, touchedActorNode.orientation, tempScale);
 
-            touchedActorNode.scale.set(originalTouchedActorObjectScale);
-            touchedActorNode.transformDirty = true;
-            touchedActorNode.update();
+                    // Render the border.
+                    renderContext.setDepthMask(false);
+                    renderContext.setBlending(true, GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+                    // ORANGE: 0xffa500ff
+                    // Transparent 50%: 0xffa50088
+                    fillColorShader.color.set(0xffa50088);
+                    modelBatch.render(componentInstance, fillColorShader);
 
-            renderContext.setDepthMask(true);
-            modelBatch.render(touchedActorNode.getRequiredMainComponentInstance(), environment);
+                    // Restore the transform.
+                    componentInstance.transform.set(tempTransform);
+
+                    // Render the mesh.
+                    renderContext.setDepthMask(true);
+                    modelBatch.render(componentInstance, environment);
+                } else if (componentInstance instanceof CollisionComponentInstance) {
+                    // If the component reprensets the collision shape, render the wireframe of it.
+
+                    final CollisionComponentInstance collisionComponentInstance =
+                            (CollisionComponentInstance) componentInstance;
+                    collisionComponentInstance.setWireframe(true);
+                    modelBatch.render(collisionComponentInstance);
+                    collisionComponentInstance.setWireframe(false);
+                }
+            }
         }
+
         modelBatch.end();
 
         if (actorCursorInstance != null) {

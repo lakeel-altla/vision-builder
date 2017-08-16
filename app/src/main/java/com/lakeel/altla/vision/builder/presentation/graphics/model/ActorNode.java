@@ -12,7 +12,6 @@ import com.lakeel.altla.vision.model.Actor;
 import com.lakeel.altla.vision.model.TransformComponent;
 
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 public final class ActorNode {
 
@@ -77,23 +76,6 @@ public final class ActorNode {
     @NonNull
     public ComponentInstance getComponentInstance(int index) {
         return componentInstances.get(index);
-    }
-
-    @Nullable
-    public ComponentInstance getMainComponentInstance() {
-        return mainComponentInstance;
-    }
-
-    @NonNull
-    public ComponentInstance getRequiredMainComponentInstance() {
-        if (mainComponentInstance == null) {
-            throw new IllegalStateException("The property 'mainComponentInstance' is null.");
-        }
-        return mainComponentInstance;
-    }
-
-    void setMainComponentInstance(@Nullable ComponentInstance mainComponentInstance) {
-        this.mainComponentInstance = mainComponentInstance;
     }
 
     void addComponentInstance(@NonNull ComponentInstance componentInstance) {

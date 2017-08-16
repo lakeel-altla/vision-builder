@@ -58,7 +58,6 @@ public final class ActorNodeFactory {
                 Gdx.app.postRunnable(() -> {
                     final MeshComponentInstance instance = new MeshComponentInstance(model, node);
                     node.addComponentInstance(instance);
-                    node.setMainComponentInstance(instance);
 
                     LOG.v("Added a mesh component instance: actorId = %s, componentClass = %s",
                           node.actor.getId(), component.getClass());
@@ -75,7 +74,6 @@ public final class ActorNodeFactory {
 
             final MeshComponentInstance instance = new MeshComponentInstance(model, node);
             node.addComponentInstance(instance);
-            node.setMainComponentInstance(instance);
 
             LOG.v("Added a mesh component instance: actorId = %s, componentClass = %s",
                   node.actor.getId(), component.getClass());
@@ -91,10 +89,6 @@ public final class ActorNodeFactory {
         final Model model = shapeModelFactory.create(collisionComponent.getClass());
         final CollisionComponentInstance instance = new CollisionComponentInstance(model, node, collisionComponent);
         node.addComponentInstance(instance);
-
-        if (node.getMainComponentInstance() == null) {
-            node.setMainComponentInstance(instance);
-        }
 
         LOG.v("Added a collision component instance: actorId = %s, componentClass = %s",
               node.actor.getId(), collisionComponent.getClass());
