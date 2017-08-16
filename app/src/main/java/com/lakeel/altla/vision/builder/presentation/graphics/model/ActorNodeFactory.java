@@ -20,11 +20,11 @@ public final class ActorNodeFactory {
 
     private final AssetLoader assetLoader;
 
-    private final ShapeModelFactory shapeModelFactory;
+    private final PrimitiveModelFactory primitiveModelFactory;
 
-    public ActorNodeFactory(@NonNull AssetLoader assetLoader, @NonNull ShapeModelFactory shapeModelFactory) {
+    public ActorNodeFactory(@NonNull AssetLoader assetLoader, @NonNull PrimitiveModelFactory primitiveModelFactory) {
         this.assetLoader = assetLoader;
-        this.shapeModelFactory = shapeModelFactory;
+        this.primitiveModelFactory = primitiveModelFactory;
     }
 
     @NonNull
@@ -70,7 +70,7 @@ public final class ActorNodeFactory {
 
             final PrimitiveMeshComponent component = (PrimitiveMeshComponent) meshComponent;
 
-            final Model model = shapeModelFactory.create(component.getClass());
+            final Model model = primitiveModelFactory.create(component.getClass());
 
             final MeshComponentInstance instance = new MeshComponentInstance(model, node);
             node.addComponentInstance(instance);
@@ -86,7 +86,7 @@ public final class ActorNodeFactory {
     private void buildCollisionComponentInstance(@NonNull ActorNode node,
                                                  @NonNull CollisionComponent collisionComponent) {
 
-        final Model model = shapeModelFactory.create(collisionComponent.getClass());
+        final Model model = primitiveModelFactory.create(collisionComponent.getClass());
         final CollisionComponentInstance instance = new CollisionComponentInstance(model, node, collisionComponent);
         node.addComponentInstance(instance);
 

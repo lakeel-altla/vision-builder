@@ -4,14 +4,11 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
-import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Disposable;
-import com.lakeel.altla.android.log.Log;
-import com.lakeel.altla.android.log.LogFactory;
 import com.lakeel.altla.vision.model.BoxCollisionComponent;
 import com.lakeel.altla.vision.model.BoxMeshComponent;
 import com.lakeel.altla.vision.model.Component;
@@ -24,9 +21,7 @@ import android.support.v4.util.SparseArrayCompat;
 import static com.badlogic.gdx.graphics.VertexAttributes.Usage.Normal;
 import static com.badlogic.gdx.graphics.VertexAttributes.Usage.Position;
 
-public final class ShapeModelFactory implements Disposable {
-
-    private static final Log LOG = LogFactory.getLog(ShapeModelFactory.class);
+public final class PrimitiveModelFactory implements Disposable {
 
     private static final int SHAPE_BOX = 0;
 
@@ -36,7 +31,7 @@ public final class ShapeModelFactory implements Disposable {
 
     private final SparseArrayCompat<Model> modelMap = new SparseArrayCompat<>();
 
-    public ShapeModelFactory() {
+    public PrimitiveModelFactory() {
         builderMap.put(SHAPE_BOX, new BoxModelBuilder());
         builderMap.put(SHAPE_SPHERE, new SphereModelBuilder());
     }
@@ -70,6 +65,7 @@ public final class ShapeModelFactory implements Disposable {
 
             modelMap.put(shapeId, model);
         }
+
         return model;
     }
 
@@ -95,10 +91,7 @@ public final class ShapeModelFactory implements Disposable {
 
         private final ModelBuilder modelBuilder = new ModelBuilder();
 
-        private final Material faceMaterial = new Material(ColorAttribute.createDiffuse(Color.YELLOW),
-                                                           new BlendingAttribute(0.5f));
-
-//        private final Material lineMaterial = new Material(ColorAttribute.createDiffuse(Color.YELLOW));
+        private final Material material = new Material(ColorAttribute.createDiffuse(Color.WHITE));
 
         private final Vector3 side1 = new Vector3();
 
@@ -119,20 +112,17 @@ public final class ShapeModelFactory implements Disposable {
         @Override
         @NonNull
         public Model build() {
-//            final float s = SIZE;
-
             modelBuilder.begin();
 
             for (int i = 0; i < NORMALS.length; i++) {
                 final MeshPartBuilder meshPartBuilder = modelBuilder.part("face_" + i,
                                                                           GL20.GL_TRIANGLES,
                                                                           Position | Normal,
-                                                                          faceMaterial);
+                                                                          material);
 
                 final Vector3 normal = NORMALS[i];
                 side1.set(normal.y, normal.z, normal.x);
                 side2.set(side1).crs(normal);
-//                side2.set(normal).crs(side1);
 
                 vertexInfo.set(position.set(normal).sub(side1).sub(side2).scl(HALF_FIZE), normal, null, null);
                 final short index0 = meshPartBuilder.vertex(vertexInfo);
@@ -154,11 +144,6 @@ public final class ShapeModelFactory implements Disposable {
                 meshPartBuilder.index(index3);
             }
 
-//            modelBuilder.part("faces", GL20.GL_TRIANGLES, Position | Normal, faceMaterial)
-//                        .box(s, s, s);
-//            modelBuilder.part("lines", GL20.GL_LINES, Position, lineMaterial)
-//                        .box(s, s, s);
-
             return modelBuilder.end();
         }
     }
@@ -169,10 +154,7 @@ public final class ShapeModelFactory implements Disposable {
 
         private final ModelBuilder modelBuilder = new ModelBuilder();
 
-        private final Material faceMaterial = new Material(ColorAttribute.createDiffuse(Color.YELLOW),
-                                                           new BlendingAttribute(0.5f));
-
-//        private final Material lineMaterial = new Material(ColorAttribute.createDiffuse(Color.YELLOW));
+        private final Material material = new Material(ColorAttribute.createDiffuse(Color.WHITE));
 
         @Override
         @NonNull
@@ -181,10 +163,8 @@ public final class ShapeModelFactory implements Disposable {
 
             modelBuilder.begin();
 
-            modelBuilder.part("faces", GL20.GL_TRIANGLES, Position | Normal, faceMaterial)
+            modelBuilder.part("faces", GL20.GL_TRIANGLES, Position | Normal, material)
                         .sphere(s, s, s, 8, 8);
-//            modelBuilder.part("lines", GL20.GL_LINES, Position, lineMaterial)
-//                        .sphere(s, s, s, 8, 8);
 
             return modelBuilder.end();
         }

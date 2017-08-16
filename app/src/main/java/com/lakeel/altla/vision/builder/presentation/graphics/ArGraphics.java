@@ -40,7 +40,7 @@ import com.lakeel.altla.vision.builder.presentation.graphics.model.ActorNodeFact
 import com.lakeel.altla.vision.builder.presentation.graphics.model.CollisionComponentInstance;
 import com.lakeel.altla.vision.builder.presentation.graphics.model.ComponentInstance;
 import com.lakeel.altla.vision.builder.presentation.graphics.model.MeshComponentInstance;
-import com.lakeel.altla.vision.builder.presentation.graphics.model.ShapeModelFactory;
+import com.lakeel.altla.vision.builder.presentation.graphics.model.PrimitiveModelFactory;
 import com.lakeel.altla.vision.builder.presentation.graphics.shader.FillColorShader;
 import com.lakeel.altla.vision.builder.presentation.graphics.shader.WireframeShader;
 import com.lakeel.altla.vision.builder.presentation.model.Axis;
@@ -125,7 +125,7 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
 
     private final AssetLoader assetLoader;
 
-    private final ShapeModelFactory shapeModelFactory = new ShapeModelFactory();
+    private final PrimitiveModelFactory primitiveModelFactory = new PrimitiveModelFactory();
 
     private final ActorNodeFactory actorNodeFactory;
 
@@ -155,8 +155,6 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
     @Nullable
     private ActorNode touchedActorNode;
 
-    private final Vector3 originalTouchedActorObjectScale = new Vector3();
-
     private boolean touchedActorLocked;
 
     private boolean translationEnabled;
@@ -177,7 +175,7 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
         this.display = display;
         this.listener = listener;
         assetLoader = new AssetLoader(visionService);
-        actorNodeFactory = new ActorNodeFactory(assetLoader, shapeModelFactory);
+        actorNodeFactory = new ActorNodeFactory(assetLoader, primitiveModelFactory);
     }
 
     @Override
@@ -260,7 +258,7 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
         fillColorShader.dispose();
         wireframeShader.dispose();
 
-        shapeModelFactory.dispose();
+        primitiveModelFactory.dispose();
 
         if (sceneFrameBuffer != null) {
             sceneFrameBuffer.dispose();
@@ -442,7 +440,7 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
             } else if (meshComponent instanceof PrimitiveMeshComponent) {
 
                 final PrimitiveMeshComponent primitiveMeshComponent = (PrimitiveMeshComponent) meshComponent;
-                final Model model = shapeModelFactory.create(primitiveMeshComponent.getClass());
+                final Model model = primitiveModelFactory.create(primitiveMeshComponent.getClass());
                 actorCursorInstance = new ActorCursorInstance(model, actor, camera);
 
             } else {
@@ -454,7 +452,7 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
             final CollisionComponent collisionComponent = actor.findComponent(CollisionComponent.class);
             if (collisionComponent != null) {
 
-                final Model model = shapeModelFactory.create(collisionComponent.getClass());
+                final Model model = primitiveModelFactory.create(collisionComponent.getClass());
                 actorCursorInstance = new ActorCursorInstance(model, actor, camera);
             }
         }
