@@ -42,6 +42,7 @@ import com.lakeel.altla.vision.builder.presentation.graphics.model.ComponentInst
 import com.lakeel.altla.vision.builder.presentation.graphics.model.MeshComponentInstance;
 import com.lakeel.altla.vision.builder.presentation.graphics.model.ShapeModelFactory;
 import com.lakeel.altla.vision.builder.presentation.graphics.shader.FillColorShader;
+import com.lakeel.altla.vision.builder.presentation.graphics.shader.WireframeShader;
 import com.lakeel.altla.vision.builder.presentation.model.Axis;
 import com.lakeel.altla.vision.model.Actor;
 import com.lakeel.altla.vision.model.AssetMeshComponent;
@@ -142,6 +143,8 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
 
     private final FillColorShader fillColorShader = new FillColorShader();
 
+    private final WireframeShader wireframeShader = new WireframeShader();
+
     @Nullable
     private ActorCursorInstance actorCursorInstance;
 
@@ -196,6 +199,7 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
         picker = new ColorObjectPicker();
 
         fillColorShader.init();
+        wireframeShader.init();
 
         actorAxesModel = new ModelBuilder().createXYZCoordinates(0.25f, new Material(), Position | ColorPacked);
 
@@ -254,6 +258,7 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
         picker.dispose();
 
         fillColorShader.dispose();
+        wireframeShader.dispose();
 
         shapeModelFactory.dispose();
 
@@ -688,12 +693,7 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
                     modelBatch.render(componentInstance, environment);
                 } else if (componentInstance instanceof CollisionComponentInstance) {
                     // If the component reprensets the collision shape, render the wireframe of it.
-
-                    final CollisionComponentInstance collisionComponentInstance =
-                            (CollisionComponentInstance) componentInstance;
-                    collisionComponentInstance.setWireframe(true);
-                    modelBatch.render(collisionComponentInstance);
-                    collisionComponentInstance.setWireframe(false);
+                    modelBatch.render(componentInstance, wireframeShader);
                 }
             }
         }
