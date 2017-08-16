@@ -76,9 +76,9 @@ public final class PrimitiveModelFactory implements Disposable {
 
     private static final class BoxModelBuilder implements Builder {
 
-        private static final float SIZE = 0.25f;
+        private static final float SIZE = 0.5f;
 
-        private static final float HALF_FIZE = SIZE * 0.5f;
+        private static final float HALF_SIZE = SIZE * 0.5f;
 
         private static final Vector3[] NORMALS = {
                 new Vector3(0, 1, 0),
@@ -97,17 +97,9 @@ public final class PrimitiveModelFactory implements Disposable {
 
         private final Vector3 side2 = new Vector3();
 
-        private final MeshPartBuilder.VertexInfo[] vertexInfos = new MeshPartBuilder.VertexInfo[4];
-
-        private MeshPartBuilder.VertexInfo vertexInfo = new MeshPartBuilder.VertexInfo();
+        private final MeshPartBuilder.VertexInfo vertexInfo = new MeshPartBuilder.VertexInfo();
 
         private final Vector3 position = new Vector3();
-
-        BoxModelBuilder() {
-            for (int i = 0; i < vertexInfos.length; i++) {
-                vertexInfos[i] = new MeshPartBuilder.VertexInfo();
-            }
-        }
 
         @Override
         @NonNull
@@ -124,16 +116,16 @@ public final class PrimitiveModelFactory implements Disposable {
                 side1.set(normal.y, normal.z, normal.x);
                 side2.set(side1).crs(normal);
 
-                vertexInfo.set(position.set(normal).sub(side1).sub(side2).scl(HALF_FIZE), normal, null, null);
+                vertexInfo.set(position.set(normal).sub(side1).sub(side2).scl(HALF_SIZE), normal, null, null);
                 final short index0 = meshPartBuilder.vertex(vertexInfo);
 
-                vertexInfo.set(position.set(normal).sub(side1).add(side2).scl(HALF_FIZE), normal, null, null);
+                vertexInfo.set(position.set(normal).sub(side1).add(side2).scl(HALF_SIZE), normal, null, null);
                 final short index1 = meshPartBuilder.vertex(vertexInfo);
 
-                vertexInfo.set(position.set(normal).add(side1).add(side2).scl(HALF_FIZE), normal, null, null);
+                vertexInfo.set(position.set(normal).add(side1).add(side2).scl(HALF_SIZE), normal, null, null);
                 final short index2 = meshPartBuilder.vertex(vertexInfo);
 
-                vertexInfo.set(position.set(normal).add(side1).sub(side2).scl(HALF_FIZE), normal, null, null);
+                vertexInfo.set(position.set(normal).add(side1).sub(side2).scl(HALF_SIZE), normal, null, null);
                 final short index3 = meshPartBuilder.vertex(vertexInfo);
 
                 meshPartBuilder.index(index0);
@@ -150,21 +142,89 @@ public final class PrimitiveModelFactory implements Disposable {
 
     private static final class SphereModelBuilder implements Builder {
 
-        private static final float SCALE = 0.5f;
+        private static final float DIAMETER = 0.5f;
 
         private final ModelBuilder modelBuilder = new ModelBuilder();
 
         private final Material material = new Material(ColorAttribute.createDiffuse(Color.WHITE));
 
+        private final Vector3 position = new Vector3();
+
+        private final Vector3 normal = new Vector3();
+
+        private final MeshPartBuilder.VertexInfo vertexInfo = new MeshPartBuilder.VertexInfo();
+
         @Override
         @NonNull
         public Model build() {
-            final float s = SCALE;
-
             modelBuilder.begin();
 
-            modelBuilder.part("faces", GL20.GL_TRIANGLES, Position | Normal, material)
-                        .sphere(s, s, s, 8, 8);
+            final MeshPartBuilder meshPartBuilder = modelBuilder.part("face",
+                                                                      GL20.GL_TRIANGLES,
+                                                                      Position | Normal,
+                                                                      material);
+
+            final float radius = DIAMETER * 0.5f;
+            final int tessellation = 16;
+
+            final int verticalSegments = tessellation;
+            final int horizontalSegments = tessellation * 2;
+
+            int vertexCount = 0;
+
+            normal.set(0, -1, 0);
+            position.set(normal).scl(radius);
+            meshPartBuilder.vertex(vertexInfo.set(position, normal, null, null));
+            vertexCount++;
+
+            for (int i = 0; i < verticalSegments - 1; i++) {
+                double latitude = ((i + 1) * Math.PI / verticalSegments) - Math.PI * 0.5d;
+                float dy = (float) Math.sin(latitude);
+                float dxz = (float) Math.cos(latitude);
+
+                for (int j = 0; j < horizontalSegments; j++) {
+                    double longitude = j * Math.PI * 2.0d / horizontalSegments;
+                    float dx = (float) Math.cos(longitude) * dxz;
+                    float dz = (float) Math.sin(longitude) * dxz;
+
+                    normal.set(dx, dy, dz);
+                    position.set(normal).scl(radius);
+                    meshPartBuilder.vertex(vertexInfo.set(position, normal, null, null));
+                    vertexCount++;
+                }
+            }
+
+            normal.set(0, 1, 0);
+            position.set(normal).scl(radius);
+            meshPartBuilder.vertex(vertexInfo.set(position, normal, null, null));
+            vertexCount++;
+
+            for (int i = 0; i < horizontalSegments; i++) {
+                meshPartBuilder.index((short) 0);
+                meshPartBuilder.index((short) (1 + (i + 1) % horizontalSegments));
+                meshPartBuilder.index((short) (1 + i));
+            }
+
+            for (int i = 0; i < verticalSegments - 2; i++) {
+                for (int j = 0; j < horizontalSegments; j++) {
+                    int nextI = i + 1;
+                    int nextJ = (j + 1) % horizontalSegments;
+
+                    meshPartBuilder.index((short) (1 + i * horizontalSegments + j));
+                    meshPartBuilder.index((short) (1 + i * horizontalSegments + nextJ));
+                    meshPartBuilder.index((short) (1 + nextI * horizontalSegments + j));
+
+                    meshPartBuilder.index((short) (1 + i * horizontalSegments + nextJ));
+                    meshPartBuilder.index((short) (1 + nextI * horizontalSegments + nextJ));
+                    meshPartBuilder.index((short) (1 + nextI * horizontalSegments + j));
+                }
+            }
+
+            for (int i = 0; i < horizontalSegments; i++) {
+                meshPartBuilder.index((short) (vertexCount - 1));
+                meshPartBuilder.index((short) (vertexCount - 2 - (i + 1) % horizontalSegments));
+                meshPartBuilder.index((short) (vertexCount - 2 - i));
+            }
 
             return modelBuilder.end();
         }
