@@ -38,7 +38,7 @@ public final class WireframeShader implements Shader {
 
     @Override
     public boolean canRender(Renderable instance) {
-        return true;
+        return instance.userData == WireframeShader.class;
     }
 
     @Override

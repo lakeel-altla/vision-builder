@@ -19,7 +19,10 @@ import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.graphics.g3d.Shader;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
+import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultTextureBinder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.RenderContext;
@@ -192,7 +195,16 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
 
         renderContext = new RenderContext(new DefaultTextureBinder(DefaultTextureBinder.WEIGHTED, 1));
 
-        modelBatch = new ModelBatch(renderContext);
+        modelBatch = new ModelBatch(renderContext, new DefaultShaderProvider() {
+            @Override
+            protected Shader createShader(Renderable renderable) {
+                if (renderable.userData == WireframeShader.class) {
+                    return wireframeShader;
+                } else {
+                    return super.createShader(renderable);
+                }
+            }
+        });
 
         picker = new ColorObjectPicker();
 
@@ -691,7 +703,7 @@ public final class ArGraphics extends ApplicationAdapter implements GestureDetec
                     modelBatch.render(componentInstance, environment);
                 } else if (componentInstance instanceof CollisionComponentInstance) {
                     // If the component reprensets the collision shape, render the wireframe of it.
-                    modelBatch.render(componentInstance, wireframeShader);
+                    modelBatch.render(componentInstance);
                 }
             }
         }
